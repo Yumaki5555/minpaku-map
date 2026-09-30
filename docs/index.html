@@ -85,6 +85,7 @@ select{padding:6px 10px;border:1px solid var(--line);border-radius:8px;backgroun
 .pop ul{margin:0;padding-left:1.1em}
 .pop li{margin:3px 0}
 .pop .d{color:#666;font-size:12px}
+.pop .approxnote{background:#fef3c7;color:#92400e;border-radius:6px;padding:4px 6px;margin:2px 0 4px}
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:620px}
 th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;white-space:nowrap}
@@ -156,7 +157,7 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
 <div id="map" role="region" aria-label="施設の地図"></div>
 <div id="cinfo" class="cinfo" hidden aria-live="polite"><button type="button" class="cx" aria-label="閉じる">×</button><div class="cbody"></div></div>
 </div>
-<p class="note">「点で見る」は1つの点が1件の施設です（同じ建物に複数ある場合は、その場所に施設の数だけ点を並べています）。「まとめて見る」は近くの施設を数字の円にまとめ、円の色の割合で種類の内訳を表します。点や円を押すと施設名・住所が見られます。点線のふちの点は、住所から位置をおおまかにしか特定できなかった施設です。住所から位置を特定できなかった 19 件は地図に表示されていません。</p>
+<p class="note">「点で見る」は1つの点が1件の施設です（同じ建物に複数ある場合は、その場所に施設の数だけ点を並べています）。「まとめて見る」は近くの施設を数字の円にまとめ、円の色の割合で種類の内訳を表します。点や円を押すと施設名・住所が見られます。点線のふちの薄い点は、番地まで特定できず町名（大字）の中心付近にまとめて置いた施設で、実際の場所とは離れていることがあります。住所から位置を特定できなかった 19 件は地図に表示されていません。</p>
 
 <h2>自治体ごとの件数</h2>
 <p class="note">「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。</p>
@@ -333,8 +334,11 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
       const list = items.map(it => '<li><b>'+esc(it[0] || '（施設名の記載なし）')+'</b><br>'+esc(it[1])
         + (it[3] ? '<br><span class="d">'+noLabel+'：'+esc(it[3])+'</span>' : '')
         + (it[2] ? '<br><span class="d">'+esc(it[2])+'</span>' : '')+'</li>').join('');
-      return '<div class="pop"><h3><span class="dot c'+cat+'"></span>'+esc(data.cats[cat])+'（'+esc(data.cities[city] || data.munis[muni])+'）'+(n > 1 ? ' 同じ建物に'+n+'件' : '')+'</h3>'
-        + (exact ? '' : '<div class="d">※位置はおおよそです</div>') + '<ul>'+list+'</ul></div>';
+      // 番地まで特定できなかった施設は、町名(大字)の中心付近にまとめて置いているので、そのことを書く
+      const head = exact ? (n > 1 ? ' 同じ建物に'+n+'件' : '') : (n > 1 ? ' この付近に'+n+'件' : '');
+      return '<div class="pop"><h3><span class="dot c'+cat+'"></span>'+esc(data.cats[cat])+'（'+esc(data.cities[city] || data.munis[muni])+'）'+head+'</h3>'
+        + (exact ? '' : '<div class="d approxnote">※番地まで特定できなかったため、町名の中心付近にまとめて表示しています。実際の場所とは離れていることがあります。</div>')
+        + '<ul>'+list+'</ul></div>';
     };
   }
   data.pins.forEach(p => {
@@ -343,7 +347,7 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
     const popup = popupFor(p);
     for (let k = 0; k < n; k++) {
       const m = L.circleMarker([lat, lng], {renderer, radius: 3, color: '#fff', weight: 1, fillColor: colors[cat],
-        fillOpacity: 0.9, dashArray: exact ? null : '2 2', n, k, cat, muni, city, base: L.latLng(lat, lng)});
+        fillOpacity: exact ? 0.9 : 0.5, dashArray: exact ? null : '2 2', n, k, cat, muni, city, base: L.latLng(lat, lng)});
       m.bindPopup(popup);
       dots.push(m);
     }

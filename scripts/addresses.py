@@ -41,7 +41,7 @@ FOREIGN_LABELS = {"English", "中文", "한국어", "繁體中文", "简体中�
 
 ADDR_LIKE = re.compile(r"(丁目|番地|[0-9０-９]番|[0-9０-９]号|[0-9０-９]+[-ー‐−－][0-9０-９])")
 # 住所の番地までを切り出す(後ろの建物名・部屋番号を落として、同じ建物をまとめて調べられるようにする)
-HOUSE_NO = re.compile(r"^(.*?(?:[0-9]+|[一二三四五六七八九十]+丁目?)(?:丁目|丁|番地|番|号|[-ー‐−－の]|[0-9]+)*)")
+HOUSE_NO = re.compile(r"^(.*?(?:[0-9]+|[一二三四五六七八九十]+丁目?)(?:丁目|丁|番地|番|号|[-ー‐−－―の]|[0-9]+)*)")
 
 
 def clean(s: str | None) -> str:
@@ -150,6 +150,10 @@ def make_point(addr: str, pref: str, city: str) -> tuple[str, str]:
     """(表示用の住所, 位置を調べるための住所) を返す。"""
     spaced = re.sub(r"\s+", " ", unicodedata.normalize("NFKC", addr)).strip()
     spaced = re.sub(r"^〒?\d{3}-\d{4}\s*", "", spaced)
+    # 「駒込1- 3-11」のようにハイフンの前後に入った空白は取る(番地が途中で切れてしまうため)
+    spaced = re.sub(r"\s*([-ー‐−－―])\s*", r"\1", spaced)
+    # 「東京都墨田区東京都墨田区押上…」のように都府県名・市区町村名が二重になっているものを直す
+    spaced = re.sub(r"^((?:東京都|神奈川県|埼玉県|千葉県|茨城県|大阪府)?\S{1,6}?[市区町村])\s*\1", r"\1", spaced)
     a_ns = spaced.replace(" ", "")
     head = prefix_for(a_ns, pref, city)
     # 番地の後ろの建物名・部屋番号を落とす。「湯島2-31-7 2階」のような空白の区切りも尊重する
@@ -207,7 +211,7 @@ def parse_file(path: str, reg: dict) -> tuple[list[dict], int]:
     if not rows:
         return [], 0
 
-    cols = header_cols(rows[0])
+    cols = None if is_combined_header(rows[0][0]) else header_cols(rows[0])
     body = rows[1:]
     if cols is None and not is_combined_header(rows[0][0]):
         # 新宿区旅館業のように1行目から中身が始まっているもの
