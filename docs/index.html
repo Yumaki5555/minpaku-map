@@ -54,7 +54,17 @@ select{padding:6px 10px;border:1px solid var(--line);border-radius:8px;backgroun
   box-shadow:0 0 0 2px rgba(255,255,255,.9),0 1px 4px rgba(0,0,0,.35)}
 .cl span{background:#fff;color:#1c1b19;border-radius:50%;width:calc(100% - 12px);height:calc(100% - 12px);
   display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;letter-spacing:-.02em}
-.ctip{font-size:12px;line-height:1.6;max-width:260px;white-space:normal}
+.ctip{font-size:12px;line-height:1.6;min-width:200px;max-width:280px;white-space:normal}
+.ctip .cc{white-space:nowrap}
+.mapwrap{position:relative}
+.cinfo{position:absolute;left:8px;right:8px;bottom:8px;z-index:1000;background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.25);padding:10px 36px 10px 12px}
+.cinfo[hidden]{display:none}
+.cinfo .ctip{min-width:0;max-width:none;font-size:13px}
+.cinfo .cc{white-space:normal;display:flex;flex-wrap:wrap;gap:2px 12px}
+.cinfo .cc br{display:none}
+.cinfo .d{color:var(--sub)}
+.cinfo .cx{position:absolute;top:4px;right:6px;border:0;background:none;font-size:20px;line-height:1;color:var(--sub);cursor:pointer;padding:4px}
 .ctip .cc{margin-top:4px}
 .ctip .d{color:#666;font-size:11px;margin-top:2px}
 .leaflet-popup-content{font-family:inherit;font-size:13px;line-height:1.5;max-height:280px;overflow:auto;margin:10px 12px}
@@ -119,7 +129,10 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
   <button class="tagbtn" data-cat="0" aria-pressed="true"><span class="dot c0"></span>民泊<span class="n">23,492</span></button><button class="tagbtn" data-cat="1" aria-pressed="true"><span class="dot c1"></span>特区民泊<span class="n">9,448</span></button><button class="tagbtn" data-cat="2" aria-pressed="true"><span class="dot c2"></span>旅館・ホテル<span class="n">14,392</span></button><button class="tagbtn" data-cat="3" aria-pressed="true"><span class="dot c3"></span>簡易宿所<span class="n">5,322</span></button>
   <select id="muni" aria-label="自治体を選ぶ"><option value="">すべての自治体</option></select>
 </div>
+<div class="mapwrap">
 <div id="map" role="region" aria-label="施設の地図"></div>
+<div id="cinfo" class="cinfo" hidden aria-live="polite"><button type="button" class="cx" aria-label="閉じる">×</button><div class="cbody"></div></div>
+</div>
 <p class="note">ピンを押すと施設名・住所が見られます。数字の丸は近くの施設をまとめたもので、拡大すると分かれます。点線のピンは住所から位置をおおまかにしか特定できなかった施設です。住所から位置を特定できなかった 19 件は地図に表示されていません。</p>
 
 <h2>自治体ごとの件数</h2>
@@ -344,12 +357,19 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
       + (top.length > 3 ? ' ほか'+(top.length - 3)+'市区町村' : '');
     const cats = tally.map((v, i) => v ? '<span class="dot c'+i+'"></span>'+esc(data.cats[i])+' '+v.toLocaleString()+'件' : '').filter(Boolean).join('<br>');
     const hint = touch ? 'もう一度押すと拡大' : '押すと拡大';
+    const body = '<div class="ctip">'+names+'<div class="cc">'+cats+'</div><div class="d">合計 '+n.toLocaleString()+'件（'+hint+'）</div></div>';
+    if (touch) {
+      // スマホは吹き出しだと画面の端で細くつぶれるので、地図の下端の情報欄に出す
+      cinfo.querySelector('.cbody').innerHTML = body; cinfo.hidden = false; tipped = layer; return;
+    }
     layer.unbindTooltip();
-    layer.bindTooltip('<div class="ctip">'+names+'<div class="cc">'+cats+'</div><div class="d">合計 '+n.toLocaleString()+'件（'+hint+'）</div></div>',
+    layer.bindTooltip(body,
       {direction: 'top', offset: [0, -14], opacity: 1}).openTooltip();
     tipped = layer;
   }
-  function hideTip() { if (tipped) { tipped.closeTooltip(); tipped = null; } }
+  const cinfo = document.getElementById('cinfo');
+  cinfo.querySelector('.cx').addEventListener('click', () => hideTip());
+  function hideTip() { if (tipped) { if (!touch) tipped.closeTooltip(); tipped = null; } cinfo.hidden = true; }
   if (!touch) {
     cluster.on('clustermouseover', e => showTip(e.layer));
     cluster.on('clustermouseout', hideTip);
