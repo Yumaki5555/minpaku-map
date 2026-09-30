@@ -12,6 +12,7 @@ import html
 import json
 import os
 import re
+import time
 import sys
 from datetime import datetime, timedelta, timezone
 
@@ -42,9 +43,20 @@ def load_json(path: str, default):
         return json.load(f)
 
 
+def open_retry(path: str, mode: str, **kwargs):
+    """Dropboxの同期中はファイルが一時的に開けないことがあるので、少し待って何度かやり直す。"""
+    for attempt in range(10):
+        try:
+            return open(path, mode, **kwargs)
+        except OSError:
+            if attempt == 9:
+                raise
+            time.sleep(3)
+
+
 def write_json(path: str, data) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
+    with open_retry(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
 
 
@@ -167,7 +179,7 @@ def main() -> None:
         ("旅館・ホテル", "簡易宿所を含む", 2, ranking(collected["points"], reg_by_code, {"旅館・ホテル", "簡易宿所"})),
     ]
     page = render(table, total, by_cat, today, prev["date"] if prev else "", not_found, ranks)
-    with open(os.path.join(DOCS, "index.html"), "w", encoding="utf-8") as f:
+    with open_retry(os.path.join(DOCS, "index.html"), "w", encoding="utf-8") as f:
         f.write(page)
     open(os.path.join(DOCS, ".nojekyll"), "a").close()
     print(f"地図ページを作りました: ピン {len(pins)}個 / 施設 {sum(by_cat.values())}件 / 位置不明 {not_found}件")

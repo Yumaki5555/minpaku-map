@@ -291,6 +291,18 @@ def latest_files(reg: dict) -> list[str]:
     return [p for p in found if os.path.basename(p).startswith(newest)]
 
 
+def open_retry(path: str, mode: str, **kwargs):
+    """Dropboxの同期中はファイルが一時的に開けないことがあるので、少し待って何度かやり直す。"""
+    import time
+    for attempt in range(10):
+        try:
+            return open(path, mode, **kwargs)
+        except OSError:
+            if attempt == 9:
+                raise
+            time.sleep(3)
+
+
 def load_registry() -> list[dict]:
     with open(REGISTRY_PATH, encoding="utf-8-sig") as f:
         return list(csv.DictReader(f))
@@ -315,7 +327,7 @@ def collect_all(save: bool = False) -> dict:
             total += n
         if pts_code:
             if save:
-                with open(backup, "w", encoding="utf-8") as f:
+                with open_retry(backup, "w", encoding="utf-8") as f:
                     json.dump(pts_code, f, ensure_ascii=False, indent=0)
         elif os.path.exists(backup):
             with open(backup, encoding="utf-8") as f:
