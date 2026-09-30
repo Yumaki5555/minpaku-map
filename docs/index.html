@@ -274,7 +274,7 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
   });
 
   const cluster = L.markerClusterGroup({
-    chunkedLoading: true, maxClusterRadius: 50, showCoverageOnHover: false,
+    chunkedLoading: true, maxClusterRadius: 50, showCoverageOnHover: false, zoomToBoundsOnClick: false,
     iconCreateFunction: c => {
       const ms = c.getAllChildMarkers();
       let n = 0; const tally = [0,0,0,0];
@@ -331,19 +331,35 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
   sel.addEventListener('change', () => {
     if (sel.value === '') { map.setView([35.68, 139.76], 10); refresh(false); } else refresh(true);
   });
-  // 円にマウスを重ねたら、含まれる市区町村と種類ごとの件数を吹き出しで出す
-  cluster.on('clustermouseover', e => {
-    const ms = e.layer.getAllChildMarkers();
+  // 円の吹き出し: 含まれる市区町村と種類ごとの件数
+  // パソコンはマウスを重ねると表示・押すと拡大。スマホ(マウスのない端末)は1回目で表示・2回目で拡大
+  const touch = window.matchMedia('(hover: none)').matches;
+  let tipped = null;
+  function showTip(layer) {
+    const ms = layer.getAllChildMarkers();
     const byCity = new Map(); const tally = [0,0,0,0]; let n = 0;
     ms.forEach(m => { const c = data.cities[m.options.city]; byCity.set(c, (byCity.get(c) || 0) + m.options.n); tally[m.options.cat] += m.options.n; n += m.options.n; });
     const top = [...byCity.entries()].sort((a, b) => b[1] - a[1]);
     const names = top.slice(0, 3).map(([c, v]) => '<b>'+esc(c)+'</b> '+v.toLocaleString()+'件').join('、')
       + (top.length > 3 ? ' ほか'+(top.length - 3)+'市区町村' : '');
     const cats = tally.map((v, i) => v ? '<span class="dot c'+i+'"></span>'+esc(data.cats[i])+' '+v.toLocaleString()+'件' : '').filter(Boolean).join('<br>');
-    e.layer.bindTooltip('<div class="ctip">'+names+'<div class="cc">'+cats+'</div><div class="d">合計 '+n.toLocaleString()+'件（押すと拡大）</div></div>',
+    const hint = touch ? 'もう一度押すと拡大' : '押すと拡大';
+    layer.unbindTooltip();
+    layer.bindTooltip('<div class="ctip">'+names+'<div class="cc">'+cats+'</div><div class="d">合計 '+n.toLocaleString()+'件（'+hint+'）</div></div>',
       {direction: 'top', offset: [0, -14], opacity: 1}).openTooltip();
+    tipped = layer;
+  }
+  function hideTip() { if (tipped) { tipped.closeTooltip(); tipped = null; } }
+  if (!touch) {
+    cluster.on('clustermouseover', e => showTip(e.layer));
+    cluster.on('clustermouseout', hideTip);
+  }
+  cluster.on('clusterclick', e => {
+    if (touch && tipped !== e.layer) { hideTip(); showTip(e.layer); return; }
+    hideTip();
+    e.layer.zoomToBounds({padding: [20, 20]});
   });
-  cluster.on('clustermouseout', e => e.layer.closeTooltip());
+  map.on('click zoomstart movestart', () => { if (touch) hideTip(); });
   map.addLayer(cluster);
   refresh(false);
 })();
