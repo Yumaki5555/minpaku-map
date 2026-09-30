@@ -274,6 +274,12 @@ h2{{font-size:1.15rem;margin:28px 0 8px}}
 .stats{{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--sub)}}
 .stats b{{color:var(--ink);font-size:1.1rem}}
 .filters{{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0 8px}}
+.viewtabs{{display:flex;gap:0;margin:14px 0 0;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;width:max-content;max-width:100%}}
+.viewtab{{border:0;background:var(--card);color:var(--sub);padding:7px 16px;font-family:inherit;font-size:.92rem;font-weight:600;cursor:pointer;
+  display:flex;flex-direction:column;align-items:flex-start;line-height:1.3}}
+.viewtab span{{font-size:.72rem;font-weight:400}}
+.viewtab + .viewtab{{border-left:1.5px solid var(--line)}}
+.viewtab[aria-selected="true"]{{background:var(--ink);color:var(--bg)}}
 .tagbtn{{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;
   padding:5px 12px;font-size:.88rem;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px}}
 .tagbtn .n{{opacity:.7;font-size:.8em}}
@@ -364,6 +370,10 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
   </div>
 </header>
 
+<div class="viewtabs" role="tablist" aria-label="地図の表示方法">
+  <button type="button" role="tab" class="viewtab" data-view="dots" aria-selected="true">点で見る<span>1件＝点1つ</span></button>
+  <button type="button" role="tab" class="viewtab" data-view="cluster" aria-selected="false">まとめて見る<span>近くの施設を数字の円に</span></button>
+</div>
 <div class="filters" role="group" aria-label="種別で絞り込み">
   {cat_btns}
   <select id="muni" aria-label="自治体を選ぶ"><option value="">すべての自治体</option></select>
@@ -372,7 +382,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 <div id="map" role="region" aria-label="施設の地図"></div>
 <div id="cinfo" class="cinfo" hidden aria-live="polite"><button type="button" class="cx" aria-label="閉じる">×</button><div class="cbody"></div></div>
 </div>
-<p class="note">ピンを押すと施設名・住所が見られます。数字の丸は近くの施設をまとめたもので、拡大すると分かれます。点線のピンは住所から位置をおおまかにしか特定できなかった施設です。{nf_note}</p>
+<p class="note">「点で見る」は1つの点が1件の施設です（同じ建物に複数ある場合は、その場所に施設の数だけ点を並べています）。「まとめて見る」は近くの施設を数字の円にまとめ、円の色の割合で種類の内訳を表します。点や円を押すと施設名・住所が見られます。点線のふちの点は、住所から位置をおおまかにしか特定できなかった施設です。{nf_note}</p>
 
 <h2>自治体ごとの件数</h2>
 <p class="note">{diff_note}「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。</p>
@@ -424,13 +434,74 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
     sel.appendChild(g);
   }});
 
+  // まとめずに全部の点をそのまま描く(Googleマイマップと同じ見せ方)。
+  // 点が約3万個あるので、1個ずつ部品にせず地図に直接描き込む方式(canvas)で軽くする
+  const renderer = L.canvas({{padding: 0.5, tolerance: 5}});
+  const dotLayer = L.layerGroup();
+  const touch = window.matchMedia('(hover: none)').matches;
+  // 施設1件につき点を1つ描く。同じ建物に複数の施設がある場合は、その場所にひまわりの種のように並べる。
+  // (民泊は同じマンションの別の部屋が1件ずつ届け出られているので、1つの点にまとめると実際より少なく見えてしまう。
+  //  1件1点にすると、どの倍率でも「点の量＝施設の数」になり、見た目が実際の件数と合う)
+  const radiusFor = z => (z <= 9 ? 2 : z <= 10 ? 2.5 : z <= 11 ? 3 : z <= 12 ? 3.5 : z <= 13 ? 4.5 : z <= 14 ? 5.5 : z <= 15 ? 7 : 8.5)
+    + (touch && z >= 14 ? 1 : 0);
+  const weightFor = z => z <= 11 ? 0.5 : 1;
+  const GOLDEN = Math.PI * (3 - Math.sqrt(5));
+
+  const dots = [];
+  // 押したときの一覧(施設名・住所・番号)。点で見る・まとめて見るの両方で使う
+  function popupFor(p) {{
+    const [lat, lng, cat, muni, exact, items, city] = p;
+    const n = items.length;
+    return () => {{
+      const noLabel = ['届出番号', '認定番号', '許可番号', '許可番号'][cat];
+      const list = items.map(it => '<li><b>'+esc(it[0] || '（施設名の記載なし）')+'</b><br>'+esc(it[1])
+        + (it[3] ? '<br><span class="d">'+noLabel+'：'+esc(it[3])+'</span>' : '')
+        + (it[2] ? '<br><span class="d">'+esc(it[2])+'</span>' : '')+'</li>').join('');
+      return '<div class="pop"><h3><span class="dot c'+cat+'"></span>'+esc(data.cats[cat])+'（'+esc(data.cities[city] || data.munis[muni])+'）'+(n > 1 ? ' 同じ建物に'+n+'件' : '')+'</h3>'
+        + (exact ? '' : '<div class="d">※位置はおおよそです</div>') + '<ul>'+list+'</ul></div>';
+    }};
+  }}
+  data.pins.forEach(p => {{
+    const [lat, lng, cat, muni, exact, items, city] = p;
+    const n = items.length;
+    const popup = popupFor(p);
+    for (let k = 0; k < n; k++) {{
+      const m = L.circleMarker([lat, lng], {{renderer, radius: 3, color: '#fff', weight: 1, fillColor: colors[cat],
+        fillOpacity: 0.9, dashArray: exact ? null : '2 2', n, k, cat, muni, city, base: L.latLng(lat, lng)}});
+      m.bindPopup(popup);
+      dots.push(m);
+    }}
+  }});
+  // 描く順番を種類に関係なく混ぜる(ある種類をまとめて上に描くと、重なった所でその色ばかり目立つため)
+  let seed = 12345;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = dots.length - 1; i > 0; i--) {{ const j = Math.floor(rnd() * (i + 1)); [dots[i], dots[j]] = [dots[j], dots[i]]; }}
+
+  // 倍率に合わせて点の大きさと、同じ建物の点の並び(画面上の間隔)を決め直す
+  function place() {{
+    if (view !== 'dots') return;
+    const z = map.getZoom(), r = radiusFor(z), w = weightFor(z);
+    // 件数の多い建物で点が遠くまで広がらないよう、広がる範囲(画面上の半径)に上限を設ける
+    const maxSpread = z <= 12 ? 30 : z <= 14 ? 36 : 45;
+    dots.forEach(m => {{
+      const o = m.options;
+      if (o.n > 1) {{
+        const gap = Math.min(r * 1.8, maxSpread / Math.sqrt(o.n - 1));
+        const d = gap * Math.sqrt(o.k), a = o.k * GOLDEN;
+        m.setLatLng(map.unproject(map.project(o.base, z).add([d * Math.cos(a), d * Math.sin(a)]), z));
+      }}
+      m.setRadius(r);
+      m.setStyle({{weight: w}});
+    }});
+  }}
+  map.on('zoomend', place);
+
+  // まとめて見る: 同じ建物の施設を1つのピンにし、近くのピンを数字入りの円(種類ごとの割合のドーナツ)にまとめる
   const cluster = L.markerClusterGroup({{
     chunkedLoading: true, maxClusterRadius: 50, showCoverageOnHover: false, zoomToBoundsOnClick: false,
     iconCreateFunction: c => {{
-      const ms = c.getAllChildMarkers();
       let n = 0; const tally = [0,0,0,0];
-      ms.forEach(m => {{ n += m.options.n; tally[m.options.cat] += m.options.n; }});
-      // 種類ごとの割合をドーナツ型で表す(1色で塗ると「民泊ばかり」のように見えてしまうため)
+      c.getAllChildMarkers().forEach(m => {{ n += m.options.n; tally[m.options.cat] += m.options.n; }});
       const size = n < 10 ? 34 : n < 100 ? 40 : n < 1000 ? 48 : 56;
       let acc = 0; const stops = [];
       tally.forEach((v, i) => {{ if (!v) return; const a = acc / n * 100, b = (acc + v) / n * 100; stops.push(colors[i]+' '+a.toFixed(2)+'% '+b.toFixed(2)+'%'); acc += v; }});
@@ -438,26 +509,59 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
         + '<span>'+n.toLocaleString()+'</span></div>', className: '', iconSize: [size, size]}});
     }}
   }});
-
-  const bigPin = window.matchMedia('(hover: none)').matches;
-  const markers = data.pins.map(p => {{
+  const pins = data.pins.map(p => {{
     const [lat, lng, cat, muni, exact, items, city] = p;
     const n = items.length;
-    // 1件ずつのピンも見やすい大きさにする(スマホは指で押しやすいようさらに大きく)。同じ建物に複数あるときは件数を中に書く
-    const size = (n > 1 ? 26 : 22) + (bigPin ? 2 : 0);
+    const size = (n > 1 ? 26 : 22) + (touch ? 2 : 0);
     const icon = L.divIcon({{className: '', iconSize: [size, size],
       html: '<div class="pin'+(exact ? '' : ' approx')+'" style="width:'+size+'px;height:'+size+'px;background:'+colors[cat]+'">'+(n > 1 ? n : '')+'</div>'}});
-    const m = L.marker([lat, lng], {{icon, n, cat, muni, city}});
-    m.bindPopup(() => {{
-      const noLabel = ['届出番号', '認定番号', '許可番号', '許可番号'][cat];
-      const list = items.map(it => '<li><b>'+esc(it[0] || '（施設名の記載なし）')+'</b><br>'+esc(it[1])
-        + (it[3] ? '<br><span class="d">'+noLabel+'：'+esc(it[3])+'</span>' : '')
-        + (it[2] ? '<br><span class="d">'+esc(it[2])+'</span>' : '')+'</li>').join('');
-      return '<div class="pop"><h3><span class="dot c'+cat+'"></span>'+esc(data.cats[cat])+'（'+esc(data.munis[muni])+'）'+(n > 1 ? ' '+n+'件' : '')+'</h3>'
-        + (exact ? '' : '<div class="d">※位置はおおよそです</div>') + '<ul>'+list+'</ul></div>';
-    }});
-    return m;
+    return L.marker([lat, lng], {{icon, n, cat, muni, city}}).bindPopup(popupFor(p));
   }});
+
+  // 円の内訳(含まれる市区町村と種類ごとの件数)。パソコンはマウスを重ねると吹き出し、
+  // スマホは1回目に押すと地図の下端の情報欄に表示・2回目で拡大
+  const cinfo = document.getElementById('cinfo');
+  let tipped = null;
+  function showTip(layer) {{
+    const byCity = new Map(); const tally = [0,0,0,0]; let n = 0;
+    layer.getAllChildMarkers().forEach(m => {{ const c = data.cities[m.options.city]; byCity.set(c, (byCity.get(c) || 0) + m.options.n); tally[m.options.cat] += m.options.n; n += m.options.n; }});
+    const top = [...byCity.entries()].sort((a, b) => b[1] - a[1]);
+    const names = top.slice(0, 3).map(([c, v]) => '<b>'+esc(c)+'</b> '+v.toLocaleString()+'件').join('、')
+      + (top.length > 3 ? ' ほか'+(top.length - 3)+'市区町村' : '');
+    const cats = tally.map((v, i) => v ? '<span class="dot c'+i+'"></span>'+esc(data.cats[i])+' '+v.toLocaleString()+'件' : '').filter(Boolean).join('<br>');
+    const body = '<div class="ctip">'+names+'<div class="cc">'+cats+'</div><div class="d">合計 '+n.toLocaleString()+'件（'+(touch ? 'もう一度押すと拡大' : '押すと拡大')+'）</div></div>';
+    tipped = layer;
+    if (touch) {{ cinfo.querySelector('.cbody').innerHTML = body; cinfo.hidden = false; return; }}
+    layer.unbindTooltip();
+    layer.bindTooltip(body, {{direction: 'top', offset: [0, -14], opacity: 1}}).openTooltip();
+  }}
+  function hideTip() {{ if (tipped && !touch) tipped.closeTooltip(); tipped = null; cinfo.hidden = true; }}
+  cinfo.querySelector('.cx').addEventListener('click', hideTip);
+  if (!touch) {{
+    cluster.on('clustermouseover', e => showTip(e.layer));
+    cluster.on('clustermouseout', hideTip);
+  }}
+  cluster.on('clusterclick', e => {{
+    if (touch && tipped !== e.layer) {{ hideTip(); showTip(e.layer); return; }}
+    hideTip();
+    e.layer.zoomToBounds({{padding: [20, 20]}});
+  }});
+  map.on('click zoomstart movestart', () => {{ if (touch) hideTip(); }});
+
+  // 表示の切り替え(点で見る/まとめて見る)。選んだ方はこの端末に覚えておく
+  let view = 'dots';
+  try {{ if (localStorage.getItem('minpaku-view') === 'cluster') view = 'cluster'; }} catch (e) {{}}
+  const tabs = [...document.querySelectorAll('.viewtab')];
+  function setView(v) {{
+    view = v;
+    tabs.forEach(t => t.setAttribute('aria-selected', t.dataset.view === v ? 'true' : 'false'));
+    hideTip();
+    if (v === 'dots') {{ map.removeLayer(cluster); map.addLayer(dotLayer); place(); }}
+    else {{ map.removeLayer(dotLayer); map.addLayer(cluster); }}
+    try {{ localStorage.setItem('minpaku-view', v); }} catch (e) {{}}
+    refresh(false);
+  }}
+  tabs.forEach(t => t.addEventListener('click', () => setView(t.dataset.view)));
 
   const btns = [...document.querySelectorAll('.tagbtn')];
   function refresh(fit){{
@@ -466,9 +570,17 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
     const muni = v[0] === 'm' ? +v.slice(1) : null;
     const pref = v[0] === 'p' ? +v.slice(1) : null;
     const hit = mi => (muni === null || mi === muni) && (pref === null || data.mpref[mi] === pref);
-    const shown = markers.filter(m => cats.has(m.options.cat) && hit(m.options.muni));
-    cluster.clearLayers();
-    cluster.addLayers(shown);
+    const pick = m => cats.has(m.options.cat) && hit(m.options.muni);
+    let shown;
+    if (view === 'dots') {{
+      shown = dots.filter(pick);
+      dotLayer.clearLayers();
+      shown.forEach(m => dotLayer.addLayer(m));
+    }} else {{
+      shown = pins.filter(pick);
+      cluster.clearLayers();
+      cluster.addLayers(shown);
+    }}
     if (fit && shown.length) map.fitBounds(L.latLngBounds(shown.map(m => m.getLatLng())), {{padding: [20, 20], maxZoom: 15}});
     document.querySelectorAll('#tbody tr').forEach(tr => {{
       const tp = +tr.dataset.pref;
@@ -484,44 +596,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
   sel.addEventListener('change', () => {{
     if (sel.value === '') {{ map.setView([35.68, 139.76], 10); refresh(false); }} else refresh(true);
   }});
-  // 円の吹き出し: 含まれる市区町村と種類ごとの件数
-  // パソコンはマウスを重ねると表示・押すと拡大。スマホ(マウスのない端末)は1回目で表示・2回目で拡大
-  const touch = window.matchMedia('(hover: none)').matches;
-  let tipped = null;
-  function showTip(layer) {{
-    const ms = layer.getAllChildMarkers();
-    const byCity = new Map(); const tally = [0,0,0,0]; let n = 0;
-    ms.forEach(m => {{ const c = data.cities[m.options.city]; byCity.set(c, (byCity.get(c) || 0) + m.options.n); tally[m.options.cat] += m.options.n; n += m.options.n; }});
-    const top = [...byCity.entries()].sort((a, b) => b[1] - a[1]);
-    const names = top.slice(0, 3).map(([c, v]) => '<b>'+esc(c)+'</b> '+v.toLocaleString()+'件').join('、')
-      + (top.length > 3 ? ' ほか'+(top.length - 3)+'市区町村' : '');
-    const cats = tally.map((v, i) => v ? '<span class="dot c'+i+'"></span>'+esc(data.cats[i])+' '+v.toLocaleString()+'件' : '').filter(Boolean).join('<br>');
-    const hint = touch ? 'もう一度押すと拡大' : '押すと拡大';
-    const body = '<div class="ctip">'+names+'<div class="cc">'+cats+'</div><div class="d">合計 '+n.toLocaleString()+'件（'+hint+'）</div></div>';
-    if (touch) {{
-      // スマホは吹き出しだと画面の端で細くつぶれるので、地図の下端の情報欄に出す
-      cinfo.querySelector('.cbody').innerHTML = body; cinfo.hidden = false; tipped = layer; return;
-    }}
-    layer.unbindTooltip();
-    layer.bindTooltip(body,
-      {{direction: 'top', offset: [0, -14], opacity: 1}}).openTooltip();
-    tipped = layer;
-  }}
-  const cinfo = document.getElementById('cinfo');
-  cinfo.querySelector('.cx').addEventListener('click', () => hideTip());
-  function hideTip() {{ if (tipped) {{ if (!touch) tipped.closeTooltip(); tipped = null; }} cinfo.hidden = true; }}
-  if (!touch) {{
-    cluster.on('clustermouseover', e => showTip(e.layer));
-    cluster.on('clustermouseout', hideTip);
-  }}
-  cluster.on('clusterclick', e => {{
-    if (touch && tipped !== e.layer) {{ hideTip(); showTip(e.layer); return; }}
-    hideTip();
-    e.layer.zoomToBounds({{padding: [20, 20]}});
-  }});
-  map.on('click zoomstart movestart', () => {{ if (touch) hideTip(); }});
-  map.addLayer(cluster);
-  refresh(false);
+  setView(view);
 }})();
 </script>
 </body>
