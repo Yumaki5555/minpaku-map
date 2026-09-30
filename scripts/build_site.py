@@ -11,6 +11,7 @@ from __future__ import annotations
 import html
 import json
 import os
+import re
 import sys
 from datetime import datetime, timedelta, timezone
 
@@ -45,6 +46,41 @@ def write_json(path: str, data) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+
+
+def city_of(addr: str, pref: str, known: list[str]) -> str:
+    """住所から市区町村名を取り出す(横浜市・大阪市などの政令市は市全体でまとめる)。"""
+    rest = addr.replace(" ", "")
+    if rest.startswith(pref):
+        rest = rest[len(pref):]
+    for name in known:  # 登録済みの自治体名(23区・政令市など)で始まるならそれ
+        if rest.startswith(name):
+            return name
+    m = re.match(r"^.{1,4}?島(.{1,4}?[町村])", rest)  # 東京都の島しょ(「三宅島三宅村」など)
+    if m:
+        return m.group(1)
+    m = re.match(r"^.+?郡(.{1,5}?[町村])", rest)
+    if m:
+        return m.group(1)
+    m = re.match(r"^(.{1,6}?市)", rest)
+    if m:
+        return m.group(1)
+    m = re.match(r"^(.{1,4}?[町村区])", rest)
+    return m.group(1) if m else ""
+
+
+def ranking(points: list[dict], reg_by_code: dict, cats: set[str], top: int = 10) -> list[tuple[str, int]]:
+    known = sorted({r["自治体名"] for r in reg_by_code.values() if not r["自治体名"].endswith(("都", "府", "県", ")"))},
+                   key=len, reverse=True)
+    counts: dict[str, int] = {}
+    for p in points:
+        if p["cat"] not in cats:
+            continue
+        pref = PREF_BY_CODE[p["code"][:2]]
+        city = city_of(p["addr"], pref, known)
+        if city:
+            counts[city] = counts.get(city, 0) + 1
+    return sorted(counts.items(), key=lambda x: -x[1])[:top]
 
 
 def main() -> None:
@@ -113,14 +149,34 @@ def main() -> None:
 
     total = sum(t["count"] for t in table)
     by_cat = {c: sum(len(p[5]) for p in pins if CATS[p[2]] == c) for c in CATS}
-    page = render(table, total, by_cat, today, prev["date"] if prev else "", not_found)
+    ranks = [
+        ("民泊", "特区民泊を含む", 0, ranking(collected["points"], reg_by_code, {"民泊", "特区民泊"})),
+        ("旅館・ホテル", "簡易宿所を含む", 2, ranking(collected["points"], reg_by_code, {"旅館・ホテル", "簡易宿所"})),
+    ]
+    page = render(table, total, by_cat, today, prev["date"] if prev else "", not_found, ranks)
     with open(os.path.join(DOCS, "index.html"), "w", encoding="utf-8") as f:
         f.write(page)
     open(os.path.join(DOCS, ".nojekyll"), "a").close()
     print(f"地図ページを作りました: ピン {len(pins)}個 / 施設 {sum(by_cat.values())}件 / 位置不明 {not_found}件")
 
 
-def render(table, total, by_cat, today, prev_date, not_found) -> str:
+def render_ranks(ranks) -> str:
+    e = html.escape
+    out = []
+    for title, sub, color, items in ranks:
+        mx = max((n for _, n in items), default=1)
+        lis = "".join(
+            f'<li title="{e(name)}：{n:,}件"><span class="rk">{i}</span><span class="rn">{e(name)}</span>'
+            f'<span class="rb"><span class="rf c{color}" style="width:{n / mx * 100:.1f}%"></span></span>'
+            f'<span class="rv">{n:,}</span></li>'
+            for i, (name, n) in enumerate(items, 1)
+        )
+        out.append(f'<section class="rank"><h3><span class="dot c{color}"></span>{e(title)}'
+                   f'<span class="rsub">（{e(sub)}）</span></h3><ol>{lis}</ol></section>')
+    return "".join(out)
+
+
+def render(table, total, by_cat, today, prev_date, not_found, ranks) -> str:
     e = html.escape
     rows = []
     last_pref = None
@@ -151,7 +207,7 @@ def render(table, total, by_cat, today, prev_date, not_found) -> str:
     nf_note = f"住所から位置を特定できなかった {not_found:,} 件は地図に表示されていません。" if not_found else ""
     return TEMPLATE.format(
         total=f"{total:,}", today=e(today), cat_btns=cat_btns, rows="\n".join(rows),
-        diff_note=diff_note, nf_note=nf_note, site_url=SITE_URL, area=AREA,
+        diff_note=diff_note, nf_note=nf_note, site_url=SITE_URL, area=AREA, ranks=render_ranks(ranks),
     )
 
 
@@ -225,6 +281,26 @@ td.num{{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}}
 tr.hide{{display:none}}
 tr.grp th{{background:var(--card);font-size:.95rem;padding-top:14px;border-bottom:2px solid var(--line)}}
 tr.grp .sub{{font-weight:400;color:var(--sub);font-size:.8rem;margin-left:8px}}
+.caution{{background:var(--card);border:1px solid var(--line);border-left:4px solid #d97706;border-radius:10px;
+  padding:10px 14px;margin:12px 0 4px;font-size:.85rem;line-height:1.7}}
+.caution .ct{{font-weight:700;margin:0 0 2px}}
+.caution ul{{margin:0;padding-left:1.2em}}
+.countgrid{{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start}}
+@media (max-width:900px){{.countgrid{{grid-template-columns:1fr}}}}
+.ranks{{display:flex;flex-direction:column;gap:12px}}
+.ranks .rt{{margin:0;font-weight:700;font-size:.95rem}}
+.rank{{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}}
+.rank h3{{font-size:.92rem;margin:0 0 6px;display:flex;align-items:center}}
+.rank .rsub{{font-weight:400;color:var(--sub);font-size:.78rem;margin-left:4px}}
+.rank ol{{list-style:none;margin:0;padding:0}}
+.rank li{{display:grid;grid-template-columns:1.4em 6.2em minmax(0,1fr) 3.6em;align-items:center;gap:6px;
+  font-size:.82rem;padding:3px 0;border-radius:6px}}
+.rank li:hover{{background:var(--chip)}}
+.rank .rk{{color:var(--sub);text-align:right;font-variant-numeric:tabular-nums}}
+.rank .rn{{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+.rank .rb{{height:10px}}
+.rank .rf{{display:block;height:100%;border-radius:0 4px 4px 0;min-width:2px}}
+.rank .rv{{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}}
 footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid var(--line);margin-top:28px}}
 </style>
 </head>
@@ -234,6 +310,15 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
   <h1>🏠 民泊・旅館業マップ</h1>
   <p class="lead">{area}の自治体が公表している、民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。毎週月曜に自動で更新しています。</p>
   <div class="stats"><span>掲載 <b>{total}</b> 件</span><span>最終更新 <b>{today}</b></span></div>
+  <div class="caution">
+    <p class="ct">このマップについて</p>
+    <ul>
+      <li>身近な地域にどのくらい民泊や旅館・ホテルがあるのかを知っていただくため、数を「見える化」することを目的にしています。</li>
+      <li>見た目は同じような無人の宿泊施設でも、自治体によって「旅館・ホテル」「簡易宿所」など区分が異なる場合があります。</li>
+      <li>掲載している施設が現在も営業しているかどうかは分かりません。営業状況は各自治体にお問い合わせください。</li>
+      <li>各自治体の公表資料を自動で読み取って作成しているため、内容や地図上の位置が誤っている場合があります。</li>
+    </ul>
+  </div>
 </header>
 
 <div class="filters" role="group" aria-label="種別で絞り込み">
@@ -245,11 +330,17 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 
 <h2>自治体ごとの件数</h2>
 <p class="note">{diff_note}「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。</p>
+<div class="countgrid">
+<div class="ranks" aria-label="市区町村別の件数ランキング">
+<p class="rt">市区町村別ランキング 上位10</p>
+{ranks}
+</div>
 <div class="tablewrap"><table>
 <thead><tr><th>自治体</th><th>種別</th><th style="text-align:right">件数</th><th style="text-align:right">増減</th><th>資料の日付</th><th>出典</th></tr></thead>
 <tbody id="tbody">
 {rows}
 </tbody></table></div>
+</div>
 
 <footer>
   <p>各自治体が公表している一覧（PDF・Excel・CSV）をもとに自動で作成しています。地図上の位置は住所から自動で推定したもので、ずれている場合があります。正確な情報は各自治体の公表資料をご確認ください。</p>

@@ -6,7 +6,7 @@
 <title>民泊・旅館業マップ｜首都圏・大阪</title>
 <meta name="description" content="東京・神奈川・埼玉・千葉・茨城・大阪の自治体が公表している民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。毎週自動更新。">
 <meta property="og:type" content="website">
-<meta property="og:title" content="民泊・旅館業マップ｜52,368件を地図で">
+<meta property="og:title" content="民泊・旅館業マップ｜52,673件を地図で">
 <meta property="og:description" content="東京・神奈川・埼玉・千葉・茨城・大阪の自治体が公表している民泊・特区民泊・旅館業の施設を地図にまとめました。毎週自動更新。">
 <meta property="og:url" content="https://yumaki5555.github.io/minpaku-map/">
 <meta name="twitter:card" content="summary">
@@ -68,6 +68,26 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 tr.hide{display:none}
 tr.grp th{background:var(--card);font-size:.95rem;padding-top:14px;border-bottom:2px solid var(--line)}
 tr.grp .sub{font-weight:400;color:var(--sub);font-size:.8rem;margin-left:8px}
+.caution{background:var(--card);border:1px solid var(--line);border-left:4px solid #d97706;border-radius:10px;
+  padding:10px 14px;margin:12px 0 4px;font-size:.85rem;line-height:1.7}
+.caution .ct{font-weight:700;margin:0 0 2px}
+.caution ul{margin:0;padding-left:1.2em}
+.countgrid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.countgrid{grid-template-columns:1fr}}
+.ranks{display:flex;flex-direction:column;gap:12px}
+.ranks .rt{margin:0;font-weight:700;font-size:.95rem}
+.rank{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.rank h3{font-size:.92rem;margin:0 0 6px;display:flex;align-items:center}
+.rank .rsub{font-weight:400;color:var(--sub);font-size:.78rem;margin-left:4px}
+.rank ol{list-style:none;margin:0;padding:0}
+.rank li{display:grid;grid-template-columns:1.4em 6.2em minmax(0,1fr) 3.6em;align-items:center;gap:6px;
+  font-size:.82rem;padding:3px 0;border-radius:6px}
+.rank li:hover{background:var(--chip)}
+.rank .rk{color:var(--sub);text-align:right;font-variant-numeric:tabular-nums}
+.rank .rn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank .rb{height:10px}
+.rank .rf{display:block;height:100%;border-radius:0 4px 4px 0;min-width:2px}
+.rank .rv{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
 footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid var(--line);margin-top:28px}
 </style>
 </head>
@@ -76,11 +96,20 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
 <header>
   <h1>🏠 民泊・旅館業マップ</h1>
   <p class="lead">東京・神奈川・埼玉・千葉・茨城・大阪の自治体が公表している、民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。毎週月曜に自動で更新しています。</p>
-  <div class="stats"><span>掲載 <b>52,368</b> 件</span><span>最終更新 <b>2026/09/30</b></span></div>
+  <div class="stats"><span>掲載 <b>52,673</b> 件</span><span>最終更新 <b>2026/09/30</b></span></div>
+  <div class="caution">
+    <p class="ct">このマップについて</p>
+    <ul>
+      <li>身近な地域にどのくらい民泊や旅館・ホテルがあるのかを知っていただくため、数を「見える化」することを目的にしています。</li>
+      <li>見た目は同じような無人の宿泊施設でも、自治体によって「旅館・ホテル」「簡易宿所」など区分が異なる場合があります。</li>
+      <li>掲載している施設が現在も営業しているかどうかは分かりません。営業状況は各自治体にお問い合わせください。</li>
+      <li>各自治体の公表資料を自動で読み取って作成しているため、内容や地図上の位置が誤っている場合があります。</li>
+    </ul>
+  </div>
 </header>
 
 <div class="filters" role="group" aria-label="種別で絞り込み">
-  <button class="tagbtn" data-cat="0" aria-pressed="true"><span class="dot c0"></span>民泊<span class="n">23,540</span></button><button class="tagbtn" data-cat="1" aria-pressed="true"><span class="dot c1"></span>特区民泊<span class="n">9,448</span></button><button class="tagbtn" data-cat="2" aria-pressed="true"><span class="dot c2"></span>旅館・ホテル<span class="n">14,131</span></button><button class="tagbtn" data-cat="3" aria-pressed="true"><span class="dot c3"></span>簡易宿所<span class="n">5,230</span></button>
+  <button class="tagbtn" data-cat="0" aria-pressed="true"><span class="dot c0"></span>民泊<span class="n">23,492</span></button><button class="tagbtn" data-cat="1" aria-pressed="true"><span class="dot c1"></span>特区民泊<span class="n">9,448</span></button><button class="tagbtn" data-cat="2" aria-pressed="true"><span class="dot c2"></span>旅館・ホテル<span class="n">14,392</span></button><button class="tagbtn" data-cat="3" aria-pressed="true"><span class="dot c3"></span>簡易宿所<span class="n">5,322</span></button>
   <select id="muni" aria-label="自治体を選ぶ"><option value="">すべての自治体</option></select>
 </div>
 <div id="map" role="region" aria-label="施設の地図"></div>
@@ -88,6 +117,11 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
 
 <h2>自治体ごとの件数</h2>
 <p class="note">「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。</p>
+<div class="countgrid">
+<div class="ranks" aria-label="市区町村別の件数ランキング">
+<p class="rt">市区町村別ランキング 上位10</p>
+<section class="rank"><h3><span class="dot c0"></span>民泊<span class="rsub">（特区民泊を含む）</span></h3><ol><li title="大阪市：11,098件"><span class="rk">1</span><span class="rn">大阪市</span><span class="rb"><span class="rf c0" style="width:100.0%"></span></span><span class="rv">11,098</span></li><li title="新宿区：3,928件"><span class="rk">2</span><span class="rn">新宿区</span><span class="rb"><span class="rf c0" style="width:35.4%"></span></span><span class="rv">3,928</span></li><li title="墨田区：2,285件"><span class="rk">3</span><span class="rn">墨田区</span><span class="rb"><span class="rf c0" style="width:20.6%"></span></span><span class="rv">2,285</span></li><li title="渋谷区：1,834件"><span class="rk">4</span><span class="rn">渋谷区</span><span class="rb"><span class="rf c0" style="width:16.5%"></span></span><span class="rv">1,834</span></li><li title="豊島区：1,826件"><span class="rk">5</span><span class="rn">豊島区</span><span class="rb"><span class="rf c0" style="width:16.5%"></span></span><span class="rv">1,826</span></li><li title="台東区：1,438件"><span class="rk">6</span><span class="rn">台東区</span><span class="rb"><span class="rf c0" style="width:13.0%"></span></span><span class="rv">1,438</span></li><li title="港区：873件"><span class="rk">7</span><span class="rn">港区</span><span class="rb"><span class="rf c0" style="width:7.9%"></span></span><span class="rv">873</span></li><li title="大田区：755件"><span class="rk">8</span><span class="rn">大田区</span><span class="rb"><span class="rf c0" style="width:6.8%"></span></span><span class="rv">755</span></li><li title="北区：612件"><span class="rk">9</span><span class="rn">北区</span><span class="rb"><span class="rf c0" style="width:5.5%"></span></span><span class="rv">612</span></li><li title="世田谷区：555件"><span class="rk">10</span><span class="rn">世田谷区</span><span class="rb"><span class="rf c0" style="width:5.0%"></span></span><span class="rv">555</span></li></ol></section><section class="rank"><h3><span class="dot c2"></span>旅館・ホテル<span class="rsub">（簡易宿所を含む）</span></h3><ol><li title="大阪市：1,861件"><span class="rk">1</span><span class="rn">大阪市</span><span class="rb"><span class="rf c2" style="width:100.0%"></span></span><span class="rv">1,861</span></li><li title="墨田区：1,136件"><span class="rk">2</span><span class="rn">墨田区</span><span class="rb"><span class="rf c2" style="width:61.0%"></span></span><span class="rv">1,136</span></li><li title="台東区：1,119件"><span class="rk">3</span><span class="rn">台東区</span><span class="rb"><span class="rf c2" style="width:60.1%"></span></span><span class="rv">1,119</span></li><li title="豊島区：984件"><span class="rk">4</span><span class="rn">豊島区</span><span class="rb"><span class="rf c2" style="width:52.9%"></span></span><span class="rv">984</span></li><li title="渋谷区：811件"><span class="rk">5</span><span class="rn">渋谷区</span><span class="rb"><span class="rf c2" style="width:43.6%"></span></span><span class="rv">811</span></li><li title="葛飾区：732件"><span class="rk">6</span><span class="rn">葛飾区</span><span class="rb"><span class="rf c2" style="width:39.3%"></span></span><span class="rv">732</span></li><li title="箱根町：728件"><span class="rk">7</span><span class="rn">箱根町</span><span class="rb"><span class="rf c2" style="width:39.1%"></span></span><span class="rv">728</span></li><li title="新宿区：716件"><span class="rk">8</span><span class="rn">新宿区</span><span class="rb"><span class="rf c2" style="width:38.5%"></span></span><span class="rv">716</span></li><li title="港区：604件"><span class="rk">9</span><span class="rn">港区</span><span class="rb"><span class="rf c2" style="width:32.5%"></span></span><span class="rv">604</span></li><li title="江東区：370件"><span class="rk">10</span><span class="rn">江東区</span><span class="rb"><span class="rf c2" style="width:19.9%"></span></span><span class="rv">370</span></li></ol></section>
+</div>
 <div class="tablewrap"><table>
 <thead><tr><th>自治体</th><th>種別</th><th style="text-align:right">件数</th><th style="text-align:right">増減</th><th>資料の日付</th><th>出典</th></tr></thead>
 <tbody id="tbody">
@@ -145,7 +179,7 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
 <tr data-muni="八王子市" data-pref="0"><td>八王子市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.hachioji.tokyo.jp/kurashi/hoken/007/018/002/p002807.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
 <tr data-muni="町田市" data-pref="0"><td>町田市</td><td><span class="dot c0"></span>民泊</td><td class="num">32</td><td class="num"></td><td></td><td><a href="https://www.city.machida.tokyo.jp/iryo/hokenjo/kankyou/jyutaku_syukuhaku/ichiran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="町田市" data-pref="0"><td>町田市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.machida.tokyo.jp/iryo/hokenjo/kankyou/ryokan.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
-<tr class="grp" data-pref="1"><th colspan="6">神奈川県<span class="sub">3,631件</span></th></tr>
+<tr class="grp" data-pref="1"><th colspan="6">神奈川県<span class="sub">3,743件</span></th></tr>
 <tr data-muni="神奈川県" data-pref="1"><td>神奈川県</td><td><span class="dot c0"></span>民泊</td><td class="num">522</td><td class="num"></td><td>2026/06/30</td><td><a href="https://www.pref.kanagawa.jp/docs/e8z/cnt/f762/p1195197.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="神奈川県" data-pref="1"><td>神奈川県</td><td><span class="dot c2"></span>旅館業</td><td class="num">1,741</td><td class="num"></td><td>2026/06/30</td><td><a href="https://www.pref.kanagawa.jp/docs/e8z/cnt/f762/p70574.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="横浜市" data-pref="1"><td>横浜市</td><td><span class="dot c0"></span>民泊</td><td class="num">347</td><td class="num"></td><td>2026/09/01</td><td><a href="https://www.city.yokohama.lg.jp/kurashi/sumai-kurashi/seikatsu/kaiteki/20180222105955.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
@@ -153,29 +187,29 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
 <tr data-muni="川崎市" data-pref="1"><td>川崎市</td><td><span class="dot c0"></span>民泊</td><td class="num">113</td><td class="num"></td><td></td><td><a href="https://www.city.kawasaki.jp/280/page/0000173594.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="川崎市" data-pref="1"><td>川崎市</td><td><span class="dot c2"></span>旅館業</td><td class="num">114</td><td class="num"></td><td></td><td><a href="https://www.city.kawasaki.jp/350/page/0000120745.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="相模原市" data-pref="1"><td>相模原市</td><td><span class="dot c0"></span>民泊</td><td class="num">28</td><td class="num"></td><td>2026/07/31</td><td><a href="https://www.city.sagamihara.kanagawa.jp/kurashi/1026489/sumai/1026515/1013506.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="相模原市" data-pref="1"><td>相模原市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.sagamihara.kanagawa.jp/kosodate/kenko/1026628/seikatsu/1007449.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
+<tr data-muni="相模原市" data-pref="1"><td>相模原市</td><td><span class="dot c2"></span>旅館業</td><td class="num">112</td><td class="num"></td><td></td><td><a href="https://opendata.city.sagamihara.kanagawa.jp/dataset/ryokan" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="横須賀市" data-pref="1"><td>横須賀市</td><td><span class="dot c0"></span>民泊</td><td class="num">144</td><td class="num"></td><td></td><td><a href="https://data.bodik.jp/dataset/142018_00_19_environmental_sanitation_facilities" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="横須賀市" data-pref="1"><td>横須賀市</td><td><span class="dot c2"></span>旅館業</td><td class="num">91</td><td class="num"></td><td></td><td><a href="https://data.bodik.jp/dataset/142018_00_19_environmental_sanitation_facilities" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="藤沢市" data-pref="1"><td>藤沢市</td><td><span class="dot c0"></span>民泊</td><td class="num">99</td><td class="num"></td><td></td><td><a href="https://www.city.fujisawa.kanagawa.jp/seiei/kenko/kenko/kankyo/jyuutakusyukuhaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="藤沢市" data-pref="1"><td>藤沢市</td><td><span class="dot c2"></span>旅館業</td><td class="num">120</td><td class="num"></td><td></td><td><a href="https://www.city.fujisawa.kanagawa.jp/seiei/kenko/kenko/kankyo/ryokan.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="茅ヶ崎市" data-pref="1"><td>茅ヶ崎市</td><td><span class="dot c0"></span>民泊</td><td class="num">50</td><td class="num"></td><td></td><td><a href="https://www.city.chigasaki.kanagawa.jp/jyohosuishin/1045355/1041779.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="茅ヶ崎市" data-pref="1"><td>茅ヶ崎市</td><td><span class="dot c2"></span>旅館業</td><td class="num">20</td><td class="num"></td><td></td><td><a href="https://www.city.chigasaki.kanagawa.jp/jyohosuishin/1045355/1041779.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr class="grp" data-pref="2"><th colspan="6">埼玉県<span class="sub">1,215件</span></th></tr>
+<tr class="grp" data-pref="2"><th colspan="6">埼玉県<span class="sub">1,278件</span></th></tr>
 <tr data-muni="埼玉県" data-pref="2"><td>埼玉県</td><td><span class="dot c0"></span>民泊</td><td class="num">456</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.pref.saitama.lg.jp/a0806/minpaku/jutaku-shukuhaku11.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="埼玉県" data-pref="2"><td>埼玉県</td><td><span class="dot c2"></span>旅館業</td><td class="num">611</td><td class="num"></td><td></td><td><a href="https://www.pref.saitama.lg.jp/a0706/6hou/ichiran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="さいたま市" data-pref="2"><td>さいたま市</td><td><span class="dot c2"></span>旅館業</td><td class="num">101</td><td class="num"></td><td></td><td><a href="https://www.city.saitama.lg.jp/002/002/011/006/p058865.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="川越市" data-pref="2"><td>川越市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.kawagoe.saitama.jp/sangyo/b-seikatsu/1012362/1012367.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
+<tr data-muni="川越市" data-pref="2"><td>川越市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.kawagoe.saitama.jp/kenko/shokuhin/1007121/1007195.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">市は毎月の新規許可分だけを公開しており、全体の一覧はなし(2026年9月確認)</div></td></tr>
 <tr data-muni="越谷市" data-pref="2"><td>越谷市</td><td><span class="dot c2"></span>旅館業</td><td class="num">31</td><td class="num"></td><td></td><td><a href="https://www.city.koshigaya.saitama.jp/kurashi_shisei/fukushi/hokenjo/kankyo/jouhouteikyou.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="川口市" data-pref="2"><td>川口市</td><td><span class="dot c0"></span>民泊</td><td class="num">16</td><td class="num"></td><td>2026/09/14</td><td><a href="https://www.city.kawaguchi.lg.jp/soshiki/01110/030/minpaku/23892.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="川口市" data-pref="2"><td>川口市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.kawaguchi.lg.jp/soshiki/01090/seikatueiseika/kankyo/ryokan_hotel/25379.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
-<tr class="grp" data-pref="3"><th colspan="6">千葉県<span class="sub">3,881件</span></th></tr>
+<tr data-muni="川口市" data-pref="2"><td>川口市</td><td><span class="dot c2"></span>旅館業</td><td class="num">63</td><td class="num"></td><td></td><td><a href="https://www.city.kawaguchi.lg.jp/soshiki/01090/seikatueiseika/kankyo/22639.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr class="grp" data-pref="3"><th colspan="6">千葉県<span class="sub">4,059件</span></th></tr>
 <tr data-muni="千葉県" data-pref="3"><td>千葉県</td><td><span class="dot c0"></span>民泊</td><td class="num">1,202</td><td class="num"></td><td>2026/06/30</td><td><a href="https://www.pref.chiba.lg.jp/eishi/tetsuzuki/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="千葉県" data-pref="3"><td>千葉県</td><td><span class="dot c2"></span>旅館業</td><td class="num">2,597</td><td class="num"></td><td></td><td><a href="https://opendata.pref.chiba.lg.jp/datasets/6" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="千葉市" data-pref="3"><td>千葉市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.chiba.jp/hokenfukushi/iryoeisei/hokenjo/kankyo/ryokan.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
+<tr data-muni="千葉市" data-pref="3"><td>千葉市</td><td><span class="dot c2"></span>旅館業</td><td class="num">178</td><td class="num"></td><td></td><td><a href="https://www.city.chiba.jp/somu/somu/seisakuhomu/shisei/hokenjokankei.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="船橋市" data-pref="3"><td>船橋市</td><td><span class="dot c2"></span>旅館業</td><td class="num">82</td><td class="num"></td><td></td><td><a href="https://data.bodik.jp/dataset/122041_20260401_seikatsueisei-eigyoushisetsu_ryokann" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="柏市" data-pref="3"><td>柏市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.kashiwa.lg.jp/seikatsueisei/shiseijoho/shisei/health_hospital/shinse/kankyoese/hotel.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
-<tr class="grp" data-pref="4"><th colspan="6">茨城県<span class="sub">1,517件</span></th></tr>
-<tr data-muni="茨城県" data-pref="4"><td>茨城県</td><td><span class="dot c0"></span>民泊</td><td class="num">312</td><td class="num"></td><td>2026/09/17</td><td><a href="https://www.pref.ibaraki.jp/hokenfukushi/seiei/kankyo/seiei/minpaku/jyouhoukoukai.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr class="grp" data-pref="4"><th colspan="6">茨城県<span class="sub">1,469件</span></th></tr>
+<tr data-muni="茨城県" data-pref="4"><td>茨城県</td><td><span class="dot c0"></span>民泊</td><td class="num">264</td><td class="num"></td><td>2026/09/17</td><td><a href="https://www.pref.ibaraki.jp/hokenfukushi/seiei/kankyo/seiei/minpaku/jyouhoukoukai.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="茨城県" data-pref="4"><td>茨城県</td><td><span class="dot c2"></span>旅館業</td><td class="num">1,110</td><td class="num"></td><td></td><td><a href="https://www.pref.ibaraki.jp/hokenfukushi/seiei/kankyo/seiei/envandani/ryokan/ryokan.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr data-muni="水戸市" data-pref="4"><td>水戸市</td><td><span class="dot c2"></span>旅館業</td><td class="num">95</td><td class="num"></td><td>2026/07/02</td><td><a href="https://www.city.mito.lg.jp/page/125448.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 <tr class="grp" data-pref="5"><th colspan="6">大阪府<span class="sub">13,879件</span></th></tr>
@@ -194,6 +228,7 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
 <tr data-muni="寝屋川市" data-pref="5"><td>寝屋川市</td><td><span class="dot c0"></span>民泊</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.neyagawa.osaka.jp/organization_list/kenkou/hokeneisei/kankyou/kankyo01/sinnpouminnpaku.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">寝屋川市は住宅宿泊事業の届出住宅を公開しておらず、データなし(確認済み・対応不要)</div></td></tr>
 <tr data-muni="寝屋川市" data-pref="5"><td>寝屋川市</td><td><span class="dot c2"></span>旅館業</td><td class="num">25</td><td class="num"></td><td></td><td><a href="https://www.city.neyagawa.osaka.jp/organization_list/keieikikaku/johosuisinka/open_data/opendata/18213.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 </tbody></table></div>
+</div>
 
 <footer>
   <p>各自治体が公表している一覧（PDF・Excel・CSV）をもとに自動で作成しています。地図上の位置は住所から自動で推定したもので、ずれている場合があります。正確な情報は各自治体の公表資料をご確認ください。</p>

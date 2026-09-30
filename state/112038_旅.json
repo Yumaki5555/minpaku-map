@@ -1,0 +1,19 @@
+{
+  "row_count": 68,
+  "date": "20260930",
+  "header": [
+    "種別",
+    "許可年月日",
+    "営業所名称",
+    "営業所所在地",
+    "営業所電話番号",
+    "営業者氏名",
+    "代表者名",
+    "営業者住所"
+  ],
+  "source_url": "https://www.city.kawaguchi.lg.jp/material/files/group/89/ryokan2025.pdf",
+  "normalized_files": [
+    "data/川口市/旅館業/整形済み/20260930_川口市_旅館業_旅館ホテル等_normalized.csv",
+    "data/川口市/旅館業/整形済み/20260930_川口市_旅館業_簡易宿所_normalized.csv"
+  ]
+}

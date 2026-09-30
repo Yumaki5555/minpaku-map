@@ -143,10 +143,11 @@ def page_links(page: str, pattern: str) -> list[tuple[str, str]]:
     """ページ内で、リンクの文字が pattern(正規表現)に合うファイルの (URL, リンクの文字) を載っている順に返す。
     bodik(CKAN)のデータセットページの場合は、データの名前をリンクの文字として扱う。
     """
-    m = re.match(r"https://data\.bodik\.jp/dataset/([^/?#]+)", page)
+    # bodikや相模原市などのCKAN(オープンデータの仕組み)のデータセットページは、APIでファイル一覧を取る
+    m = re.match(r"(https?://[^/]+)/dataset/([^/?#]+)/?$", page)
     try:
         if m:
-            resp = requests.get("https://data.bodik.jp/api/3/action/package_show", params={"id": m.group(1)}, timeout=30)
+            resp = requests.get(f"{m.group(1)}/api/3/action/package_show", params={"id": m.group(2)}, timeout=30)
             resp.raise_for_status()
             items = [(r["url"], r.get("name", "")) for r in resp.json()["result"]["resources"]]
         else:
@@ -273,22 +274,28 @@ def load_source(path: str, fmt: str, row: dict, kind: str) -> "ExtractResult":
     return extract(path, fmt, kind_hint=kind, sheet_hint=sheet)
 
 
+OWNER_COLS = ("営業者", "申請者", "代表者", "開設者", "事業者")
+
+
+def key_col(names, word: str) -> str | None:
+    """列名の中から「名称」「所在地」「方書」を含む施設側の列を探す(「営業所名称」「所在地住所」なども可)。"""
+    for n in names:
+        if n and word in n and not any(o in n for o in OWNER_COLS) and not n.endswith(("2", "２")):
+            return n
+    return None
+
+
 def facility_key(rec: dict) -> tuple:
     """施設名・所在地・方書を、表記ゆれ(全角/半角・空白)をそろえて並べたもの。"""
-    def n(*names):
-        for name in names:
-            if rec.get(name):
-                return squash(rec[name])
-        return ""
-    return (n("施設名称", "名称"), n("施設所在地", "所在地"), n("施設方書", "方書"))
+    def n(word):
+        col = key_col(rec.keys(), word)
+        return squash(rec[col]) if col and rec.get(col) else ""
+    return (n("名称"), n("所在地"), n("方書"))
 
 
 def squash(v) -> str:
     """全角/半角・空白・改行の違いをそろえる(PDFから読むと途中に改行が入るため)。"""
     return re.sub(r"\s+", "", unicodedata.normalize("NFKC", str(v or "")))
-
-
-KEY_COLS = ("施設名称", "名称", "施設所在地", "所在地")
 
 
 def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base_url: str) -> tuple[list, str]:
@@ -299,7 +306,7 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
     pattern = row.get("追加情報文字", "").strip()
     if not pattern or not header:
         return rows, ""
-    if not any(h in KEY_COLS for h in header):
+    if not (key_col(header, "名称") or key_col(header, "所在地")):
         return rows, ""  # 列の名前が分からないと照合できない(列名指定を使う)
     # 全体一覧の日付。URLに無ければ、ページ上のリンクの文字(「令和8年6月30日終了時点」など)から読む
     base_date = link_date(base_url)
@@ -344,7 +351,7 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
                 if re.fullmatch(r"(環境)?[（(]?廃止[)）]?", joined):
                     section, dh = "廃止", None
                     continue
-                if any(c in KEY_COLS for c in cells):
+                if key_col(cells, "名称") or key_col(cells, "所在地"):
                     dh = cells
                     continue
                 if not dh and len(cells) == len(header) and re.fullmatch(r"\d+", cells[0] or ""):

@@ -1,0 +1,24 @@
+{
+  "row_count": 112,
+  "date": "20260930",
+  "header": [
+    "施設名称",
+    "施設所在地",
+    "施設所在地方書",
+    "施設電話番号",
+    "種別",
+    "許可番号",
+    "許可日",
+    "申請者名称",
+    "申請者役職名",
+    "申請者氏名",
+    "申請者住所",
+    "申請者住所方書",
+    "申請者電話番号"
+  ],
+  "source_url": "https://opendata.city.sagamihara.kanagawa.jp/dataset/3c170a3f-be82-429e-9e5d-b1c61ad0536b/resource/8adf46eb-87f1-4aee-a043-e927d0782a16/download/13.zip",
+  "normalized_files": [
+    "data/相模原市/旅館業/整形済み/20260930_相模原市_旅館業_旅館ホテル等_normalized.csv",
+    "data/相模原市/旅館業/整形済み/20260930_相模原市_旅館業_簡易宿所_normalized.csv"
+  ]
+}

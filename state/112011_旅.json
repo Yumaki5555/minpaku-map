@@ -1,0 +1,20 @@
+{
+  "row_count": 1,
+  "date": "20260930",
+  "header": [
+    "No",
+    "店名称",
+    "営業所所在地",
+    "",
+    "",
+    "営業所電話番号",
+    "申請者名",
+    "",
+    "種類",
+    "許可日"
+  ],
+  "source_url": "https://www.city.kawagoe.saitama.jp/_res/projects/default_project/_page_/001/007/195/ryokann0806.pdf",
+  "normalized_files": [
+    "data/川越市/旅館業/整形済み/20260930_川越市_旅館業_normalized.csv"
+  ]
+}

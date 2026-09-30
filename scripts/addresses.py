@@ -221,6 +221,9 @@ def parse_file(path: str, reg: dict) -> tuple[list[dict], int]:
 
     def add(addr: str, name: str, dt: str, r: list[str], no: str = "") -> None:
         full, geo = make_point(addr, pref, city)
+        # 都府県全体の一覧で市区町村名の無いもの(茨城県の「東海ヒルズ101号室」のような建物名だけの行)は住所ではない
+        if not city and not re.match(r"^.{1,10}?[市区町村郡島]", full[len(pref):]):
+            return
         if not no:
             # 番号の列が見つからなくても、民泊の届出番号(M+9桁)の形のマスがあれば使う
             no = next((m.group(0) for c in r for m in [MINPAKU_NO.search(norm(clean(c)))] if m), "")
