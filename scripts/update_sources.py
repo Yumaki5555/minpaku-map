@@ -502,6 +502,11 @@ def process_row(row: dict) -> dict:
             print(f"[{ward}/{kind}] ダウンロード中: {t_url}")
         path = download(t_url, dest_dir, f"{key}.{t_fmt or 'bin'}")
         if not path:
+            if "前回の控え" in row.get("メモ", ""):
+                # 千葉県のオープンデータのように海外からの接続を断るサイトは、前回の控え(state/points/)を使う
+                summary["status"] = "対象外"
+                summary["detail"] = "海外から取得できないため前回の控えを使用"
+                return summary
             summary["status"] = "要確認"
             summary["detail"] = "ダウンロード失敗"
             return summary
