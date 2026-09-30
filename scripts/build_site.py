@@ -263,8 +263,10 @@ select{{padding:6px 10px;border:1px solid var(--line);border-radius:8px;backgrou
 .note{{font-size:.8rem;color:var(--sub);margin:6px 0}}
 .pin{{border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.35)}}
 .pin.approx{{border-style:dashed}}
-.cl{{border-radius:50%;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 0 0 3px rgba(255,255,255,.7),0 1px 4px rgba(0,0,0,.4);font-size:12px}}
+.cl{{border-radius:50%;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 2px rgba(255,255,255,.9),0 1px 4px rgba(0,0,0,.35)}}
+.cl span{{background:#fff;color:#1c1b19;border-radius:50%;width:calc(100% - 12px);height:calc(100% - 12px);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;letter-spacing:-.02em}}
 .leaflet-popup-content{{font-family:inherit;font-size:13px;line-height:1.5;max-height:280px;overflow:auto;margin:10px 12px}}
 .pop h3{{font-size:13px;margin:0 0 4px}}
 .pop ul{{margin:0;padding-left:1.1em}}
@@ -272,7 +274,8 @@ select{{padding:6px 10px;border:1px solid var(--line);border-radius:8px;backgrou
 .pop .d{{color:#666;font-size:12px}}
 .tablewrap{{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}}
 table{{border-collapse:collapse;width:100%;font-size:.88rem;min-width:620px}}
-th,td{{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}}
+th,td{{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;white-space:nowrap}}
+td:last-child{{white-space:normal;width:100%}}
 th{{background:var(--chip);font-weight:600;position:sticky;top:0}}
 td.num{{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}}
 .up{{color:var(--up);font-weight:700}}.down{{color:var(--down);font-weight:700}}
@@ -384,10 +387,13 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
       const ms = c.getAllChildMarkers();
       let n = 0; const tally = [0,0,0,0];
       ms.forEach(m => {{ n += m.options.n; tally[m.options.cat] += m.options.n; }});
-      const top = tally.indexOf(Math.max(...tally));
-      const size = n < 10 ? 30 : n < 100 ? 36 : n < 1000 ? 44 : 52;
-      return L.divIcon({{html: '<div class="cl" style="width:'+size+'px;height:'+size+'px;background:'+colors[top]+'">'+n.toLocaleString()+'</div>',
-        className: '', iconSize: [size, size]}});
+      // 種類ごとの割合をドーナツ型で表す(1色で塗ると「民泊ばかり」のように見えてしまうため)
+      const size = n < 10 ? 34 : n < 100 ? 40 : n < 1000 ? 48 : 56;
+      let acc = 0; const stops = [];
+      tally.forEach((v, i) => {{ if (!v) return; const a = acc / n * 100, b = (acc + v) / n * 100; stops.push(colors[i]+' '+a.toFixed(2)+'% '+b.toFixed(2)+'%'); acc += v; }});
+      const tip = tally.map((v, i) => v ? data.cats[i]+' '+v.toLocaleString()+'件' : '').filter(Boolean).join(' / ');
+      return L.divIcon({{html: '<div class="cl" title="'+tip+'" style="width:'+size+'px;height:'+size+'px;background:conic-gradient('+stops.join(',')+')">'
+        + '<span>'+n.toLocaleString()+'</span></div>', className: '', iconSize: [size, size]}});
     }}
   }});
 
