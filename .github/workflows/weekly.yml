@@ -43,4 +43,8 @@ jobs:
           # 実行中に手作業の変更が保存されていても失敗しないよう、最新を取り込んでから保存する
           # (取り込みでぶつかった地図データなどは、今回の自動更新の結果を優先する)
           git pull --rebase -X theirs
+          # 取り込んだ最新のプログラムで地図ページを作り直す(実行中に見た目を変えた場合の反映もれを防ぐ)
+          python -u scripts/build_site.py
+          git add -A docs state
+          git diff --cached --quiet || git commit -m "地図ページを最新のプログラムで作り直し"
           git push
