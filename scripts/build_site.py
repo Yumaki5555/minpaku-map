@@ -286,7 +286,8 @@ select{{padding:6px 10px;border:1px solid var(--line);border-radius:8px;backgrou
 #map.zoomed .basemap{{filter:grayscale(.4) contrast(.45) brightness(1.18)}}
 #map{{height:68vh;min-height:420px;border:1px solid var(--line);border-radius:12px;background:var(--chip)}}
 .note{{font-size:.8rem;color:var(--sub);margin:6px 0}}
-.pin{{border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.35)}}
+.pin{{border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.3);
+  color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}}
 .pin.approx{{border-style:dashed}}
 .cl{{border-radius:50%;display:flex;align-items:center;justify-content:center;
   box-shadow:0 0 0 2px rgba(255,255,255,.9),0 1px 4px rgba(0,0,0,.35)}}
@@ -438,12 +439,14 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
     }}
   }});
 
+  const bigPin = window.matchMedia('(hover: none)').matches;
   const markers = data.pins.map(p => {{
     const [lat, lng, cat, muni, exact, items, city] = p;
     const n = items.length;
-    const size = n > 1 ? 16 : 12;
+    // 1件ずつのピンも見やすい大きさにする(スマホは指で押しやすいようさらに大きく)。同じ建物に複数あるときは件数を中に書く
+    const size = (n > 1 ? 22 : 18) + (bigPin ? 2 : 0);
     const icon = L.divIcon({{className: '', iconSize: [size, size],
-      html: '<div class="pin'+(exact ? '' : ' approx')+'" style="width:'+size+'px;height:'+size+'px;background:'+colors[cat]+'"></div>'}});
+      html: '<div class="pin'+(exact ? '' : ' approx')+'" style="width:'+size+'px;height:'+size+'px;background:'+colors[cat]+'">'+(n > 1 ? n : '')+'</div>'}});
     const m = L.marker([lat, lng], {{icon, n, cat, muni, city}});
     m.bindPopup(() => {{
       const noLabel = ['届出番号', '認定番号', '許可番号', '許可番号'][cat];
