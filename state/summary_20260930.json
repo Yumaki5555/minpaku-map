@@ -353,7 +353,7 @@
     "自治体名": "渋谷区",
     "種別": "民泊",
     "status": "OK",
-    "detail": "1870件 / 前回(1474件)から+396件 / pdfplumberで1906行検出",
+    "detail": "1870件 / 前回から変化なし / pdfplumberで1906行検出",
     "row_count": 1870,
     "normalized_path": "data/渋谷区/民泊/整形済み/20260930_渋谷区_民泊_normalized.csv",
     "normalized_paths": [
@@ -365,8 +365,8 @@
     "自治体コード": "131130_旅",
     "自治体名": "渋谷区",
     "種別": "旅館業",
-    "status": "要確認(件数急変)",
-    "detail": "811件 / 前回(211件)から+600件 / pdfplumberで861行検出",
+    "status": "OK",
+    "detail": "811件 / 前回から変化なし / pdfplumberで861行検出",
     "row_count": 811,
     "normalized_path": "data/渋谷区/旅館業/整形済み/20260930_渋谷区_旅館業_旅館ホテル等_normalized.csv (旅館・ホテル等 792件) / data/渋谷区/旅館業/整形済み/20260930_渋谷区_旅館業_簡易宿所_normalized.csv (簡易宿所 19件)",
     "normalized_paths": [
