@@ -1,0 +1,13 @@
+{
+  "row_count": 50,
+  "date": "20260930",
+  "header": [
+    "No",
+    "施設所在地",
+    "（受付・届出情報）届出年月日"
+  ],
+  "source_url": "https://www.city.chigasaki.kanagawa.jp/_res/projects/default_project/_page_/001/041/779/minpakuall2025.csv",
+  "normalized_files": [
+    "data/茅ヶ崎市/民泊/整形済み/20260930_茅ヶ崎市_民泊_normalized.csv"
+  ]
+}

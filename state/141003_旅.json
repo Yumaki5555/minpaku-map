@@ -1,0 +1,22 @@
+{
+  "row_count": 242,
+  "date": "20260930",
+  "header": [
+    "台帳番号",
+    "許可番号",
+    "申請者法人名称",
+    "申請者役職",
+    "申請者氏名",
+    "施設所在地",
+    "施設名称",
+    "施設名称２",
+    "施設電話番号",
+    "業種",
+    "詳細業種",
+    "許可等年月日"
+  ],
+  "source_url": "https://www.city.yokohama.lg.jp/kurashi/sumai-kurashi/seikatsu/kaiteki/kankyodata.files/20260401ryokan.zip",
+  "normalized_files": [
+    "data/横浜市/旅館業/整形済み/20260930_横浜市_旅館業_normalized.csv"
+  ]
+}

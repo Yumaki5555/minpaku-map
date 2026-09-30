@@ -1,0 +1,14 @@
+{
+  "row_count": 32,
+  "date": "20260930",
+  "header": [
+    "No",
+    "施設所在地",
+    "施設方書",
+    "(受付・届出情報)受付年月日"
+  ],
+  "source_url": "https://www.city.machida.tokyo.jp/iryo/hokenjo/kankyou/jyutaku_syukuhaku/ichiran.files/minpaku.pdf",
+  "normalized_files": [
+    "data/町田市/民泊/整形済み/20260930_町田市_民泊_normalized.csv"
+  ]
+}

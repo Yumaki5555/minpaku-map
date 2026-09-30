@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>民泊・旅館業マップ｜東京23区・大阪</title>
-<meta name="description" content="東京23区と大阪の自治体が公表している民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。毎週自動更新。">
+<title>民泊・旅館業マップ｜首都圏・大阪</title>
+<meta name="description" content="東京・神奈川・埼玉・千葉・茨城・大阪の自治体が公表している民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。毎週自動更新。">
 <meta property="og:type" content="website">
-<meta property="og:title" content="民泊・旅館業マップ｜40,596件を地図で">
-<meta property="og:description" content="東京23区と大阪の自治体が公表している民泊・特区民泊・旅館業の施設を地図にまとめました。毎週自動更新。">
+<meta property="og:title" content="民泊・旅館業マップ｜52,368件を地図で">
+<meta property="og:description" content="東京・神奈川・埼玉・千葉・茨城・大阪の自治体が公表している民泊・特区民泊・旅館業の施設を地図にまとめました。毎週自動更新。">
 <meta property="og:url" content="https://yumaki5555.github.io/minpaku-map/">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
@@ -44,6 +44,8 @@ h2{font-size:1.15rem;margin:28px 0 8px}
 select{padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:.9rem;font-family:inherit}
 .dot{display:inline-block;width:11px;height:11px;border-radius:50%;flex:none;vertical-align:-1px;margin-right:4px}
 .c0{background:var(--c0)}.c1{background:var(--c1)}.c2{background:var(--c2)}.c3{background:var(--c3)}
+.basemap{transition:filter .3s}
+#map.zoomed .basemap{filter:grayscale(.4) contrast(.45) brightness(1.18)}
 #map{height:68vh;min-height:420px;border:1px solid var(--line);border-radius:12px;background:var(--chip)}
 .note{font-size:.8rem;color:var(--sub);margin:6px 0}
 .pin{border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
@@ -64,6 +66,8 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .none{color:var(--sub)}
 .memo{font-size:.78rem;color:var(--sub)}
 tr.hide{display:none}
+tr.grp th{background:var(--card);font-size:.95rem;padding-top:14px;border-bottom:2px solid var(--line)}
+tr.grp .sub{font-weight:400;color:var(--sub);font-size:.8rem;margin-left:8px}
 footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid var(--line);margin-top:28px}
 </style>
 </head>
@@ -71,83 +75,124 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
 <div class="wrap">
 <header>
   <h1>🏠 民泊・旅館業マップ</h1>
-  <p class="lead">東京23区と大阪の自治体が公表している、民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。毎週月曜に自動で更新しています。</p>
-  <div class="stats"><span>掲載 <b>40,596</b> 件</span><span>最終更新 <b>2026/09/30</b></span></div>
+  <p class="lead">東京・神奈川・埼玉・千葉・茨城・大阪の自治体が公表している、民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。毎週月曜に自動で更新しています。</p>
+  <div class="stats"><span>掲載 <b>52,368</b> 件</span><span>最終更新 <b>2026/09/30</b></span></div>
 </header>
 
 <div class="filters" role="group" aria-label="種別で絞り込み">
-  <button class="tagbtn" data-cat="0" aria-pressed="true"><span class="dot c0"></span>民泊<span class="n">19,668</span></button><button class="tagbtn" data-cat="1" aria-pressed="true"><span class="dot c1"></span>特区民泊<span class="n">9,448</span></button><button class="tagbtn" data-cat="2" aria-pressed="true"><span class="dot c2"></span>旅館・ホテル<span class="n">9,917</span></button><button class="tagbtn" data-cat="3" aria-pressed="true"><span class="dot c3"></span>簡易宿所<span class="n">1,562</span></button>
+  <button class="tagbtn" data-cat="0" aria-pressed="true"><span class="dot c0"></span>民泊<span class="n">23,540</span></button><button class="tagbtn" data-cat="1" aria-pressed="true"><span class="dot c1"></span>特区民泊<span class="n">9,448</span></button><button class="tagbtn" data-cat="2" aria-pressed="true"><span class="dot c2"></span>旅館・ホテル<span class="n">14,131</span></button><button class="tagbtn" data-cat="3" aria-pressed="true"><span class="dot c3"></span>簡易宿所<span class="n">5,230</span></button>
   <select id="muni" aria-label="自治体を選ぶ"><option value="">すべての自治体</option></select>
 </div>
 <div id="map" role="region" aria-label="施設の地図"></div>
-<p class="note">ピンを押すと施設名・住所が見られます。数字の丸は近くの施設をまとめたもので、拡大すると分かれます。点線のピンは住所から位置をおおまかにしか特定できなかった施設です。住所から位置を特定できなかった 1 件は地図に表示されていません。</p>
+<p class="note">ピンを押すと施設名・住所が見られます。数字の丸は近くの施設をまとめたもので、拡大すると分かれます。点線のピンは住所から位置をおおまかにしか特定できなかった施設です。住所から位置を特定できなかった 19 件は地図に表示されていません。</p>
 
 <h2>自治体ごとの件数</h2>
 <p class="note">「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。</p>
 <div class="tablewrap"><table>
 <thead><tr><th>自治体</th><th>種別</th><th style="text-align:right">件数</th><th style="text-align:right">増減</th><th>資料の日付</th><th>出典</th></tr></thead>
 <tbody id="tbody">
-<tr data-muni="千代田区"><td>千代田区</td><td><span class="dot c0"></span>民泊</td><td class="num">56</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.chiyoda.lg.jp/koho/kurashi/jutakushukuhakujigyo/todokedejutakuichiran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="千代田区"><td>千代田区</td><td><span class="dot c2"></span>旅館業</td><td class="num">173</td><td class="num"></td><td></td><td><a href="https://www.city.chiyoda.lg.jp/koho/kurashi/kankyoese/egyo/shisetsu.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="中央区"><td>中央区</td><td><span class="dot c0"></span>民泊</td><td class="num">107</td><td class="num"></td><td>2026/06/26</td><td><a href="https://www.city.chuo.lg.jp/a0030/kenkouiryou/eisei/seikatsueisei/minpaku/todokedejyuutakukouhyou.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="中央区"><td>中央区</td><td><span class="dot c2"></span>旅館業</td><td class="num">250</td><td class="num"></td><td></td><td><a href="https://www.city.chuo.lg.jp/a0030/kenkouiryou/eisei/kankyoueisei/kankyoueiseisisetsuichiran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="港区"><td>港区</td><td><span class="dot c0"></span>民泊</td><td class="num">873</td><td class="num"></td><td>2026/07/31</td><td><a href="https://www.city.minato.tokyo.jp/jutakushukuhakutan/minpakuichiran20180614.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="港区"><td>港区</td><td><span class="dot c2"></span>旅館業</td><td class="num">604</td><td class="num"></td><td></td><td><a href="https://catalog.data.metro.tokyo.lg.jp/dataset/t131032d0000000235" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="新宿区"><td>新宿区</td><td><span class="dot c0"></span>民泊</td><td class="num">3,928</td><td class="num"></td><td></td><td><a href="https://www.city.shinjuku.lg.jp/kenkou/eisei03_002094.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="新宿区"><td>新宿区</td><td><span class="dot c2"></span>旅館業</td><td class="num">716</td><td class="num"></td><td></td><td><a href="https://www.city.shinjuku.lg.jp/kenkou/eisei03_002069.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="文京区"><td>文京区</td><td><span class="dot c0"></span>民泊</td><td class="num">333</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.bunkyo.lg.jp/b026/p003112/index.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="文京区"><td>文京区</td><td><span class="dot c2"></span>旅館業</td><td class="num">67</td><td class="num"></td><td></td><td><a href="https://www.city.bunkyo.lg.jp/b026/p002833.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="台東区"><td>台東区</td><td><span class="dot c0"></span>民泊</td><td class="num">1,438</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.taito.lg.jp/kenchiku/jutaku/eisei/shisetsuichiran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="台東区"><td>台東区</td><td><span class="dot c2"></span>旅館業</td><td class="num">1,119</td><td class="num"></td><td></td><td><a href="https://www.city.taito.lg.jp/kenchiku/jutaku/eisei/shisetsuichiran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="墨田区"><td>墨田区</td><td><span class="dot c0"></span>民泊</td><td class="num">2,285</td><td class="num"></td><td>2026/03/01</td><td><a href="https://www.city.sumida.lg.jp/kenko_fukushi/eisei/kankyo_eisei/taa0200020220216.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="墨田区"><td>墨田区</td><td><span class="dot c2"></span>旅館業</td><td class="num">1,136</td><td class="num"></td><td>2026/04/01</td><td><a href="https://www.city.sumida.lg.jp/kenko_fukushi/eisei/kankyo_eisei/taa0200020220216.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="江東区"><td>江東区</td><td><span class="dot c0"></span>民泊</td><td class="num">48</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.koto.lg.jp/260403/fukushi/ese/kankyo/minpaku_index.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="江東区"><td>江東区</td><td><span class="dot c2"></span>旅館業</td><td class="num">370</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.koto.lg.jp/260403/fukushi/ese/kankyo/ryokan_index.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="品川区"><td>品川区</td><td><span class="dot c0"></span>民泊</td><td class="num">258</td><td class="num"></td><td>2026/09/15</td><td><a href="https://www.city.shinagawa.tokyo.jp/PC/kenkou/kenkou-eisei/kenkou-eisei-kankyo/hpg000033251.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="品川区"><td>品川区</td><td><span class="dot c2"></span>旅館業</td><td class="num">250</td><td class="num"></td><td></td><td><a href="https://www.city.shinagawa.tokyo.jp/ct/other/20251210150540_3.csv" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="目黒区"><td>目黒区</td><td><span class="dot c0"></span>民泊</td><td class="num">24</td><td class="num"></td><td>2026/03/31</td><td><a href="https://www.city.meguro.tokyo.jp/kurashi/hoken_eisei/eisei/minpaku/minpakujissi/etsuran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="目黒区"><td>目黒区</td><td><span class="dot c2"></span>旅館業</td><td class="num">94</td><td class="num"></td><td>2026/03/31</td><td><a href="https://data.bodik.jp/dataset/131105_ryokan" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="大田区"><td>大田区</td><td><span class="dot c0"></span>民泊</td><td class="num">257</td><td class="num"></td><td></td><td><a href="https://www.city.ota.tokyo.jp/seikatsu/hoken/minpaku/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="大田区"><td>大田区</td><td><span class="dot c1"></span>特区民泊</td><td class="num">498</td><td class="num"></td><td>2026/09/16</td><td><a href="https://www.city.ota.tokyo.jp/seikatsu/hoken/minpaku/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="大田区"><td>大田区</td><td><span class="dot c2"></span>旅館業</td><td class="num">180</td><td class="num"></td><td>2026/09/16</td><td><a href="https://www.city.ota.tokyo.jp/seikatsu/hoken/minpaku/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="世田谷区"><td>世田谷区</td><td><span class="dot c0"></span>民泊</td><td class="num">555</td><td class="num"></td><td>2026/02/28</td><td><a href="https://www.city.setagaya.lg.jp/02245/3248.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="世田谷区"><td>世田谷区</td><td><span class="dot c2"></span>旅館業</td><td class="num">347</td><td class="num"></td><td>2026/03/31</td><td><a href="https://www.city.setagaya.lg.jp/02245/3224.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="渋谷区"><td>渋谷区</td><td><span class="dot c0"></span>民泊</td><td class="num">1,834</td><td class="num"></td><td></td><td><a href="https://www.city.shibuya.tokyo.jp/kenko/eisei/kankyo/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="渋谷区"><td>渋谷区</td><td><span class="dot c2"></span>旅館業</td><td class="num">811</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.shibuya.tokyo.jp/kenko/eisei/kankyo/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="中野区"><td>中野区</td><td><span class="dot c0"></span>民泊</td><td class="num">497</td><td class="num"></td><td></td><td><a href="https://www.city.tokyo-nakano.lg.jp/kenko_hukushi/pet-eisei/kankyoueisei/jyutakusyukuhaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="中野区"><td>中野区</td><td><span class="dot c2"></span>旅館業</td><td class="num">309</td><td class="num"></td><td></td><td><a href="https://www2.wagmap.jp/nakanodatamap/OpenData?mids=44&amp;pno=1" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="杉並区"><td>杉並区</td><td><span class="dot c0"></span>民泊</td><td class="num">438</td><td class="num"></td><td></td><td><a href="https://www.city.suginami.tokyo.jp/s046/871.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="杉並区"><td>杉並区</td><td><span class="dot c2"></span>旅館業</td><td class="num">174</td><td class="num"></td><td></td><td><a href="https://www.city.suginami.tokyo.jp/s046/870.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="豊島区"><td>豊島区</td><td><span class="dot c0"></span>民泊</td><td class="num">1,826</td><td class="num"></td><td>2026/07/15</td><td><a href="https://www.city.toshima.lg.jp/214/kurashi/ese/kankyoese/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="豊島区"><td>豊島区</td><td><span class="dot c2"></span>旅館業</td><td class="num">984</td><td class="num"></td><td>2026/03/31</td><td><a href="https://www.city.toshima.lg.jp/214/kurashi/ese/kankyoese/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="北区"><td>北区</td><td><span class="dot c0"></span>民泊</td><td class="num">612</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.kita.lg.jp/socialcare-health/hygiene/1008979/1008993.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="北区"><td>北区</td><td><span class="dot c2"></span>旅館業</td><td class="num">293</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.kita.lg.jp/socialcare-health/hygiene/1008979/1008993.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="荒川区"><td>荒川区</td><td><span class="dot c0"></span>民泊</td><td class="num">12</td><td class="num"></td><td></td><td><a href="https://www.city.arakawa.tokyo.jp/a032/jigyousha/toroku/kankyoeiseieigyoshisetsu_list.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="荒川区"><td>荒川区</td><td><span class="dot c2"></span>旅館業</td><td class="num">98</td><td class="num"></td><td></td><td><a href="https://www.city.arakawa.tokyo.jp/a032/jigyousha/toroku/kankyoeiseieigyoshisetsu_list.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="板橋区"><td>板橋区</td><td><span class="dot c0"></span>民泊</td><td class="num">449</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.itabashi.tokyo.jp/kenko/eisei/kankyo/ryokan/1003881.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="板橋区"><td>板橋区</td><td><span class="dot c2"></span>旅館業</td><td class="num">191</td><td class="num"></td><td>2026/03/31</td><td><a href="https://www.city.itabashi.tokyo.jp/kenko/eisei/kankyo/1051271.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="練馬区"><td>練馬区</td><td><span class="dot c0"></span>民泊</td><td class="num">113</td><td class="num"></td><td>2026/09/25</td><td><a href="https://www.city.nerima.tokyo.jp/hokenfukushi/eisei/minpaku/minnpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="練馬区"><td>練馬区</td><td><span class="dot c2"></span>旅館業</td><td class="num">22</td><td class="num"></td><td>2026/08/14</td><td><a href="https://www.city.nerima.tokyo.jp/hokenfukushi/eisei/kankyoeisei/hotel.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="足立区"><td>足立区</td><td><span class="dot c0"></span>民泊</td><td class="num">293</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.adachi.tokyo.jp/sekatsuese/todokedejyouhoukoramu.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="足立区"><td>足立区</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><div class="memo">行政サイトで非公開。直接ダウンロードできる一覧なし</div></td></tr>
-<tr data-muni="葛飾区"><td>葛飾区</td><td><span class="dot c0"></span>民泊</td><td class="num">370</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.katsushika.lg.jp/online/1007359/1030292/1007374/1007411/1026096.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="葛飾区"><td>葛飾区</td><td><span class="dot c2"></span>旅館業</td><td class="num">732</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.katsushika.lg.jp/online/1007359/1030292/1007374/1007411/1026096.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="江戸川区"><td>江戸川区</td><td><span class="dot c0"></span>民泊</td><td class="num">552</td><td class="num"></td><td></td><td><a href="https://www.city.edogawa.tokyo.jp/e055/kenko/eisei/kankyo/open_data.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="江戸川区"><td>江戸川区</td><td><span class="dot c2"></span>旅館業</td><td class="num">141</td><td class="num"></td><td></td><td><a href="https://www.city.edogawa.tokyo.jp/e055/kenko/eisei/kankyo/open_data.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="大阪府"><td>大阪府</td><td><span class="dot c0"></span>民泊</td><td class="num">236</td><td class="num"></td><td>2026/07/31</td><td><a href="https://www.pref.osaka.lg.jp/o100090/kankyoeisei/minnpaku/index.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="大阪府"><td>大阪府</td><td><span class="dot c1"></span>特区民泊</td><td class="num">56</td><td class="num"></td><td>2026/07/31</td><td><a href="https://www.pref.osaka.lg.jp/o100090/kankyoeisei/minpaku/index.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="大阪府"><td>大阪府</td><td><span class="dot c2"></span>旅館業</td><td class="num">427</td><td class="num"></td><td>2026/07/31</td><td><a href="https://www.pref.osaka.lg.jp/o100090/kankyoeisei/minpaku-service/index.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="大阪市"><td>大阪市</td><td><span class="dot c0"></span>民泊</td><td class="num">2,211</td><td class="num"></td><td></td><td><a href="https://www.city.osaka.lg.jp/kenko/page/0000382418.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="大阪市"><td>大阪市</td><td><span class="dot c2"></span>旅館業</td><td class="num">1,861</td><td class="num"></td><td></td><td><a href="https://www.city.osaka.lg.jp/kenko/page/0000382418.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="大阪市"><td>大阪市</td><td><span class="dot c1"></span>特区民泊</td><td class="num">8,887</td><td class="num"></td><td></td><td><a href="https://www.city.osaka.lg.jp/kenko/page/0000382418.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="堺市"><td>堺市</td><td><span class="dot c0"></span>民泊</td><td class="num">36</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.sakai.lg.jp/kenko/kankyoeisei/taisaku/ryokankeihatu.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="堺市"><td>堺市</td><td><span class="dot c2"></span>旅館業</td><td class="num">76</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.sakai.lg.jp/kenko/kankyoeisei/taisaku/ryokankeihatu.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="枚方市"><td>枚方市</td><td><span class="dot c0"></span>民泊</td><td class="num">28</td><td class="num"></td><td></td><td><a href="https://www.city.hirakata.osaka.jp/0000025284.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="枚方市"><td>枚方市</td><td><span class="dot c2"></span>旅館業</td><td class="num">18</td><td class="num"></td><td></td><td><a href="https://www.city.hirakata.osaka.jp/0000025284.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="八尾市"><td>八尾市</td><td><span class="dot c0"></span>民泊</td><td class="num">7</td><td class="num"></td><td>2026/01/31</td><td><a href="https://www.city.yao.osaka.jp/kenkou_fukushi/shokuhinneisei/1008560/1008584/1008588.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="八尾市"><td>八尾市</td><td><span class="dot c2"></span>旅館業</td><td class="num">11</td><td class="num"></td><td>2026/01/31</td><td><a href="https://www.city.yao.osaka.jp/kenkou_fukushi/shokuhinneisei/1008560/1008584/1008588.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
-<tr data-muni="寝屋川市"><td>寝屋川市</td><td><span class="dot c0"></span>民泊</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.neyagawa.osaka.jp/organization_list/kenkou/hokeneisei/kankyou/kankyo01/sinnpouminnpaku.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">寝屋川市は住宅宿泊事業の届出住宅を公開しておらず、データなし(確認済み・対応不要)</div></td></tr>
-<tr data-muni="寝屋川市"><td>寝屋川市</td><td><span class="dot c2"></span>旅館業</td><td class="num">25</td><td class="num"></td><td></td><td><a href="https://www.city.neyagawa.osaka.jp/organization_list/keieikikaku/johosuisinka/open_data/opendata/18213.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr class="grp" data-pref="0"><th colspan="6">東京都<span class="sub">28,245件</span></th></tr>
+<tr data-muni="千代田区" data-pref="0"><td>千代田区</td><td><span class="dot c0"></span>民泊</td><td class="num">56</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.chiyoda.lg.jp/koho/kurashi/jutakushukuhakujigyo/todokedejutakuichiran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="千代田区" data-pref="0"><td>千代田区</td><td><span class="dot c2"></span>旅館業</td><td class="num">173</td><td class="num"></td><td></td><td><a href="https://www.city.chiyoda.lg.jp/koho/kurashi/kankyoese/egyo/shisetsu.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="中央区" data-pref="0"><td>中央区</td><td><span class="dot c0"></span>民泊</td><td class="num">107</td><td class="num"></td><td>2026/06/26</td><td><a href="https://www.city.chuo.lg.jp/a0030/kenkouiryou/eisei/seikatsueisei/minpaku/todokedejyuutakukouhyou.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="中央区" data-pref="0"><td>中央区</td><td><span class="dot c2"></span>旅館業</td><td class="num">250</td><td class="num"></td><td></td><td><a href="https://www.city.chuo.lg.jp/a0030/kenkouiryou/eisei/kankyoueisei/kankyoueiseisisetsuichiran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="港区" data-pref="0"><td>港区</td><td><span class="dot c0"></span>民泊</td><td class="num">873</td><td class="num"></td><td>2026/07/31</td><td><a href="https://www.city.minato.tokyo.jp/jutakushukuhakutan/minpakuichiran20180614.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="港区" data-pref="0"><td>港区</td><td><span class="dot c2"></span>旅館業</td><td class="num">604</td><td class="num"></td><td></td><td><a href="https://catalog.data.metro.tokyo.lg.jp/dataset/t131032d0000000235" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="新宿区" data-pref="0"><td>新宿区</td><td><span class="dot c0"></span>民泊</td><td class="num">3,928</td><td class="num"></td><td></td><td><a href="https://www.city.shinjuku.lg.jp/kenkou/eisei03_002094.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="新宿区" data-pref="0"><td>新宿区</td><td><span class="dot c2"></span>旅館業</td><td class="num">716</td><td class="num"></td><td></td><td><a href="https://www.city.shinjuku.lg.jp/kenkou/eisei03_002069.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="文京区" data-pref="0"><td>文京区</td><td><span class="dot c0"></span>民泊</td><td class="num">333</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.bunkyo.lg.jp/b026/p003112/index.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="文京区" data-pref="0"><td>文京区</td><td><span class="dot c2"></span>旅館業</td><td class="num">67</td><td class="num"></td><td></td><td><a href="https://www.city.bunkyo.lg.jp/b026/p002833.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="台東区" data-pref="0"><td>台東区</td><td><span class="dot c0"></span>民泊</td><td class="num">1,438</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.taito.lg.jp/kenchiku/jutaku/eisei/shisetsuichiran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="台東区" data-pref="0"><td>台東区</td><td><span class="dot c2"></span>旅館業</td><td class="num">1,119</td><td class="num"></td><td></td><td><a href="https://www.city.taito.lg.jp/kenchiku/jutaku/eisei/shisetsuichiran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="墨田区" data-pref="0"><td>墨田区</td><td><span class="dot c0"></span>民泊</td><td class="num">2,285</td><td class="num"></td><td>2026/03/01</td><td><a href="https://www.city.sumida.lg.jp/kenko_fukushi/eisei/kankyo_eisei/taa0200020220216.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="墨田区" data-pref="0"><td>墨田区</td><td><span class="dot c2"></span>旅館業</td><td class="num">1,136</td><td class="num"></td><td>2026/04/01</td><td><a href="https://www.city.sumida.lg.jp/kenko_fukushi/eisei/kankyo_eisei/taa0200020220216.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="江東区" data-pref="0"><td>江東区</td><td><span class="dot c0"></span>民泊</td><td class="num">48</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.koto.lg.jp/260403/fukushi/ese/kankyo/minpaku_index.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="江東区" data-pref="0"><td>江東区</td><td><span class="dot c2"></span>旅館業</td><td class="num">370</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.koto.lg.jp/260403/fukushi/ese/kankyo/ryokan_index.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="品川区" data-pref="0"><td>品川区</td><td><span class="dot c0"></span>民泊</td><td class="num">258</td><td class="num"></td><td>2026/09/15</td><td><a href="https://www.city.shinagawa.tokyo.jp/PC/kenkou/kenkou-eisei/kenkou-eisei-kankyo/hpg000033251.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="品川区" data-pref="0"><td>品川区</td><td><span class="dot c2"></span>旅館業</td><td class="num">250</td><td class="num"></td><td></td><td><a href="https://www.city.shinagawa.tokyo.jp/ct/other/20251210150540_3.csv" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="目黒区" data-pref="0"><td>目黒区</td><td><span class="dot c0"></span>民泊</td><td class="num">24</td><td class="num"></td><td>2026/03/31</td><td><a href="https://www.city.meguro.tokyo.jp/kurashi/hoken_eisei/eisei/minpaku/minpakujissi/etsuran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="目黒区" data-pref="0"><td>目黒区</td><td><span class="dot c2"></span>旅館業</td><td class="num">94</td><td class="num"></td><td>2026/03/31</td><td><a href="https://data.bodik.jp/dataset/131105_ryokan" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="大田区" data-pref="0"><td>大田区</td><td><span class="dot c0"></span>民泊</td><td class="num">257</td><td class="num"></td><td></td><td><a href="https://www.city.ota.tokyo.jp/seikatsu/hoken/minpaku/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="大田区" data-pref="0"><td>大田区</td><td><span class="dot c1"></span>特区民泊</td><td class="num">498</td><td class="num"></td><td>2026/09/16</td><td><a href="https://www.city.ota.tokyo.jp/seikatsu/hoken/minpaku/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="大田区" data-pref="0"><td>大田区</td><td><span class="dot c2"></span>旅館業</td><td class="num">181</td><td class="num"></td><td>2026/09/16</td><td><a href="https://www.city.ota.tokyo.jp/seikatsu/hoken/minpaku/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="世田谷区" data-pref="0"><td>世田谷区</td><td><span class="dot c0"></span>民泊</td><td class="num">555</td><td class="num"></td><td>2026/02/28</td><td><a href="https://www.city.setagaya.lg.jp/02245/3248.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="世田谷区" data-pref="0"><td>世田谷区</td><td><span class="dot c2"></span>旅館業</td><td class="num">347</td><td class="num"></td><td>2026/03/31</td><td><a href="https://www.city.setagaya.lg.jp/02245/3224.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="渋谷区" data-pref="0"><td>渋谷区</td><td><span class="dot c0"></span>民泊</td><td class="num">1,834</td><td class="num"></td><td></td><td><a href="https://www.city.shibuya.tokyo.jp/kenko/eisei/kankyo/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="渋谷区" data-pref="0"><td>渋谷区</td><td><span class="dot c2"></span>旅館業</td><td class="num">811</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.shibuya.tokyo.jp/kenko/eisei/kankyo/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="中野区" data-pref="0"><td>中野区</td><td><span class="dot c0"></span>民泊</td><td class="num">497</td><td class="num"></td><td></td><td><a href="https://www.city.tokyo-nakano.lg.jp/kenko_hukushi/pet-eisei/kankyoueisei/jyutakusyukuhaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="中野区" data-pref="0"><td>中野区</td><td><span class="dot c2"></span>旅館業</td><td class="num">309</td><td class="num"></td><td></td><td><a href="https://www2.wagmap.jp/nakanodatamap/OpenData?mids=44&amp;pno=1" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="杉並区" data-pref="0"><td>杉並区</td><td><span class="dot c0"></span>民泊</td><td class="num">438</td><td class="num"></td><td></td><td><a href="https://www.city.suginami.tokyo.jp/s046/871.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="杉並区" data-pref="0"><td>杉並区</td><td><span class="dot c2"></span>旅館業</td><td class="num">174</td><td class="num"></td><td></td><td><a href="https://www.city.suginami.tokyo.jp/s046/870.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="豊島区" data-pref="0"><td>豊島区</td><td><span class="dot c0"></span>民泊</td><td class="num">1,826</td><td class="num"></td><td>2026/07/15</td><td><a href="https://www.city.toshima.lg.jp/214/kurashi/ese/kankyoese/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="豊島区" data-pref="0"><td>豊島区</td><td><span class="dot c2"></span>旅館業</td><td class="num">984</td><td class="num"></td><td>2026/03/31</td><td><a href="https://www.city.toshima.lg.jp/214/kurashi/ese/kankyoese/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="北区" data-pref="0"><td>北区</td><td><span class="dot c0"></span>民泊</td><td class="num">612</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.kita.lg.jp/socialcare-health/hygiene/1008979/1008993.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="北区" data-pref="0"><td>北区</td><td><span class="dot c2"></span>旅館業</td><td class="num">293</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.kita.lg.jp/socialcare-health/hygiene/1008979/1008993.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="荒川区" data-pref="0"><td>荒川区</td><td><span class="dot c0"></span>民泊</td><td class="num">12</td><td class="num"></td><td></td><td><a href="https://www.city.arakawa.tokyo.jp/a032/jigyousha/toroku/kankyoeiseieigyoshisetsu_list.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="荒川区" data-pref="0"><td>荒川区</td><td><span class="dot c2"></span>旅館業</td><td class="num">98</td><td class="num"></td><td></td><td><a href="https://www.city.arakawa.tokyo.jp/a032/jigyousha/toroku/kankyoeiseieigyoshisetsu_list.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="板橋区" data-pref="0"><td>板橋区</td><td><span class="dot c0"></span>民泊</td><td class="num">449</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.itabashi.tokyo.jp/kenko/eisei/kankyo/ryokan/1003881.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="板橋区" data-pref="0"><td>板橋区</td><td><span class="dot c2"></span>旅館業</td><td class="num">191</td><td class="num"></td><td>2026/03/31</td><td><a href="https://www.city.itabashi.tokyo.jp/kenko/eisei/kankyo/1051271.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="練馬区" data-pref="0"><td>練馬区</td><td><span class="dot c0"></span>民泊</td><td class="num">113</td><td class="num"></td><td>2026/09/25</td><td><a href="https://www.city.nerima.tokyo.jp/hokenfukushi/eisei/minpaku/minnpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="練馬区" data-pref="0"><td>練馬区</td><td><span class="dot c2"></span>旅館業</td><td class="num">22</td><td class="num"></td><td>2026/08/14</td><td><a href="https://www.city.nerima.tokyo.jp/hokenfukushi/eisei/kankyoeisei/hotel.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="足立区" data-pref="0"><td>足立区</td><td><span class="dot c0"></span>民泊</td><td class="num">293</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.adachi.tokyo.jp/sekatsuese/todokedejyouhoukoramu.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="足立区" data-pref="0"><td>足立区</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><div class="memo">行政サイトで非公開。直接ダウンロードできる一覧なし</div></td></tr>
+<tr data-muni="葛飾区" data-pref="0"><td>葛飾区</td><td><span class="dot c0"></span>民泊</td><td class="num">370</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.katsushika.lg.jp/online/1007359/1030292/1007374/1007411/1026096.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="葛飾区" data-pref="0"><td>葛飾区</td><td><span class="dot c2"></span>旅館業</td><td class="num">732</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.katsushika.lg.jp/online/1007359/1030292/1007374/1007411/1026096.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="江戸川区" data-pref="0"><td>江戸川区</td><td><span class="dot c0"></span>民泊</td><td class="num">552</td><td class="num"></td><td></td><td><a href="https://www.city.edogawa.tokyo.jp/e055/kenko/eisei/kankyo/open_data.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="江戸川区" data-pref="0"><td>江戸川区</td><td><span class="dot c2"></span>旅館業</td><td class="num">141</td><td class="num"></td><td></td><td><a href="https://www.city.edogawa.tokyo.jp/e055/kenko/eisei/kankyo/open_data.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="東京都(多摩)" data-pref="0"><td>東京都(多摩)</td><td><span class="dot c0"></span>民泊</td><td class="num">532</td><td class="num"></td><td>2026/09/02</td><td><a href="https://www.sangyo-rodo.metro.tokyo.lg.jp/application/tourism/minpaku/list" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="東京都(多摩)" data-pref="0"><td>東京都(多摩)</td><td><span class="dot c2"></span>旅館業</td><td class="num">926</td><td class="num"></td><td></td><td><a href="https://www.hokeniryo.metro.tokyo.lg.jp/kenkou/hokenjo_daicho/shokuhineigyokyokadaicho" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="八王子市" data-pref="0"><td>八王子市</td><td><span class="dot c0"></span>民泊</td><td class="num">37</td><td class="num"></td><td></td><td><a href="https://www.city.hachioji.tokyo.jp/kurashi/hoken/007/018/001/p022969.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="八王子市" data-pref="0"><td>八王子市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.hachioji.tokyo.jp/kurashi/hoken/007/018/002/p002807.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
+<tr data-muni="町田市" data-pref="0"><td>町田市</td><td><span class="dot c0"></span>民泊</td><td class="num">32</td><td class="num"></td><td></td><td><a href="https://www.city.machida.tokyo.jp/iryo/hokenjo/kankyou/jyutaku_syukuhaku/ichiran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="町田市" data-pref="0"><td>町田市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.machida.tokyo.jp/iryo/hokenjo/kankyou/ryokan.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
+<tr class="grp" data-pref="1"><th colspan="6">神奈川県<span class="sub">3,631件</span></th></tr>
+<tr data-muni="神奈川県" data-pref="1"><td>神奈川県</td><td><span class="dot c0"></span>民泊</td><td class="num">522</td><td class="num"></td><td>2026/06/30</td><td><a href="https://www.pref.kanagawa.jp/docs/e8z/cnt/f762/p1195197.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="神奈川県" data-pref="1"><td>神奈川県</td><td><span class="dot c2"></span>旅館業</td><td class="num">1,741</td><td class="num"></td><td>2026/06/30</td><td><a href="https://www.pref.kanagawa.jp/docs/e8z/cnt/f762/p70574.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="横浜市" data-pref="1"><td>横浜市</td><td><span class="dot c0"></span>民泊</td><td class="num">347</td><td class="num"></td><td>2026/09/01</td><td><a href="https://www.city.yokohama.lg.jp/kurashi/sumai-kurashi/seikatsu/kaiteki/20180222105955.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="横浜市" data-pref="1"><td>横浜市</td><td><span class="dot c2"></span>旅館業</td><td class="num">242</td><td class="num"></td><td></td><td><a href="https://www.city.yokohama.lg.jp/kurashi/sumai-kurashi/seikatsu/kaiteki/kankyodata.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="川崎市" data-pref="1"><td>川崎市</td><td><span class="dot c0"></span>民泊</td><td class="num">113</td><td class="num"></td><td></td><td><a href="https://www.city.kawasaki.jp/280/page/0000173594.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="川崎市" data-pref="1"><td>川崎市</td><td><span class="dot c2"></span>旅館業</td><td class="num">114</td><td class="num"></td><td></td><td><a href="https://www.city.kawasaki.jp/350/page/0000120745.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="相模原市" data-pref="1"><td>相模原市</td><td><span class="dot c0"></span>民泊</td><td class="num">28</td><td class="num"></td><td>2026/07/31</td><td><a href="https://www.city.sagamihara.kanagawa.jp/kurashi/1026489/sumai/1026515/1013506.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="相模原市" data-pref="1"><td>相模原市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.sagamihara.kanagawa.jp/kosodate/kenko/1026628/seikatsu/1007449.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
+<tr data-muni="横須賀市" data-pref="1"><td>横須賀市</td><td><span class="dot c0"></span>民泊</td><td class="num">144</td><td class="num"></td><td></td><td><a href="https://data.bodik.jp/dataset/142018_00_19_environmental_sanitation_facilities" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="横須賀市" data-pref="1"><td>横須賀市</td><td><span class="dot c2"></span>旅館業</td><td class="num">91</td><td class="num"></td><td></td><td><a href="https://data.bodik.jp/dataset/142018_00_19_environmental_sanitation_facilities" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="藤沢市" data-pref="1"><td>藤沢市</td><td><span class="dot c0"></span>民泊</td><td class="num">99</td><td class="num"></td><td></td><td><a href="https://www.city.fujisawa.kanagawa.jp/seiei/kenko/kenko/kankyo/jyuutakusyukuhaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="藤沢市" data-pref="1"><td>藤沢市</td><td><span class="dot c2"></span>旅館業</td><td class="num">120</td><td class="num"></td><td></td><td><a href="https://www.city.fujisawa.kanagawa.jp/seiei/kenko/kenko/kankyo/ryokan.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="茅ヶ崎市" data-pref="1"><td>茅ヶ崎市</td><td><span class="dot c0"></span>民泊</td><td class="num">50</td><td class="num"></td><td></td><td><a href="https://www.city.chigasaki.kanagawa.jp/jyohosuishin/1045355/1041779.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="茅ヶ崎市" data-pref="1"><td>茅ヶ崎市</td><td><span class="dot c2"></span>旅館業</td><td class="num">20</td><td class="num"></td><td></td><td><a href="https://www.city.chigasaki.kanagawa.jp/jyohosuishin/1045355/1041779.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr class="grp" data-pref="2"><th colspan="6">埼玉県<span class="sub">1,215件</span></th></tr>
+<tr data-muni="埼玉県" data-pref="2"><td>埼玉県</td><td><span class="dot c0"></span>民泊</td><td class="num">456</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.pref.saitama.lg.jp/a0806/minpaku/jutaku-shukuhaku11.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="埼玉県" data-pref="2"><td>埼玉県</td><td><span class="dot c2"></span>旅館業</td><td class="num">611</td><td class="num"></td><td></td><td><a href="https://www.pref.saitama.lg.jp/a0706/6hou/ichiran.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="さいたま市" data-pref="2"><td>さいたま市</td><td><span class="dot c2"></span>旅館業</td><td class="num">101</td><td class="num"></td><td></td><td><a href="https://www.city.saitama.lg.jp/002/002/011/006/p058865.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="川越市" data-pref="2"><td>川越市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.kawagoe.saitama.jp/sangyo/b-seikatsu/1012362/1012367.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
+<tr data-muni="越谷市" data-pref="2"><td>越谷市</td><td><span class="dot c2"></span>旅館業</td><td class="num">31</td><td class="num"></td><td></td><td><a href="https://www.city.koshigaya.saitama.jp/kurashi_shisei/fukushi/hokenjo/kankyo/jouhouteikyou.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="川口市" data-pref="2"><td>川口市</td><td><span class="dot c0"></span>民泊</td><td class="num">16</td><td class="num"></td><td>2026/09/14</td><td><a href="https://www.city.kawaguchi.lg.jp/soshiki/01110/030/minpaku/23892.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="川口市" data-pref="2"><td>川口市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.kawaguchi.lg.jp/soshiki/01090/seikatueiseika/kankyo/ryokan_hotel/25379.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
+<tr class="grp" data-pref="3"><th colspan="6">千葉県<span class="sub">3,881件</span></th></tr>
+<tr data-muni="千葉県" data-pref="3"><td>千葉県</td><td><span class="dot c0"></span>民泊</td><td class="num">1,202</td><td class="num"></td><td>2026/06/30</td><td><a href="https://www.pref.chiba.lg.jp/eishi/tetsuzuki/minpaku.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="千葉県" data-pref="3"><td>千葉県</td><td><span class="dot c2"></span>旅館業</td><td class="num">2,597</td><td class="num"></td><td></td><td><a href="https://opendata.pref.chiba.lg.jp/datasets/6" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="千葉市" data-pref="3"><td>千葉市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.chiba.jp/hokenfukushi/iryoeisei/hokenjo/kankyo/ryokan.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
+<tr data-muni="船橋市" data-pref="3"><td>船橋市</td><td><span class="dot c2"></span>旅館業</td><td class="num">82</td><td class="num"></td><td></td><td><a href="https://data.bodik.jp/dataset/122041_20260401_seikatsueisei-eigyoushisetsu_ryokann" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="柏市" data-pref="3"><td>柏市</td><td><span class="dot c2"></span>旅館業</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.kashiwa.lg.jp/seikatsueisei/shiseijoho/shisei/health_hospital/shinse/kankyoese/hotel.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">一覧の公開なし(2026年9月確認)</div></td></tr>
+<tr class="grp" data-pref="4"><th colspan="6">茨城県<span class="sub">1,517件</span></th></tr>
+<tr data-muni="茨城県" data-pref="4"><td>茨城県</td><td><span class="dot c0"></span>民泊</td><td class="num">312</td><td class="num"></td><td>2026/09/17</td><td><a href="https://www.pref.ibaraki.jp/hokenfukushi/seiei/kankyo/seiei/minpaku/jyouhoukoukai.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="茨城県" data-pref="4"><td>茨城県</td><td><span class="dot c2"></span>旅館業</td><td class="num">1,110</td><td class="num"></td><td></td><td><a href="https://www.pref.ibaraki.jp/hokenfukushi/seiei/kankyo/seiei/envandani/ryokan/ryokan.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="水戸市" data-pref="4"><td>水戸市</td><td><span class="dot c2"></span>旅館業</td><td class="num">95</td><td class="num"></td><td>2026/07/02</td><td><a href="https://www.city.mito.lg.jp/page/125448.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr class="grp" data-pref="5"><th colspan="6">大阪府<span class="sub">13,879件</span></th></tr>
+<tr data-muni="大阪府" data-pref="5"><td>大阪府</td><td><span class="dot c0"></span>民泊</td><td class="num">236</td><td class="num"></td><td>2026/07/31</td><td><a href="https://www.pref.osaka.lg.jp/o100090/kankyoeisei/minnpaku/index.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="大阪府" data-pref="5"><td>大阪府</td><td><span class="dot c1"></span>特区民泊</td><td class="num">56</td><td class="num"></td><td>2026/07/31</td><td><a href="https://www.pref.osaka.lg.jp/o100090/kankyoeisei/minpaku/index.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="大阪府" data-pref="5"><td>大阪府</td><td><span class="dot c2"></span>旅館業</td><td class="num">427</td><td class="num"></td><td>2026/07/31</td><td><a href="https://www.pref.osaka.lg.jp/o100090/kankyoeisei/minpaku-service/index.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="大阪市" data-pref="5"><td>大阪市</td><td><span class="dot c0"></span>民泊</td><td class="num">2,211</td><td class="num"></td><td></td><td><a href="https://www.city.osaka.lg.jp/kenko/page/0000382418.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="大阪市" data-pref="5"><td>大阪市</td><td><span class="dot c2"></span>旅館業</td><td class="num">1,861</td><td class="num"></td><td></td><td><a href="https://www.city.osaka.lg.jp/kenko/page/0000382418.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="大阪市" data-pref="5"><td>大阪市</td><td><span class="dot c1"></span>特区民泊</td><td class="num">8,887</td><td class="num"></td><td></td><td><a href="https://www.city.osaka.lg.jp/kenko/page/0000382418.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="堺市" data-pref="5"><td>堺市</td><td><span class="dot c0"></span>民泊</td><td class="num">36</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.sakai.lg.jp/kenko/kankyoeisei/taisaku/ryokankeihatu.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="堺市" data-pref="5"><td>堺市</td><td><span class="dot c2"></span>旅館業</td><td class="num">76</td><td class="num"></td><td>2026/08/31</td><td><a href="https://www.city.sakai.lg.jp/kenko/kankyoeisei/taisaku/ryokankeihatu.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="枚方市" data-pref="5"><td>枚方市</td><td><span class="dot c0"></span>民泊</td><td class="num">28</td><td class="num"></td><td></td><td><a href="https://www.city.hirakata.osaka.jp/0000025284.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="枚方市" data-pref="5"><td>枚方市</td><td><span class="dot c2"></span>旅館業</td><td class="num">18</td><td class="num"></td><td></td><td><a href="https://www.city.hirakata.osaka.jp/0000025284.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="八尾市" data-pref="5"><td>八尾市</td><td><span class="dot c0"></span>民泊</td><td class="num">7</td><td class="num"></td><td>2026/01/31</td><td><a href="https://www.city.yao.osaka.jp/kenkou_fukushi/shokuhinneisei/1008560/1008584/1008588.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="八尾市" data-pref="5"><td>八尾市</td><td><span class="dot c2"></span>旅館業</td><td class="num">11</td><td class="num"></td><td>2026/01/31</td><td><a href="https://www.city.yao.osaka.jp/kenkou_fukushi/shokuhinneisei/1008560/1008584/1008588.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
+<tr data-muni="寝屋川市" data-pref="5"><td>寝屋川市</td><td><span class="dot c0"></span>民泊</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.neyagawa.osaka.jp/organization_list/kenkou/hokeneisei/kankyou/kankyo01/sinnpouminnpaku.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">寝屋川市は住宅宿泊事業の届出住宅を公開しておらず、データなし(確認済み・対応不要)</div></td></tr>
+<tr data-muni="寝屋川市" data-pref="5"><td>寝屋川市</td><td><span class="dot c2"></span>旅館業</td><td class="num">25</td><td class="num"></td><td></td><td><a href="https://www.city.neyagawa.osaka.jp/organization_list/keieikikaku/johosuisinka/open_data/opendata/18213.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 </tbody></table></div>
 
 <footer>
@@ -160,10 +205,14 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>
 (async function(){
-  const map = L.map('map', {preferCanvas:true}).setView([35.68, 139.76], 11);
+  const map = L.map('map', {preferCanvas:true}).setView([35.68, 139.76], 10);
   L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
-    maxZoom: 18, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
+    maxZoom: 18, className: 'basemap',
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
   }).addTo(map);
+  // 地理院の淡色地図は大きく拡大すると線や文字が濃くなるので、拡大時だけ背景を薄くしてピンを見やすくする
+  const soften = () => document.getElementById('map').classList.toggle('zoomed', map.getZoom() >= 15);
+  map.on('zoomend', soften); soften();
 
   const css = getComputedStyle(document.documentElement);
   const colors = [0,1,2,3].map(i => css.getPropertyValue('--c'+i).trim());
@@ -173,7 +222,14 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
   const data = await res.json();
 
   const sel = document.getElementById('muni');
-  data.munis.forEach((m, i) => { const o = document.createElement('option'); o.value = i; o.textContent = m; sel.appendChild(o); });
+  data.prefs.forEach((pf, pi) => {
+    const idx = data.munis.map((m, i) => i).filter(i => data.mpref[i] === pi);
+    if (!idx.length) return;
+    const g = document.createElement('optgroup'); g.label = pf;
+    const all = document.createElement('option'); all.value = 'p' + pi; all.textContent = pf + '（すべて）'; g.appendChild(all);
+    idx.forEach(i => { const o = document.createElement('option'); o.value = 'm' + i; o.textContent = data.munis[i]; g.appendChild(o); });
+    sel.appendChild(g);
+  });
 
   const cluster = L.markerClusterGroup({
     chunkedLoading: true, maxClusterRadius: 50, showCoverageOnHover: false,
@@ -209,18 +265,27 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
   const btns = [...document.querySelectorAll('.tagbtn')];
   function refresh(fit){
     const cats = new Set(btns.filter(b => b.getAttribute('aria-pressed') === 'true').map(b => +b.dataset.cat));
-    const muni = sel.value === '' ? null : +sel.value;
-    const shown = markers.filter(m => cats.has(m.options.cat) && (muni === null || m.options.muni === muni));
+    const v = sel.value;
+    const muni = v[0] === 'm' ? +v.slice(1) : null;
+    const pref = v[0] === 'p' ? +v.slice(1) : null;
+    const hit = mi => (muni === null || mi === muni) && (pref === null || data.mpref[mi] === pref);
+    const shown = markers.filter(m => cats.has(m.options.cat) && hit(m.options.muni));
     cluster.clearLayers();
     cluster.addLayers(shown);
     if (fit && shown.length) map.fitBounds(L.latLngBounds(shown.map(m => m.getLatLng())), {padding: [20, 20], maxZoom: 15});
-    document.querySelectorAll('#tbody tr').forEach(tr => tr.classList.toggle('hide', muni !== null && tr.dataset.muni !== data.munis[muni]));
+    document.querySelectorAll('#tbody tr').forEach(tr => {
+      const tp = +tr.dataset.pref;
+      const show = tr.classList.contains('grp')
+        ? (pref === null || tp === pref) && (muni === null || data.mpref[muni] === tp)
+        : (pref === null || tp === pref) && (muni === null || tr.dataset.muni === data.munis[muni]);
+      tr.classList.toggle('hide', !show);
+    });
   }
   btns.forEach(b => b.addEventListener('click', () => {
     b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); refresh(false);
   }));
   sel.addEventListener('change', () => {
-    if (sel.value === '') { map.setView([35.68, 139.76], 11); refresh(false); } else refresh(true);
+    if (sel.value === '') { map.setView([35.68, 139.76], 10); refresh(false); } else refresh(true);
   });
   map.addLayer(cluster);
   refresh(false);

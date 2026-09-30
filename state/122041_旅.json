@@ -1,0 +1,20 @@
+{
+  "row_count": 82,
+  "date": "20260930",
+  "header": [
+    "業態",
+    "施設_名称",
+    "施設所在地",
+    "施設電話番号",
+    "申請者_氏名",
+    "代表者_氏名",
+    "申請者所在地",
+    "申請者電話番号",
+    "確認（許可）日",
+    "営業の種類"
+  ],
+  "source_url": "https://data.bodik.jp/dataset/b8545c67-0051-4b47-b73b-feffd3a79d87/resource/46780ab9-e4c9-451f-93bb-11c1808de7d4/download/ryokann2026071.csv",
+  "normalized_files": [
+    "data/船橋市/旅館業/整形済み/20260930_船橋市_旅館業_normalized.csv"
+  ]
+}

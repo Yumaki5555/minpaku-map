@@ -1,0 +1,12 @@
+{
+  "row_count": 144,
+  "date": "20260930",
+  "header": [
+    "nan",
+    "住宅の所在地"
+  ],
+  "source_url": "https://data.bodik.jp/dataset/76f9d975-d773-486b-b7ad-48d046a4a696/resource/5e018d93-7a42-4aa7-9b6a-77daeca73efc/download/minpaku_202608.xlsx",
+  "normalized_files": [
+    "data/横須賀市/民泊/整形済み/20260930_横須賀市_民泊_normalized.csv"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "row_count": 186,
+  "date": "20260930",
+  "header": [
+    "1",
+    "第M140000250号",
+    "澤田　信司",
+    "麻生区東百合丘4-32-5"
+  ],
+  "source_url": "https://www.city.kawasaki.jp/280/cmsfiles/contents/0000173/173594/260826.csv",
+  "normalized_files": [
+    "data/川崎市/民泊/整形済み/20260930_川崎市_民泊_normalized.csv"
+  ]
+}

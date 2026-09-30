@@ -1,0 +1,19 @@
+{
+  "row_count": 326,
+  "date": "20260930",
+  "header": [
+    "",
+    "No",
+    "",
+    "",
+    "届出年月日",
+    "",
+    "",
+    "届出住宅の所在地",
+    ""
+  ],
+  "source_url": "https://www.pref.ibaraki.jp/hokenfukushi/seiei/kankyo/seiei/minpaku/documents/20260917todokedejyouhou.pdf",
+  "normalized_files": [
+    "data/茨城県/民泊/整形済み/20260930_茨城県_民泊_normalized.csv"
+  ]
+}

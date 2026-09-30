@@ -22,6 +22,7 @@ import re
 import sys
 import time
 import unicodedata
+import zipfile
 from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
@@ -31,6 +32,7 @@ from bs4 import BeautifulSoup
 
 sys.path.insert(0, os.path.dirname(__file__))
 from extractors import (  # noqa: E402
+    ExtractResult,
     extract,
     find_source_date,
     split_kani_shukusho,
@@ -81,8 +83,8 @@ def merge_split_rows(rows: list) -> list:
     return out
 
 
-def find_latest_link(row: dict) -> str | None:
-    """「元HP」のページを開き、リンクの文字が「リンク文字」(正規表現)に合う最初のファイルのURLを返す。"""
+def find_latest_link(row: dict) -> tuple[str, str] | None:
+    """「元HP」のページを開き、リンクの文字が「リンク文字」(正規表現)に合う最初のファイルの (URL, 形式) を返す。"""
     page, pattern = row.get("元HP", "").strip(), row.get("リンク文字", "").strip()
     if not page or not pattern:
         return None
@@ -91,13 +93,15 @@ def find_latest_link(row: dict) -> str | None:
         print(f"  [警告] ページ内に「{pattern}」に合うファイルが見つかりませんでした: {page}")
         return None
     # 同じ名前でPDFとExcelの両方がある自治体(枚方市など)は、今までと同じ形式を優先する
-    same = [x for x in found if infer_format(x[0]) == infer_format(row.get("文書リンク", ""))]
+    prev_fmt = infer_format(row.get("文書リンク", "")) or row.get("ファイル形式", "")
+    same = [x for x in found if link_format(*x) == prev_fmt]
     found = same or found
     # 板橋区のように月ごとの一覧が並んでいる場合は、日付が一番新しいものを選ぶ
-    dated = [(link_date(t) or link_date(u), u) for u, t in found]
-    if sum(1 for d, _ in dated if d) >= 2:
-        return max((d, u) for d, u in dated if d)[1]
-    return found[0][0]
+    dated = [(link_date(t) or link_date(u), u, t) for u, t in found]
+    if sum(1 for d, _, _ in dated if d) >= 2:
+        _, u, t = max(x for x in dated if x[0])
+        return u, link_format(u, t)
+    return found[0][0], link_format(*found[0])
 
 
 def link_date(text: str) -> tuple[int, int] | None:
@@ -159,7 +163,7 @@ def page_links(page: str, pattern: str) -> list[tuple[str, str]]:
         return []
     out, seen = [], set()
     for url, text in items:
-        if re.search(pattern, text) and infer_format(url) and url not in seen:
+        if re.search(pattern, f"{text} {url}") and link_format(url, text) and url not in seen:
             out.append((url, text))
             seen.add(url)
     return out
@@ -172,8 +176,10 @@ def untab(rows: list) -> list:
     return rows
 
 
-def read_tables(path: str) -> list[tuple[str, list[list[str]]]]:
-    """CSV/Excel/PDFを (シート名, 行の一覧) の並びとして読む。"""
+def read_tables(path: str, zip_pattern: str = "") -> list[tuple[str, list[list[str]]]]:
+    """CSV/Excel/PDF(ZIPの中身を含む)を (シート名, 行の一覧) の並びとして読む。"""
+    if infer_format(path) == "zip":
+        return [t for inner in unzip(path, zip_pattern) for t in read_tables(inner)]
     if infer_format(path) == "pdf":
         res = extract(path, "pdf")
         return [("", [list(res.header or [])] + [list(r) for r in res.rows])]
@@ -183,14 +189,88 @@ def read_tables(path: str) -> list[tuple[str, list[list[str]]]]:
                 for name, df in sheets.items()]
     raw = open(path, "rb").read()
     text = ""
-    for enc in ("utf-8-sig", "cp932"):
+    encs = ("utf-16",) if raw[:2] in (b"\xff\xfe", b"\xfe\xff") else ("utf-8-sig", "cp932")
+    for enc in encs:
         try:
             text = raw.decode(enc)
             break
         except UnicodeDecodeError:
             continue
-    rows = [r for r in csv.reader(io.StringIO(text)) if any(c.strip() for c in r)]
+    first = text.splitlines()[0] if text else ""
+    delim = "\t" if first.count("\t") > first.count(",") else ","
+    rows = [r for r in csv.reader(io.StringIO(text), delimiter=delim) if any(c.strip() for c in r)]
     return [("", untab(rows))]
+
+
+def unzip(path: str, pattern: str = "") -> list[str]:
+    """ZIPを同じ場所に展開し、中の表ファイル(CSV/Excel/PDF)の場所を返す。pattern でファイル名を絞り込める。"""
+    out_dir = path + "_files"
+    os.makedirs(out_dir, exist_ok=True)
+    files = []
+    with zipfile.ZipFile(path) as z:
+        for info in z.infolist():
+            name = info.filename
+            if not (info.flag_bits & 0x800):
+                try:
+                    name = name.encode("cp437").decode("cp932")  # 日本のZIPはファイル名がShift_JISのことが多い
+                except (UnicodeEncodeError, UnicodeDecodeError):
+                    pass
+            base = os.path.basename(name)
+            if info.is_dir() or not infer_format(base) or infer_format(base) == "zip":
+                continue
+            if pattern and not re.search(pattern, base):
+                continue
+            dest = os.path.join(out_dir, safe_name(base))
+            with z.open(info) as src, open_with_retry(dest, "wb") as dst:
+                dst.write(src.read())
+            files.append(dest)
+    return sorted(files)
+
+
+def match_col(name: str, header: list) -> int | None:
+    """列名が同じ列を探す。千葉県のように「施設名称」と「施設名称１」の違いは同じ列とみなす。"""
+    if name in header:
+        return header.index(name)
+    def base(x):
+        return re.sub(r"[1１]$", "", squash(x)).replace("氏名", "名")
+    for i, h in enumerate(header):
+        if base(h) == base(name):
+            return i
+    return None
+
+
+def combine_results(results: list) -> "ExtractResult":
+    """複数のファイルから読んだ表を1つにまとめる。列の並びが違う場合は列名で合わせる。"""
+    results = [r for r in results if r.header or r.rows]
+    if not results:
+        return ExtractResult(row_count=0, note="読み取れる表がありませんでした")
+    header = list(results[0].header)
+    rows = [list(r) for r in results[0].rows]
+    for r in results[1:]:
+        if list(r.header) == header or not header:
+            rows += [list(x) for x in r.rows]
+            continue
+        idx = [match_col(h, r.header) for h in header]
+        if all(i is None for i in idx) and len(r.header) == len(header):
+            rows += [list(r.header)] + [list(x) for x in r.rows]  # 見出しの無い表は並び順が同じとみなす
+            continue
+        rows += [[(x[i] if i is not None and i < len(x) else "") for i in idx] for x in r.rows]
+    notes = "・".join(sorted({r.note for r in results if r.note}))
+    return ExtractResult(row_count=len(rows), header=header, rows=rows,
+                         note=f"{len(results)}ファイルを結合({notes})", raw_text=results[0].raw_text)
+
+
+def load_source(path: str, fmt: str, row: dict, kind: str) -> "ExtractResult":
+    """ダウンロードしたファイルを表として読む。ZIPなら中のファイルをすべて読んでまとめる。"""
+    sheet = row.get("シート指定", "").strip() or None
+    if sheet == "*" and fmt in ("xlsx", "xls"):
+        names = list(pd.read_excel(path, sheet_name=None, header=None, nrows=0).keys())
+        return combine_results([extract(path, fmt, kind_hint=kind, sheet_hint=n) for n in names])
+    if fmt == "zip":
+        inner = unzip(path, row.get("ZIP内ファイル", "").strip())
+        results = [extract(p, infer_format(p), kind_hint=kind, sheet_hint=sheet) for p in inner]
+        return combine_results(results)
+    return extract(path, fmt, kind_hint=kind, sheet_hint=sheet)
 
 
 def facility_key(rec: dict) -> tuple:
@@ -208,6 +288,9 @@ def squash(v) -> str:
     return re.sub(r"\s+", "", unicodedata.normalize("NFKC", str(v or "")))
 
 
+KEY_COLS = ("施設名称", "名称", "施設所在地", "所在地")
+
+
 def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base_url: str) -> tuple[list, str]:
     """「基準日の全体一覧」+「毎月の新規・廃止」で公表している自治体(台東区・墨田区・目黒区・港区など)向け。
     追加情報のファイルを順に読み、新規の施設を足し、廃止の施設を取り除く。
@@ -216,7 +299,7 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
     pattern = row.get("追加情報文字", "").strip()
     if not pattern or not header:
         return rows, ""
-    if "施設名称" not in header and "名称" not in header:
+    if not any(h in KEY_COLS for h in header):
         return rows, ""  # 列の名前が分からないと照合できない(列名指定を使う)
     # 全体一覧の日付。URLに無ければ、ページ上のリンクの文字(「令和8年6月30日終了時点」など)から読む
     base_date = link_date(base_url)
@@ -235,8 +318,8 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
 
     links = page_links(row.get("元HP", ""), pattern)
     # 墨田区のように同じ内容がExcelとPDFの両方で載っている場合は、読み取りが確実なExcel/CSVだけを使う
-    if any(infer_format(u) != "pdf" for u, _ in links):
-        links = [(u, t) for u, t in links if infer_format(u) != "pdf"]
+    if any(link_format(u, t) != "pdf" for u, t in links):
+        links = [(u, t) for u, t in links if link_format(u, t) != "pdf"]
     # ページの一番上(最新)の月は今年のものとみなして、そこから年をさかのぼる
     dates = infer_years(links, datetime.now().year)
     for (url, text), d in zip(links, dates):
@@ -244,12 +327,12 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
             continue
         if base_date and d and d <= base_date:
             continue  # 全体一覧より前の分は、すでに全体一覧に含まれている
-        path = download(url, dest_dir, os.path.basename(urlparse(url).path))
+        path = download(url, dest_dir, f"diff.{link_format(url, text)}")
         if not path:
             continue
         used += 1
         hint = "廃止" if re.search(r"廃止|haishi", text + url) else "新規"
-        for sheet, table in read_tables(path):
+        for sheet, table in read_tables(path, row.get("ZIP内ファイル", "").strip()):
             section = "廃止" if "廃止" in sheet else "新規" if "新規" in sheet else hint
             dh = None
             for r in table:
@@ -261,7 +344,7 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
                 if re.fullmatch(r"(環境)?[（(]?廃止[)）]?", joined):
                     section, dh = "廃止", None
                     continue
-                if "施設名称" in cells or "名称" in cells:
+                if any(c in KEY_COLS for c in cells):
                     dh = cells
                     continue
                 if not dh and len(cells) == len(header) and re.fullmatch(r"\d+", cells[0] or ""):
@@ -288,10 +371,24 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
 
 def infer_format(url: str) -> str:
     path = urlparse(url).path.lower()
-    for ext in ("pdf", "xlsx", "xls", "csv", "docx"):
+    for ext in ("pdf", "xlsx", "xls", "csv", "docx", "zip"):
         if path.endswith("." + ext):
             return ext
     return ""
+
+
+def text_format(text: str) -> str:
+    """東京都のサイトのように拡張子のないリンクは、リンクの文字(「PDF」「CSV」など)から形式を判断する。"""
+    t = unicodedata.normalize("NFKC", text).lower()
+    for word, fmt in (("csv", "csv"), ("zip", "zip"), ("エクセル", "xlsx"), ("excel", "xlsx"),
+                      ("xlsx", "xlsx"), ("pdf", "pdf")):
+        if word in t:
+            return fmt
+    return ""
+
+
+def link_format(url: str, text: str = "") -> str:
+    return infer_format(url) or text_format(text)
 
 
 def safe_name(s: str) -> str:
@@ -314,6 +411,8 @@ def download(url: str, dest_dir: str, basename_hint: str) -> str | None:
     os.makedirs(dest_dir, exist_ok=True)
     parsed = urlparse(url)
     orig_name = os.path.basename(parsed.path) or basename_hint
+    if not infer_format(orig_name) and infer_format(basename_hint):
+        orig_name += "." + infer_format(basename_hint)
     fname = f"{TODAY}_{safe_name(orig_name)}"
     dest_path = os.path.join(dest_dir, fname)
     try:
@@ -370,11 +469,13 @@ def process_row(row: dict) -> dict:
     kind = row["種別"]
     # ファイル名が毎回変わる自治体向け: 自治体のページから最新のファイルを探し直す
     latest = find_latest_link(row)
-    if latest and latest != row.get("文書リンク", "").strip():
-        print(f"[{ward}/{kind}] 新しいファイルを見つけました: {latest}")
-        row["文書リンク"] = latest
+    if latest:
+        if latest[0] != row.get("文書リンク", "").strip():
+            print(f"[{ward}/{kind}] 新しいファイルを見つけました: {latest[0]}")
+        row["文書リンク"] = latest[0]
+        row["ファイル形式"] = latest[1]
     url = row.get("文書リンク", "").strip()
-    fmt = infer_format(url) if url else ""
+    fmt = (infer_format(url) or row.get("ファイル形式", "")) if url else ""
     row["ファイル形式"] = fmt
     key = state_key(row)
 
@@ -388,13 +489,24 @@ def process_row(row: dict) -> dict:
 
     dest_dir = os.path.join(DATA_DIR, safe_name(ward), safe_name(kind), "元データ")
     print(f"[{ward}/{kind}] ダウンロード中: {url}")
-    path = download(url, dest_dir, f"{key}.{fmt or 'bin'}")
-    if not path:
-        summary["status"] = "要確認"
-        summary["detail"] = "ダウンロード失敗"
-        return summary
-
-    result = extract(path, fmt, kind_hint=kind, sheet_hint=row.get("シート指定", "").strip() or None)
+    # 神奈川県の旅館業のように、地域ごとに分かれた複数のファイルをまとめて1つの一覧として扱う
+    if row.get("まとめ取得", "").strip() == "1" and row.get("リンク文字"):
+        links = page_links(row["元HP"], row["リンク文字"])
+        same = [x for x in links if link_format(*x) == fmt]
+        targets = [(u, link_format(u, t)) for u, t in (same or links)]
+    else:
+        targets = [(url, fmt)]
+    results, path = [], None
+    for t_url, t_fmt in targets:
+        if len(targets) > 1:
+            print(f"[{ward}/{kind}] ダウンロード中: {t_url}")
+        path = download(t_url, dest_dir, f"{key}.{t_fmt or 'bin'}")
+        if not path:
+            summary["status"] = "要確認"
+            summary["detail"] = "ダウンロード失敗"
+            return summary
+        results.append(load_source(path, t_fmt, row, kind))
+    result = results[0] if len(results) == 1 else combine_results(results)
 
     # 目黒区のように、1つのマスにタブ区切りで全部の列が入っている表を直す
     if result.header and len(result.header) == 1 and "\t" in str(result.header[0]):
@@ -429,6 +541,11 @@ def process_row(row: dict) -> dict:
         result.note += f"(2行に分かれた{len(result.rows) - len(merged)}件を1行にまとめた)"
         result.rows = merged
         result.row_count = len(merged)
+
+    # 空行は数えない(横浜市のCSVには空行が多く含まれる)
+    filled = [r for r in result.rows if any(str(c).strip() not in ("", "nan", "None") for c in r)]
+    if len(filled) != len(result.rows):
+        result.rows, result.row_count = filled, len(filled)
 
     # 旅館業以外の施設も入っている資料(中野区など)は、指定された列の値で絞り込む
     cond = row.get("絞り込み", "").strip()
@@ -585,7 +702,7 @@ def main() -> None:
 
     only_codes = set(sys.argv[1:])
     if only_codes:
-        rows_to_run = [r for r in rows if r["自治体コード"] in only_codes]
+        rows_to_run = [r for r in rows if any(r["自治体コード"].startswith(c) for c in only_codes)]
         print(f"[テストモード] 指定された{len(rows_to_run)}件のみ実行します: {only_codes}")
     else:
         rows_to_run = rows

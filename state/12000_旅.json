@@ -1,0 +1,21 @@
+{
+  "row_count": 2597,
+  "date": "20260930",
+  "header": [
+    "申請者名",
+    "施設名称１",
+    "施設名称２",
+    "施設所在地１",
+    "施設所在地２",
+    "施設電話番号",
+    "業務種別",
+    "旅館業の種別",
+    "季節営業",
+    "許可番号",
+    "許可日"
+  ],
+  "source_url": "https://opendata.pref.chiba.lg.jp/resource_download/82",
+  "normalized_files": [
+    "data/千葉県/旅館業/整形済み/20260930_千葉県_旅館業_normalized.csv"
+  ]
+}

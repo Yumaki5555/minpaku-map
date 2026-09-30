@@ -1,0 +1,12 @@
+{
+  "row_count": 1203,
+  "date": "20260930",
+  "header": [
+    "届出年月日",
+    "住宅の所在地"
+  ],
+  "source_url": "https://www.pref.chiba.lg.jp/eishi/tetsuzuki/documents/itiran0630.pdf",
+  "normalized_files": [
+    "data/千葉県/民泊/整形済み/20260930_千葉県_民泊_normalized.csv"
+  ]
+}

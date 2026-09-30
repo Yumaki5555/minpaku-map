@@ -26,7 +26,7 @@ STATE_DIR = os.path.join(BASE_DIR, "state")
 DATA_DIR = os.path.join(BASE_DIR, "data")
 POINTS_DIR = os.path.join(STATE_DIR, "points")
 
-PREF_BY_CODE = {"13": "東京都", "27": "大阪府"}
+PREF_BY_CODE = {"08": "茨城県", "11": "埼玉県", "12": "千葉県", "13": "東京都", "14": "神奈川県", "27": "大阪府"}
 
 ADDR_WORDS = ("所在地", "住所", "町丁目", "location")
 OWNER_WORDS = ("営業者", "事業者", "管理業者", "申請者", "開設者", "経営者", "代表者", "連絡先")
@@ -45,7 +45,8 @@ HOUSE_NO = re.compile(r"^(.*?(?:[0-9]+|[一二三四五六七八九十]+丁目?)
 
 
 def clean(s: str | None) -> str:
-    s = (s or "").replace("\r", "").replace("\n", "")
+    # PDFの読み取りでハイフンが「(cid:695)」のような記号に化けることがある(川口市)
+    s = re.sub(r"\(cid:\d+\)", "-", (s or "").replace("\r", "").replace("\n", ""))
     return "" if s.strip().lower() in ("nan", "none", "-", "―", "／") else s.strip()
 
 
@@ -102,11 +103,27 @@ def guess_addr_col(rows: list[list[str]]) -> int | None:
     return best
 
 
+def find_address_cell(row: list[str], city: str) -> str:
+    """住所の列がずれている行から、住所らしいマスを探す。1つのマスに番号と住所がくっついている場合は、
+    市区町村名の位置から後ろを住所とみなす。"""
+    for c in row:
+        v = clean(c)
+        if not v:
+            continue
+        if city and city in v and not v.startswith(city):
+            return v[v.index(city):]
+        if ADDR_LIKE.search(v) and not re.match(r"^(第|M\d)", norm(v)) and len(norm(v)) > 5:
+            return v
+    return ""
+
+
 def build_address(row: list[str], cols: dict) -> str:
     def cell(i):
         return clean(row[i]) if i is not None and i < len(row) else ""
 
     addr = cell(cols["addr"])
+    if cols.get("addr2") is not None and cell(cols["addr2"]):
+        addr += cell(cols["addr2"])
     if cols.get("ban") is not None:  # 「丁目」「番」「号」が別の列
         chome, ban, go = cell(cols.get("chome")), cell(cols["ban"]), cell(cols.get("go"))
         if chome:
@@ -124,8 +141,8 @@ def prefix_for(a_ns: str, pref: str, city: str) -> str:
         return ""
     if city and a_ns.startswith(city):
         return pref
-    if pref == "大阪府" and (not city or a_ns.startswith("大阪市")):
-        return pref  # 府全体の資料は市町村名から始まっている
+    if not city:
+        return pref  # 都府県の資料(大阪府・神奈川県・東京都の多摩地域など)は市町村名から始まっている
     return pref + city
 
 
@@ -158,6 +175,9 @@ def header_cols(header: list[str]) -> dict | None:
     if addr is None:
         return None
     cols = {"addr": addr}
+    nxt = re.sub(r"[1１]$", "２", norm(header[addr])) if re.search(r"[1１]$", norm(header[addr])) else None
+    if nxt:
+        cols["addr2"] = next((i for i, h in enumerate(header) if norm(h) in (nxt, nxt.replace("２", "2"))), None)
     for key, word in (("ban", "番"), ("go", "号"), ("chome", "丁目")):
         for i, h in enumerate(header):
             if i != addr and clean(h) and norm(h) == word:
@@ -180,7 +200,8 @@ def parse_file(path: str, reg: dict) -> tuple[list[dict], int]:
     """1つのCSVから地図用の点を取り出す。戻り値は(点の一覧, データ行数)。"""
     code, muni, kind = reg["自治体コード"], reg["自治体名"], reg["種別"]
     pref = PREF_BY_CODE.get(code[:2], "")
-    city = "" if muni == pref else muni
+    # 「東京都(多摩)」のように都府県名で始まる自治体名は、都府県全体の資料として扱う
+    city = "" if muni.startswith(pref) else muni
 
     rows = read_rows(path)
     if not rows:
@@ -202,7 +223,7 @@ def parse_file(path: str, reg: dict) -> tuple[list[dict], int]:
         full, geo = make_point(addr, pref, city)
         if not no:
             # 番号の列が見つからなくても、民泊の届出番号(M+9桁)の形のマスがあれば使う
-            no = next((norm(c) for c in r if MINPAKU_NO.fullmatch(norm(clean(c)))), "")
+            no = next((m.group(0) for c in r for m in [MINPAKU_NO.search(norm(clean(c)))] if m), "")
         pts.append({"name": norm(name), "addr": full, "geo": geo, "date": dt, "no": no,
                     "cat": category(kind, code, path, r)})
 
@@ -230,8 +251,10 @@ def parse_file(path: str, reg: dict) -> tuple[list[dict], int]:
                 continue
             cols = {"addr": addr_col, "name": addr_col - 1 if addr_col > 0 else None, "date": None}
         addr = build_address(r, cols)
+        if not addr:
+            addr = find_address_cell(r, city)
         # 見出しの2段目(「商号、名称又は氏名」など)や外国語の見出し行を飛ばす
-        if not addr or not re.search(r"[0-9０-９一二三四五六七八九十]", addr) or has_word(addr, ADDR_WORDS):
+        if not addr or not re.search(r"[0-9０-９一二三四五六七八九十]|[町村]|字", addr) or has_word(addr, ADDR_WORDS):
             if addr and not has_word(addr, ADDR_WORDS) and not re.search(r"[A-Za-z]{4}", addr):
                 n += 1  # 住所らしくない(番地なし等)けれどデータ行
             continue

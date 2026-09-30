@@ -1,0 +1,23 @@
+{
+  "row_count": 926,
+  "date": "20260930",
+  "header": [
+    "許可番号",
+    "営業形態",
+    "施設名称",
+    "施設TEL",
+    "施設所在地",
+    "施設ビル名",
+    "営業者氏名",
+    "法人代表者氏名",
+    "営業者住所",
+    "営業者ビル名",
+    "営業者TEL",
+    "許可年月日"
+  ],
+  "source_url": "https://www.hokeniryo.metro.tokyo.lg.jp/documents/d/hokeniryo/kankyo-ryokan-1-7",
+  "normalized_files": [
+    "data/東京都(多摩)/旅館業/整形済み/20260930_東京都(多摩)_旅館業_旅館ホテル等_normalized.csv",
+    "data/東京都(多摩)/旅館業/整形済み/20260930_東京都(多摩)_旅館業_簡易宿所_normalized.csv"
+  ]
+}

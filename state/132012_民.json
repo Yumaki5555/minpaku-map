@@ -1,0 +1,16 @@
+{
+  "row_count": 37,
+  "date": "20260930",
+  "header": [
+    "No",
+    "住宅の所在地",
+    "住宅宿泊事業者の\n電話番号等",
+    "周辺地域の住民に対する周知等*1が\n完了した年月日",
+    "届出番号*2",
+    "届出日"
+  ],
+  "source_url": "https://www.city.hachioji.tokyo.jp/kurashi/hoken/007/018/001/p022969_d/fil/jutakuichiran.pdf",
+  "normalized_files": [
+    "data/八王子市/民泊/整形済み/20260930_八王子市_民泊_normalized.csv"
+  ]
+}

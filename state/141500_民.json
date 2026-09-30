@@ -1,0 +1,13 @@
+{
+  "row_count": 28,
+  "date": "20260930",
+  "header": [
+    "No.",
+    "届出番号",
+    "住宅の所在地"
+  ],
+  "source_url": "https://www.city.sagamihara.kanagawa.jp/_res/projects/default_project/_page_/001/013/506/minpakujigyotodokede_20260731.pdf",
+  "normalized_files": [
+    "data/相模原市/民泊/整形済み/20260930_相模原市_民泊_normalized.csv"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "row_count": 612,
+  "date": "20260930",
+  "header": [
+    "業種",
+    "営業の種類",
+    "施設名称",
+    "施設所在地",
+    "施設電話番号",
+    "申請者名",
+    "許可年月日"
+  ],
+  "source_url": "https://www.pref.saitama.lg.jp/documents/232288/r7nenndo.zip",
+  "normalized_files": [
+    "data/埼玉県/旅館業/整形済み/20260930_埼玉県_旅館業_normalized.csv"
+  ]
+}

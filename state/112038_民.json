@@ -1,0 +1,15 @@
+{
+  "row_count": 17,
+  "date": "20260930",
+  "header": [
+    "",
+    "",
+    "届出年月日",
+    "届出番号",
+    "所在地"
+  ],
+  "source_url": "https://www.city.kawaguchi.lg.jp/material/files/group/104/jutaku0914.pdf",
+  "normalized_files": [
+    "data/川口市/民泊/整形済み/20260930_川口市_民泊_normalized.csv"
+  ]
+}

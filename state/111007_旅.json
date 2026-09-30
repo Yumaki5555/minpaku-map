@@ -1,0 +1,19 @@
+{
+  "row_count": 101,
+  "date": "20260930",
+  "header": [
+    "許可年月日",
+    "許可番号",
+    "種別",
+    "施設名称",
+    "施設所在地",
+    "施設電話番号",
+    "営業者",
+    "総客室数"
+  ],
+  "source_url": "https://www.city.saitama.lg.jp/002/002/011/006/p058865_d/fil/ryokanxls.pdf",
+  "normalized_files": [
+    "data/さいたま市/旅館業/整形済み/20260930_さいたま市_旅館業_旅館ホテル等_normalized.csv",
+    "data/さいたま市/旅館業/整形済み/20260930_さいたま市_旅館業_簡易宿所_normalized.csv"
+  ]
+}

@@ -15,7 +15,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(__file__))
-from addresses import collect_all, load_registry  # noqa: E402
+from addresses import PREF_BY_CODE, collect_all, load_registry  # noqa: E402
 from geocode import load_cache  # noqa: E402
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,6 +25,12 @@ HISTORY_PATH = os.path.join(DATA, "history.json")
 SITE_URL = "https://yumaki5555.github.io/minpaku-map/"
 
 CATS = ["民泊", "特区民泊", "旅館・ホテル", "簡易宿所"]
+PREFS = ["東京都", "神奈川県", "埼玉県", "千葉県", "茨城県", "大阪府"]
+AREA = "東京・神奈川・埼玉・千葉・茨城・大阪"
+
+
+def pref_index(code: str) -> int:
+    return PREFS.index(PREF_BY_CODE[code[:2]])
 JST = timezone(timedelta(hours=9))
 
 
@@ -47,10 +53,13 @@ def main() -> None:
     collected = collect_all(save=True)
     cache = load_cache()
 
+    registry = sorted(registry, key=lambda r: pref_index(r["自治体コード"]))  # 同じ都府県の中は登録順
     munis: list[str] = []
+    muni_pref: list[int] = []
     for r in registry:
         if r["自治体名"] not in munis:
             munis.append(r["自治体名"])
+            muni_pref.append(pref_index(r["自治体コード"]))
     reg_by_code = {r["自治体コード"]: r for r in registry}
 
     # 同じ場所・同じ種別の施設(同じ建物の別の部屋など)は1つのピンにまとめる
@@ -71,7 +80,8 @@ def main() -> None:
         placed[p["code"]] = placed.get(p["code"], 0) + 1
 
     pins = [[g["lat"], g["lng"], g["cat"], g["muni"], g["exact"], g["items"]] for g in groups.values()]
-    write_json(os.path.join(DATA, "points.json"), {"cats": CATS, "munis": munis, "pins": pins, "updated": today})
+    write_json(os.path.join(DATA, "points.json"), {"cats": CATS, "munis": munis, "mpref": muni_pref,
+                                                   "prefs": PREFS, "pins": pins, "updated": today})
 
     # 自治体・種別ごとの件数表
     table = []
@@ -79,7 +89,7 @@ def main() -> None:
         code = r["自治体コード"]
         st = collected["stats"].get(code, {})
         table.append({
-            "code": code, "muni": r["自治体名"],
+            "code": code, "muni": r["自治体名"], "pref": pref_index(code),
             "kind": "特区民泊" if code.endswith("民特") else r["種別"],
             "count": st.get("with_addr", 0), "placed": placed.get(code, 0),
             "src_date": r.get("元データ日付", ""), "page": r.get("元HP", ""), "doc": r.get("文書リンク", ""),
@@ -113,7 +123,13 @@ def main() -> None:
 def render(table, total, by_cat, today, prev_date, not_found) -> str:
     e = html.escape
     rows = []
+    last_pref = None
     for t in table:
+        if t["pref"] != last_pref:
+            last_pref = t["pref"]
+            sub = sum(x["count"] for x in table if x["pref"] == t["pref"])
+            rows.append(f'<tr class="grp" data-pref="{t["pref"]}"><th colspan="6">{e(PREFS[t["pref"]])}'
+                        f'<span class="sub">{sub:,}件</span></th></tr>')
         link = f'<a href="{e(t["page"] or t["doc"])}" target="_blank" rel="noopener">自治体のページ</a>' if (t["page"] or t["doc"]) else ""
         if t["count"] == 0:
             num = '<span class="none">データなし</span>'
@@ -124,7 +140,7 @@ def render(table, total, by_cat, today, prev_date, not_found) -> str:
             diff = f'<span class="{"up" if t["diff"] > 0 else "down"}">{t["diff"]:+,}</span>'
         note = f'<div class="memo">{e(t["memo"])}</div>' if t["memo"] else ""
         rows.append(
-            f'<tr data-muni="{e(t["muni"])}"><td>{e(t["muni"])}</td><td><span class="dot c{CATS.index(t["kind"]) if t["kind"] in CATS else 2}"></span>{e(t["kind"])}</td>'
+            f'<tr data-muni="{e(t["muni"])}" data-pref="{t["pref"]}"><td>{e(t["muni"])}</td><td><span class="dot c{CATS.index(t["kind"]) if t["kind"] in CATS else 2}"></span>{e(t["kind"])}</td>'
             f'<td class="num">{num}</td><td class="num">{diff}</td><td>{e(t["src_date"])}</td><td>{link}{note}</td></tr>'
         )
     cat_btns = "".join(
@@ -135,7 +151,7 @@ def render(table, total, by_cat, today, prev_date, not_found) -> str:
     nf_note = f"住所から位置を特定できなかった {not_found:,} 件は地図に表示されていません。" if not_found else ""
     return TEMPLATE.format(
         total=f"{total:,}", today=e(today), cat_btns=cat_btns, rows="\n".join(rows),
-        diff_note=diff_note, nf_note=nf_note, site_url=SITE_URL,
+        diff_note=diff_note, nf_note=nf_note, site_url=SITE_URL, area=AREA,
     )
 
 
@@ -144,11 +160,11 @@ TEMPLATE = """<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>民泊・旅館業マップ｜東京23区・大阪</title>
-<meta name="description" content="東京23区と大阪の自治体が公表している民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。毎週自動更新。">
+<title>民泊・旅館業マップ｜首都圏・大阪</title>
+<meta name="description" content="{area}の自治体が公表している民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。毎週自動更新。">
 <meta property="og:type" content="website">
 <meta property="og:title" content="民泊・旅館業マップ｜{total}件を地図で">
-<meta property="og:description" content="東京23区と大阪の自治体が公表している民泊・特区民泊・旅館業の施設を地図にまとめました。毎週自動更新。">
+<meta property="og:description" content="{area}の自治体が公表している民泊・特区民泊・旅館業の施設を地図にまとめました。毎週自動更新。">
 <meta property="og:url" content="{site_url}">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
@@ -185,6 +201,8 @@ h2{{font-size:1.15rem;margin:28px 0 8px}}
 select{{padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:.9rem;font-family:inherit}}
 .dot{{display:inline-block;width:11px;height:11px;border-radius:50%;flex:none;vertical-align:-1px;margin-right:4px}}
 .c0{{background:var(--c0)}}.c1{{background:var(--c1)}}.c2{{background:var(--c2)}}.c3{{background:var(--c3)}}
+.basemap{{transition:filter .3s}}
+#map.zoomed .basemap{{filter:grayscale(.4) contrast(.45) brightness(1.18)}}
 #map{{height:68vh;min-height:420px;border:1px solid var(--line);border-radius:12px;background:var(--chip)}}
 .note{{font-size:.8rem;color:var(--sub);margin:6px 0}}
 .pin{{border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.35)}}
@@ -205,6 +223,8 @@ td.num{{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}}
 .none{{color:var(--sub)}}
 .memo{{font-size:.78rem;color:var(--sub)}}
 tr.hide{{display:none}}
+tr.grp th{{background:var(--card);font-size:.95rem;padding-top:14px;border-bottom:2px solid var(--line)}}
+tr.grp .sub{{font-weight:400;color:var(--sub);font-size:.8rem;margin-left:8px}}
 footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid var(--line);margin-top:28px}}
 </style>
 </head>
@@ -212,7 +232,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 <div class="wrap">
 <header>
   <h1>🏠 民泊・旅館業マップ</h1>
-  <p class="lead">東京23区と大阪の自治体が公表している、民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。毎週月曜に自動で更新しています。</p>
+  <p class="lead">{area}の自治体が公表している、民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。毎週月曜に自動で更新しています。</p>
   <div class="stats"><span>掲載 <b>{total}</b> 件</span><span>最終更新 <b>{today}</b></span></div>
 </header>
 
@@ -241,10 +261,14 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>
 (async function(){{
-  const map = L.map('map', {{preferCanvas:true}}).setView([35.68, 139.76], 11);
+  const map = L.map('map', {{preferCanvas:true}}).setView([35.68, 139.76], 10);
   L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{{z}}/{{x}}/{{y}}.png', {{
-    maxZoom: 18, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
+    maxZoom: 18, className: 'basemap',
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
   }}).addTo(map);
+  // 地理院の淡色地図は大きく拡大すると線や文字が濃くなるので、拡大時だけ背景を薄くしてピンを見やすくする
+  const soften = () => document.getElementById('map').classList.toggle('zoomed', map.getZoom() >= 15);
+  map.on('zoomend', soften); soften();
 
   const css = getComputedStyle(document.documentElement);
   const colors = [0,1,2,3].map(i => css.getPropertyValue('--c'+i).trim());
@@ -254,7 +278,14 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
   const data = await res.json();
 
   const sel = document.getElementById('muni');
-  data.munis.forEach((m, i) => {{ const o = document.createElement('option'); o.value = i; o.textContent = m; sel.appendChild(o); }});
+  data.prefs.forEach((pf, pi) => {{
+    const idx = data.munis.map((m, i) => i).filter(i => data.mpref[i] === pi);
+    if (!idx.length) return;
+    const g = document.createElement('optgroup'); g.label = pf;
+    const all = document.createElement('option'); all.value = 'p' + pi; all.textContent = pf + '（すべて）'; g.appendChild(all);
+    idx.forEach(i => {{ const o = document.createElement('option'); o.value = 'm' + i; o.textContent = data.munis[i]; g.appendChild(o); }});
+    sel.appendChild(g);
+  }});
 
   const cluster = L.markerClusterGroup({{
     chunkedLoading: true, maxClusterRadius: 50, showCoverageOnHover: false,
@@ -290,18 +321,27 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
   const btns = [...document.querySelectorAll('.tagbtn')];
   function refresh(fit){{
     const cats = new Set(btns.filter(b => b.getAttribute('aria-pressed') === 'true').map(b => +b.dataset.cat));
-    const muni = sel.value === '' ? null : +sel.value;
-    const shown = markers.filter(m => cats.has(m.options.cat) && (muni === null || m.options.muni === muni));
+    const v = sel.value;
+    const muni = v[0] === 'm' ? +v.slice(1) : null;
+    const pref = v[0] === 'p' ? +v.slice(1) : null;
+    const hit = mi => (muni === null || mi === muni) && (pref === null || data.mpref[mi] === pref);
+    const shown = markers.filter(m => cats.has(m.options.cat) && hit(m.options.muni));
     cluster.clearLayers();
     cluster.addLayers(shown);
     if (fit && shown.length) map.fitBounds(L.latLngBounds(shown.map(m => m.getLatLng())), {{padding: [20, 20], maxZoom: 15}});
-    document.querySelectorAll('#tbody tr').forEach(tr => tr.classList.toggle('hide', muni !== null && tr.dataset.muni !== data.munis[muni]));
+    document.querySelectorAll('#tbody tr').forEach(tr => {{
+      const tp = +tr.dataset.pref;
+      const show = tr.classList.contains('grp')
+        ? (pref === null || tp === pref) && (muni === null || data.mpref[muni] === tp)
+        : (pref === null || tp === pref) && (muni === null || tr.dataset.muni === data.munis[muni]);
+      tr.classList.toggle('hide', !show);
+    }});
   }}
   btns.forEach(b => b.addEventListener('click', () => {{
     b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); refresh(false);
   }}));
   sel.addEventListener('change', () => {{
-    if (sel.value === '') {{ map.setView([35.68, 139.76], 11); refresh(false); }} else refresh(true);
+    if (sel.value === '') {{ map.setView([35.68, 139.76], 10); refresh(false); }} else refresh(true);
   }});
   map.addLayer(cluster);
   refresh(false);
