@@ -1,0 +1,41 @@
+# 毎週月曜の朝6時（日本時間）に、各自治体の民泊・旅館業の一覧を集め直し、地図ページを作り直して公開する
+name: weekly-update
+
+on:
+  schedule:
+    - cron: "0 21 * * 0"   # 世界標準時の日曜21時 = 日本時間の月曜朝6時
+  workflow_dispatch:        # 手動でも実行できるようにする
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: 必要な道具を入れる
+        run: pip install -r requirements.txt
+      - name: 自治体の一覧を集める（件数比較・スプレッドシート更新も）
+        run: python -u scripts/update_sources.py
+        env:
+          SHEETS_WEBAPP_URL: ${{ secrets.SHEETS_WEBAPP_URL }}
+          SHEETS_SECRET: ${{ secrets.SHEETS_SECRET }}
+      - name: 新しい住所の位置を調べる
+        run: python -u scripts/geocode.py
+        env:
+          GEOCODE_MAX_MINUTES: "60"   # 終わらなかった分は次回へ持ち越し
+      - name: 地図ページを作る
+        run: python -u scripts/build_site.py
+      - name: 変更を保存して公開
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A registry.csv state geocode_cache.json docs 最新の実行結果.txt
+          git diff --cached --quiet || git commit -m "毎週の自動更新 $(TZ=Asia/Tokyo date +%Y-%m-%d)"
+          git push

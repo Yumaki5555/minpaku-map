@@ -1,0 +1,16 @@
+{
+  "row_count": 1861,
+  "date": "20260930",
+  "header": [
+    "No",
+    "施設名称",
+    "施設所在地",
+    "営業者名",
+    "営業の種別"
+  ],
+  "source_url": "https://www.city.osaka.lg.jp/kenko/cmsfiles/contents/0000382/382418/20260531ryokan.csv",
+  "normalized_files": [
+    "data/大阪市/旅館業/整形済み/20260930_大阪市_旅館業_旅館ホテル等_normalized.csv",
+    "data/大阪市/旅館業/整形済み/20260930_大阪市_旅館業_簡易宿所_normalized.csv"
+  ]
+}

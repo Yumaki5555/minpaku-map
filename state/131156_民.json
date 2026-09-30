@@ -1,0 +1,14 @@
+{
+  "row_count": 439,
+  "date": "20260930",
+  "header": [
+    "届出年月日",
+    "届出番号",
+    "届出住宅の所在地",
+    "住宅宿泊管理業者の名称(家主不在型の場合)"
+  ],
+  "source_url": "https://www.city.suginami.tokyo.jp/documents/871/todokede.pdf",
+  "normalized_files": [
+    "data/杉並区/民泊/整形済み/20260930_杉並区_民泊_normalized.csv"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "row_count": 552,
+  "date": "20260930",
+  "header": [
+    "No",
+    "届出受理日",
+    "届出番号",
+    "住宅の所在地",
+    "管理業者の名称",
+    "管理業者の連絡先",
+    "緊急連絡先"
+  ],
+  "source_url": "https://www.city.edogawa.tokyo.jp/documents/51159/r0808_mimpaku_ichiran.xlsx",
+  "normalized_files": [
+    "data/江戸川区/民泊/整形済み/20260930_江戸川区_民泊_normalized.csv"
+  ]
+}

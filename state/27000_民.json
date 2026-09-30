@@ -1,0 +1,12 @@
+{
+  "row_count": 236,
+  "date": "20260930",
+  "header": [
+    "連番",
+    "住宅の所在地"
+  ],
+  "source_url": "https://www.pref.osaka.lg.jp/documents/34854/jyuhaku080731.xlsx",
+  "normalized_files": [
+    "data/大阪府/民泊/整形済み/20260930_大阪府_民泊_normalized.csv"
+  ]
+}

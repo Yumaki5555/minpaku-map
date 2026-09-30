@@ -1,0 +1,16 @@
+{
+  "row_count": 18,
+  "date": "20260930",
+  "header": [
+    "施設名称",
+    "施設所在地",
+    "施設ビル名",
+    "開設者(申請者)",
+    "開始年月日",
+    "許可番号"
+  ],
+  "source_url": "https://www.city.hirakata.osaka.jp/cmsfiles/contents/0000025/25284/ryokanall.xlsx",
+  "normalized_files": [
+    "data/枚方市/旅館業/整形済み/20260930_枚方市_旅館業_normalized.csv"
+  ]
+}

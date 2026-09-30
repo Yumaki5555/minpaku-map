@@ -1,0 +1,56 @@
+[
+  {
+    "自治体コード": "131075_旅",
+    "自治体名": "墨田区",
+    "種別": "旅館業",
+    "status": "OK",
+    "detail": "1136件 / 前回(1013件)から+123件 / 種別キーワード一致シートを使用: ['旅館業'](毎月の追加情報3件を反映: 新規+128 廃止-5)",
+    "row_count": 1136,
+    "normalized_path": "data/墨田区/旅館業/整形済み/20260930_墨田区_旅館業_normalized.csv",
+    "normalized_paths": [
+      "data/墨田区/旅館業/整形済み/20260930_墨田区_旅館業_normalized.csv"
+    ],
+    "source_path": "data/墨田区/旅館業/元データ/20260930_kk080413.xlsx",
+    "source_date": "2026/04/01"
+  },
+  {
+    "自治体コード": "271004_民",
+    "自治体名": "大阪市",
+    "種別": "民泊",
+    "status": "OK",
+    "detail": "2213件 / 前回から変化なし / encoding=cp932, sep=','",
+    "row_count": 2213,
+    "normalized_path": "data/大阪市/民泊/整形済み/20260930_大阪市_民泊_normalized.csv",
+    "normalized_paths": [
+      "data/大阪市/民泊/整形済み/20260930_大阪市_民泊_normalized.csv"
+    ],
+    "source_path": "data/大阪市/民泊/元データ/20260930_20260531_shinpou.csv"
+  },
+  {
+    "自治体コード": "271004_旅",
+    "自治体名": "大阪市",
+    "種別": "旅館業",
+    "status": "OK",
+    "detail": "1861件 / 前回から変化なし / encoding=cp932, sep=','",
+    "row_count": 1861,
+    "normalized_path": "data/大阪市/旅館業/整形済み/20260930_大阪市_旅館業_旅館ホテル等_normalized.csv (旅館・ホテル等 1304件) / data/大阪市/旅館業/整形済み/20260930_大阪市_旅館業_簡易宿所_normalized.csv (簡易宿所 557件)",
+    "normalized_paths": [
+      "data/大阪市/旅館業/整形済み/20260930_大阪市_旅館業_旅館ホテル等_normalized.csv",
+      "data/大阪市/旅館業/整形済み/20260930_大阪市_旅館業_簡易宿所_normalized.csv"
+    ],
+    "source_path": "data/大阪市/旅館業/元データ/20260930_20260531ryokan.csv"
+  },
+  {
+    "自治体コード": "271004_民特",
+    "自治体名": "大阪市",
+    "種別": "民泊",
+    "status": "OK",
+    "detail": "8887件 / 前回から変化なし / encoding=cp932, sep=','",
+    "row_count": 8887,
+    "normalized_path": "data/大阪市/民泊/整形済み/20260930_大阪市_民泊_特区_normalized.csv",
+    "normalized_paths": [
+      "data/大阪市/民泊/整形済み/20260930_大阪市_民泊_特区_normalized.csv"
+    ],
+    "source_path": "data/大阪市/民泊/元データ/20260930_20260531tokku.csv"
+  }
+]

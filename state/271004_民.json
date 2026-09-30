@@ -1,0 +1,15 @@
+{
+  "row_count": 2213,
+  "date": "20260930",
+  "header": [
+    "No.",
+    "届出番号",
+    "届出住宅の所在地",
+    "周辺住民説明の実施状況",
+    "消防法令適合通知書の添付※"
+  ],
+  "source_url": "https://www.city.osaka.lg.jp/kenko/cmsfiles/contents/0000382/382418/20260531_shinpou.csv",
+  "normalized_files": [
+    "data/大阪市/民泊/整形済み/20260930_大阪市_民泊_normalized.csv"
+  ]
+}

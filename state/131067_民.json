@@ -1,0 +1,17 @@
+{
+  "row_count": 1488,
+  "date": "20260930",
+  "header": [
+    "",
+    "所在地",
+    "届出番号",
+    "届出日",
+    "住宅宿泊事業者が住宅宿泊管理業務の委託をする場合における、住宅宿泊管理業者に関する事項",
+    "",
+    ""
+  ],
+  "source_url": "https://www.city.taito.lg.jp/kenchiku/jutaku/eisei/shisetsuichiran.files/20260831.pdf",
+  "normalized_files": [
+    "data/台東区/民泊/整形済み/20260930_台東区_民泊_normalized.csv"
+  ]
+}

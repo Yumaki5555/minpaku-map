@@ -1,0 +1,14 @@
+{
+  "row_count": 48,
+  "date": "20260930",
+  "header": [
+    "No",
+    "届出住宅の住所",
+    "届出番号",
+    "住宅宿泊事業者の連絡先(※)"
+  ],
+  "source_url": "https://www.city.koto.lg.jp/260403/fukushi/ese/kankyo/documents/202608minpakua_list.pdf",
+  "normalized_files": [
+    "data/江東区/民泊/整形済み/20260930_江東区_民泊_normalized.csv"
+  ]
+}

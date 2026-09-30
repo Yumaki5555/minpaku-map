@@ -1,0 +1,18 @@
+{
+  "row_count": 1827,
+  "date": "20260930",
+  "header": [
+    "No.",
+    "届出住宅所在地",
+    "建物名室番",
+    "届出番号",
+    "届出年月日",
+    "届出者名",
+    "住宅宿泊管理業者に委託を行う場合",
+    ""
+  ],
+  "source_url": "https://www.city.toshima.lg.jp/documents/21284/todokedezumi-r80715.pdf",
+  "normalized_files": [
+    "data/豊島区/民泊/整形済み/20260930_豊島区_民泊_normalized.csv"
+  ]
+}

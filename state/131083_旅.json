@@ -1,0 +1,18 @@
+{
+  "row_count": 370,
+  "date": "20260930",
+  "header": [
+    "No.",
+    "施設の名称",
+    "施設の所在地",
+    "",
+    "施設の電話番号",
+    "営業の種類",
+    "営業者名",
+    "許可年月日"
+  ],
+  "source_url": "https://www.city.koto.lg.jp/260403/fukushi/ese/kankyo/documents/202608_ryokan_list.pdf",
+  "normalized_files": [
+    "data/江東区/旅館業/整形済み/20260930_江東区_旅館業_normalized.csv"
+  ]
+}

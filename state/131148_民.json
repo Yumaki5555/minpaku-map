@@ -1,0 +1,15 @@
+{
+  "row_count": 497,
+  "date": "20260930",
+  "header": [
+    "届出年月日",
+    "住宅の所在地",
+    "住宅の方書",
+    "制限区域",
+    "管理業者"
+  ],
+  "source_url": "https://www.city.tokyo-nakano.lg.jp/kenko_hukushi/pet-eisei/kankyoueisei/jyutakusyukuhaku.files/R8.09itirann.pdf",
+  "normalized_files": [
+    "data/中野区/民泊/整形済み/20260930_中野区_民泊_normalized.csv"
+  ]
+}

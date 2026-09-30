@@ -1,0 +1,16 @@
+{
+  "row_count": 191,
+  "date": "20260930",
+  "header": [
+    "施設名称",
+    "施設所在地",
+    "施設電話番号",
+    "申請者氏名",
+    "客室数",
+    "許可開始年月日"
+  ],
+  "source_url": "https://www.city.itabashi.tokyo.jp/_res/projects/default_project/_page_/001/051/271/20260831opendate.xlsx",
+  "normalized_files": [
+    "data/板橋区/旅館業/整形済み/20260930_板橋区_旅館業_normalized.csv"
+  ]
+}

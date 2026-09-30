@@ -1,0 +1,16 @@
+{
+  "row_count": 107,
+  "date": "20260930",
+  "header": [
+    "",
+    "届出住宅所在地",
+    "住宅宿泊事業者の連絡先\n(法人の場合は、商号又は名称及び連絡先)",
+    "住宅宿泊管理業者の連絡先\n(法人の場合は、商号又は名称及び連絡先)",
+    "届出番号",
+    "住宅宿泊事業の\n開始日"
+  ],
+  "source_url": "https://www.city.chuo.lg.jp/documents/3395/20260717minpaku.pdf",
+  "normalized_files": [
+    "data/中央区/民泊/整形済み/20260930_中央区_民泊_normalized.csv"
+  ]
+}

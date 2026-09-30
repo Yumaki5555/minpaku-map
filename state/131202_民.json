@@ -1,0 +1,15 @@
+{
+  "row_count": 113,
+  "date": "20260930",
+  "header": [
+    "",
+    "届出番号",
+    "届出住宅の所在地",
+    "住宅宿泊管理業の委託をする場合における\n住宅宿泊管理業者の商号、名称または氏名",
+    "区条例※1第6条第1項の\n事業実施制限の有無※2"
+  ],
+  "source_url": "https://www.city.nerima.tokyo.jp/hokenfukushi/eisei/minpaku/minnpaku.files/20260925.pdf",
+  "normalized_files": [
+    "data/練馬区/民泊/整形済み/20260930_練馬区_民泊_normalized.csv"
+  ]
+}

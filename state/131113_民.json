@@ -1,0 +1,15 @@
+{
+  "row_count": 257,
+  "date": "20260930",
+  "header": [
+    "HP番号",
+    "所在地",
+    "届出受理日",
+    "証票交付済※",
+    ""
+  ],
+  "source_url": "https://www.city.ota.tokyo.jp/seikatsu/hoken/minpaku/minpaku.files/0916todokede.pdf",
+  "normalized_files": [
+    "data/大田区/民泊/整形済み/20260930_大田区_民泊_normalized.csv"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "row_count": 309,
+  "date": "20260930",
+  "header": [
+    "市区町村コード",
+    "No",
+    "都道府県名",
+    "市区町村名",
+    "施設番号",
+    "業種",
+    "施設名称",
+    "施設所在地",
+    "施設方書",
+    "TEL1",
+    "許可日",
+    "許可番号",
+    "施設_種別_等",
+    "経度",
+    "緯度",
+    "分類"
+  ],
+  "source_url": "https://www2.wagmap.jp/nakanodatamap/nakanodatamap/opendatafile/map_44/CSV/opendata_5000793.csv",
+  "normalized_files": [
+    "data/中野区/旅館業/整形済み/20260930_中野区_旅館業_normalized.csv"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "row_count": 173,
+  "date": "20260930",
+  "header": [
+    "施設名称",
+    "施設所在地",
+    "施設ビル名",
+    "電話番号",
+    "許可日",
+    "施設(種別)"
+  ],
+  "source_url": "https://www.city.chiyoda.lg.jp/documents/4950/r808ryokangyo.pdf",
+  "normalized_files": [
+    "data/千代田区/旅館業/整形済み/20260930_千代田区_旅館業_旅館ホテル等_normalized.csv",
+    "data/千代田区/旅館業/整形済み/20260930_千代田区_旅館業_簡易宿所_normalized.csv"
+  ]
+}

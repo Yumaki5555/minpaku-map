@@ -1,0 +1,13 @@
+{
+  "row_count": 7,
+  "date": "20260930",
+  "header": [
+    "施設名称",
+    "所在地",
+    "営業種別"
+  ],
+  "source_url": "https://www.city.yao.osaka.jp/_res/projects/default_project/_page_/001/008/588/20260131.pdf",
+  "normalized_files": [
+    "data/八尾市/民泊/整形済み/20260930_八尾市_民泊_normalized.csv"
+  ]
+}

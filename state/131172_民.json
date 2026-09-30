@@ -1,0 +1,14 @@
+{
+  "row_count": 612,
+  "date": "20260930",
+  "header": [
+    "届出番号",
+    "届出日",
+    "届出住宅所在地",
+    "住宅に人を宿泊させる間、不在とならない旨"
+  ],
+  "source_url": "https://www.city.kita.lg.jp/_res/projects/default_project/_page_/001/008/993/zyuusyuku0808.pdf",
+  "normalized_files": [
+    "data/北区/民泊/整形済み/20260930_北区_民泊_normalized.csv"
+  ]
+}

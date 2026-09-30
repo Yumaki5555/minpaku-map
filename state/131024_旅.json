@@ -1,0 +1,21 @@
+{
+  "row_count": 250,
+  "date": "20260930",
+  "header": [
+    "No",
+    "確認（許可）年月日",
+    "施設名",
+    "所在地",
+    "丁目",
+    "番",
+    "号",
+    "付属",
+    "ビル名",
+    "開設者名",
+    "業態"
+  ],
+  "source_url": "https://www.city.chuo.lg.jp/documents/5654/260831ryokan.xlsx",
+  "normalized_files": [
+    "data/中央区/旅館業/整形済み/20260930_中央区_旅館業_normalized.csv"
+  ]
+}

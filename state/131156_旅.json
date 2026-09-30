@@ -1,0 +1,19 @@
+{
+  "row_count": 174,
+  "date": "20260930",
+  "header": [
+    "No",
+    "施設名称",
+    "施設所在地",
+    "施設方書",
+    "TEL1",
+    "営業者名",
+    "許可日",
+    "許可番号",
+    "施設(種\n別)"
+  ],
+  "source_url": "https://www.city.suginami.tokyo.jp/documents/870/ryokan202608.pdf",
+  "normalized_files": [
+    "data/杉並区/旅館業/整形済み/20260930_杉並区_旅館業_normalized.csv"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "row_count": 2285,
+  "date": "20260930",
+  "header": [
+    "",
+    "届出住宅所在地",
+    "届出番号",
+    "届出年月日",
+    "住宅宿泊管理業者の商\n号、名称又は氏名",
+    "住宅宿泊管理業\n者の連絡先",
+    "住宅宿泊管理業者の登録番号"
+  ],
+  "source_url": "https://www.city.sumida.lg.jp/kenko_fukushi/eisei/kankyo_eisei/taa0200020220216.files/jj080916.pdf",
+  "normalized_files": [
+    "data/墨田区/民泊/整形済み/20260930_墨田区_民泊_normalized.csv"
+  ]
+}

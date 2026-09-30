@@ -1,0 +1,18 @@
+{
+  "row_count": 333,
+  "date": "20260930",
+  "header": [
+    "届出番号",
+    "届出年月日",
+    "届出住宅の所在地",
+    "住宅宿泊事業者の商号、名称又は氏名",
+    "住宅宿泊事業者連絡先",
+    "住宅宿泊管理業者名",
+    "登録番号",
+    "住宅宿泊管理業者の緊急連絡先"
+  ],
+  "source_url": "https://www.city.bunkyo.lg.jp/documents/3037/itiran20260831nengappi.pdf",
+  "normalized_files": [
+    "data/文京区/民泊/整形済み/20260930_文京区_民泊_normalized.csv"
+  ]
+}
