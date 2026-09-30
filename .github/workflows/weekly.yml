@@ -13,9 +13,11 @@ jobs:
   update:
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    env:
+      TZ: Asia/Tokyo   # 日付・時刻を日本時間で記録する
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
