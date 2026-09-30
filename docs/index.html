@@ -42,6 +42,12 @@ h2{font-size:1.15rem;margin:28px 0 8px}
 .viewtab span{font-size:.72rem;font-weight:400}
 .viewtab + .viewtab{border-left:1.5px solid var(--line)}
 .viewtab[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.search{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 8px}
+.search input{flex:1 1 260px;min-width:0;padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;
+  background:var(--card);color:var(--ink);font-size:.95rem;font-family:inherit}
+.search button{border:0;background:var(--ink);color:var(--bg);border-radius:8px;padding:8px 16px;font-weight:700;font-family:inherit;cursor:pointer}
+.qmsg{font-size:.82rem;color:var(--sub);flex-basis:100%}
+.qmsg:empty{display:none}
 .tagbtn{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;
   padding:5px 12px;font-size:.88rem;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
 .tagbtn .n{opacity:.7;font-size:.8em}
@@ -140,6 +146,12 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
   <button class="tagbtn" data-cat="0" aria-pressed="true"><span class="dot c0"></span>民泊<span class="n">23,492</span></button><button class="tagbtn" data-cat="1" aria-pressed="true"><span class="dot c1"></span>特区民泊<span class="n">9,448</span></button><button class="tagbtn" data-cat="2" aria-pressed="true"><span class="dot c2"></span>旅館・ホテル<span class="n">14,392</span></button><button class="tagbtn" data-cat="3" aria-pressed="true"><span class="dot c3"></span>簡易宿所<span class="n">5,322</span></button>
   <select id="muni" aria-label="自治体を選ぶ"><option value="">すべての自治体</option></select>
 </div>
+<form id="search" class="search" role="search" autocomplete="off">
+  <input type="search" id="q" list="citylist" placeholder="市区町村名・住所で探す（例：新宿区、箱根町、西新宿2丁目）" aria-label="市区町村名・住所で探す">
+  <button type="submit">移動</button>
+  <span id="qmsg" class="qmsg" aria-live="polite"></span>
+</form>
+<datalist id="citylist"></datalist>
 <div class="mapwrap">
 <div id="map" role="region" aria-label="施設の地図"></div>
 <div id="cinfo" class="cinfo" hidden aria-live="polite"><button type="button" class="cx" aria-label="閉じる">×</button><div class="cbody"></div></div>
@@ -460,6 +472,48 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
   sel.addEventListener('change', () => {
     if (sel.value === '') { map.setView([35.68, 139.76], 10); refresh(false); } else refresh(true);
   });
+  // 市区町村名・住所で探して地図を移動する
+  const cityPins = new Map();
+  data.pins.forEach(p => { const c = data.cities[p[6]]; if (!cityPins.has(c)) cityPins.set(c, []); cityPins.get(c).push([p[0], p[1]]); });
+  const citylist = document.getElementById('citylist');
+  [...cityPins.entries()].sort((a, b) => b[1].length - a[1].length).forEach(([c]) => {
+    const o = document.createElement('option'); o.value = c; citylist.appendChild(o);
+  });
+  const qmsg = document.getElementById('qmsg');
+  const AREA_PREFS = data.prefs;
+  document.getElementById('search').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const q = document.getElementById('q').value.trim().replace(/\s+/g, '');
+    if (!q) return;
+    qmsg.textContent = '';
+    // 1) 市区町村名(都府県名が付いていてもよい)と一致したら、その市区町村の施設がすべて入る範囲へ
+    const bare = q.replace(/^(東京都|神奈川県|埼玉県|千葉県|茨城県|大阪府)/, '');
+    const hit = cityPins.get(bare) || cityPins.get(bare + '市') || cityPins.get(bare + '区') || cityPins.get(bare + '町');
+    if (hit) {
+      map.fitBounds(L.latLngBounds(hit), {padding: [20, 20], maxZoom: 15});
+      return;
+    }
+    // 2) それ以外は国土地理院の住所検索で場所を調べる
+    qmsg.textContent = '検索中…';
+    try {
+      const res = await fetch('https://msearch.gsi.go.jp/address-search/AddressSearch?q=' + encodeURIComponent(q));
+      const found = (await res.json()).filter(f => AREA_PREFS.some(pf => f.properties.title.startsWith(pf)));
+      if (!found.length) { qmsg.textContent = '「' + q + '」は見つかりませんでした。市区町村名や住所で試してください。'; return; }
+      // 同じ地名が複数あるときは、近く(約1km以内)に施設が多い場所を優先する
+      const near = f => { const [x, y] = f.geometry.coordinates; return data.pins.reduce((n, p) => n + (Math.abs(p[0] - y) < 0.009 && Math.abs(p[1] - x) < 0.011 ? p[5].length : 0), 0); };
+      const ranked = found.slice(0, 20).map(f => [f, near(f)]).sort((a, b) => b[1] - a[1]).map(x => x[0]);
+      const go = f => { const [lng, lat] = f.geometry.coordinates; map.setView([lat, lng], 16); };
+      go(ranked[0]);
+      qmsg.innerHTML = esc(ranked[0].properties.title) + ' に移動しました'
+        + (ranked.length > 1 ? '　ほかの候補：' + ranked.slice(1, 6).map((f, i) => '<a href="#" data-i="' + (i + 1) + '">' + esc(f.properties.title) + '</a>').join('／') : '');
+      qmsg.querySelectorAll('a').forEach(a => a.addEventListener('click', e => {
+        e.preventDefault(); const f = ranked[+a.dataset.i]; go(f); qmsg.innerHTML = esc(f.properties.title) + ' に移動しました';
+      }));
+    } catch (e) {
+      qmsg.textContent = '検索できませんでした。時間をおいて試してください。';
+    }
+  });
+
   setView(view);
 })();
 </script>
