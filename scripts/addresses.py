@@ -33,6 +33,10 @@ OWNER_WORDS = ("営業者", "事業者", "管理業者", "申請者", "開設者
 NAME_WORDS = ("施設名", "名称", "施 設 名")
 DATE_WORDS = ("届出年月日", "届出日", "届出受理日", "許可日", "許可年月日", "許可開始", "確認", "開始日", "開始年月日")
 
+# 届出番号(民泊)・認定番号(特区民泊)・許可番号(旅館業)の列
+NO_WORDS = ("届出番号", "認定番号", "許可番号", "確認番号", "許可・確認・届出番号", "届 出 番 号")
+MINPAKU_NO = re.compile(r"第?M\d{9}号?")
+
 FOREIGN_LABELS = {"English", "中文", "한국어", "繁體中文", "简体中文"}
 
 ADDR_LIKE = re.compile(r"(丁目|番地|[0-9０-９]番|[0-9０-９]号|[0-9０-９]+[-ー‐−－][0-9０-９])")
@@ -160,6 +164,7 @@ def header_cols(header: list[str]) -> dict | None:
                 cols[key] = i
     cols["name"] = find_col(header, NAME_WORDS, exclude=OWNER_WORDS + ("カナ", "ビル", "商号"))
     cols["date"] = find_col(header, DATE_WORDS, exclude=("番号",))
+    cols["no"] = find_col(header, NO_WORDS, exclude=("管理業", "登録番号", "郵便", "電話"))
     return cols
 
 
@@ -193,9 +198,12 @@ def parse_file(path: str, reg: dict) -> tuple[list[dict], int]:
 
     pts, n = [], 0
 
-    def add(addr: str, name: str, dt: str, r: list[str]) -> None:
+    def add(addr: str, name: str, dt: str, r: list[str], no: str = "") -> None:
         full, geo = make_point(addr, pref, city)
-        pts.append({"name": norm(name), "addr": full, "geo": geo, "date": dt,
+        if not no:
+            # 番号の列が見つからなくても、民泊の届出番号(M+9桁)の形のマスがあれば使う
+            no = next((norm(c) for c in r if MINPAKU_NO.fullmatch(norm(clean(c)))), "")
+        pts.append({"name": norm(name), "addr": full, "geo": geo, "date": dt, "no": no,
                     "cat": category(kind, code, path, r)})
 
     for r in body:
@@ -228,10 +236,11 @@ def parse_file(path: str, reg: dict) -> tuple[list[dict], int]:
                 n += 1  # 住所らしくない(番地なし等)けれどデータ行
             continue
         n += 1
-        nc, dc = cols.get("name"), cols.get("date")
+        nc, dc, oc = cols.get("name"), cols.get("date"), cols.get("no")
         name = clean(r[nc]) if nc is not None and nc < len(r) else ""
         dt = format_date(r[dc]) if dc is not None and dc < len(r) else ""
-        add(addr, name, dt, r)
+        no = norm(clean(r[oc])) if oc is not None and oc < len(r) else ""
+        add(addr, name, dt, r, no)
     return pts, n
 
 

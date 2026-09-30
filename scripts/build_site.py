@@ -67,7 +67,7 @@ def main() -> None:
         key = (lat, lng, p["cat"])
         g = groups.setdefault(key, {"lat": lat, "lng": lng, "exact": exact, "cat": CATS.index(p["cat"]),
                                     "muni": munis.index(muni), "items": []})
-        g["items"].append([p["name"], p["addr"], p["date"]])
+        g["items"].append([p["name"], p["addr"], p["date"], p.get("no", "")])
         placed[p["code"]] = placed.get(p["code"], 0) + 1
 
     pins = [[g["lat"], g["lng"], g["cat"], g["muni"], g["exact"], g["items"]] for g in groups.values()]
@@ -277,7 +277,10 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
       html: '<div class="pin'+(exact ? '' : ' approx')+'" style="width:'+size+'px;height:'+size+'px;background:'+colors[cat]+'"></div>'}});
     const m = L.marker([lat, lng], {{icon, n, cat, muni}});
     m.bindPopup(() => {{
-      const list = items.map(it => '<li><b>'+esc(it[0] || '（施設名の記載なし）')+'</b><br>'+esc(it[1])+(it[2] ? '<br><span class="d">'+esc(it[2])+'</span>' : '')+'</li>').join('');
+      const noLabel = ['届出番号', '認定番号', '許可番号', '許可番号'][cat];
+      const list = items.map(it => '<li><b>'+esc(it[0] || '（施設名の記載なし）')+'</b><br>'+esc(it[1])
+        + (it[3] ? '<br><span class="d">'+noLabel+'：'+esc(it[3])+'</span>' : '')
+        + (it[2] ? '<br><span class="d">'+esc(it[2])+'</span>' : '')+'</li>').join('');
       return '<div class="pop"><h3><span class="dot c'+cat+'"></span>'+esc(data.cats[cat])+'（'+esc(data.munis[muni])+'）'+(n > 1 ? ' '+n+'件' : '')+'</h3>'
         + (exact ? '' : '<div class="d">※位置はおおよそです</div>') + '<ul>'+list+'</ul></div>';
     }});
