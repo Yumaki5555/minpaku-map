@@ -69,9 +69,14 @@ def city_of(addr: str, pref: str, known: list[str]) -> str:
     return m.group(1) if m else ""
 
 
+def known_names(reg_by_code: dict) -> list[str]:
+    """登録済みの市区町村名(都府県全体の資料は除く)を、長い名前から順に並べたもの。"""
+    return sorted({r["自治体名"] for r in reg_by_code.values() if not r["自治体名"].endswith(("都", "府", "県", ")"))},
+                  key=len, reverse=True)
+
+
 def ranking(points: list[dict], reg_by_code: dict, cats: set[str], top: int = 10) -> list[tuple[str, int]]:
-    known = sorted({r["自治体名"] for r in reg_by_code.values() if not r["自治体名"].endswith(("都", "府", "県", ")"))},
-                   key=len, reverse=True)
+    known = known_names(reg_by_code)
     counts: dict[str, int] = {}
     for p in points:
         if p["cat"] not in cats:
@@ -98,6 +103,9 @@ def main() -> None:
             muni_pref.append(pref_index(r["自治体コード"]))
     reg_by_code = {r["自治体コード"]: r for r in registry}
 
+    known = known_names(reg_by_code)
+    cities: list[str] = []
+
     # 同じ場所・同じ種別の施設(同じ建物の別の部屋など)は1つのピンにまとめる
     groups: dict[tuple, dict] = {}
     placed: dict[str, int] = {}
@@ -110,13 +118,18 @@ def main() -> None:
         lat, lng, exact = loc
         muni = reg_by_code[p["code"]]["自治体名"]
         key = (lat, lng, p["cat"])
-        g = groups.setdefault(key, {"lat": lat, "lng": lng, "exact": exact, "cat": CATS.index(p["cat"]),
-                                    "muni": munis.index(muni), "items": []})
+        if key not in groups:
+            city = city_of(p["addr"], PREF_BY_CODE[p["code"][:2]], known) or muni
+            if city not in cities:
+                cities.append(city)
+            groups[key] = {"lat": lat, "lng": lng, "exact": exact, "cat": CATS.index(p["cat"]),
+                           "muni": munis.index(muni), "city": cities.index(city), "items": []}
+        g = groups[key]
         g["items"].append([p["name"], p["addr"], p["date"], p.get("no", "")])
         placed[p["code"]] = placed.get(p["code"], 0) + 1
 
-    pins = [[g["lat"], g["lng"], g["cat"], g["muni"], g["exact"], g["items"]] for g in groups.values()]
-    write_json(os.path.join(DATA, "points.json"), {"cats": CATS, "munis": munis, "mpref": muni_pref,
+    pins = [[g["lat"], g["lng"], g["cat"], g["muni"], g["exact"], g["items"], g["city"]] for g in groups.values()]
+    write_json(os.path.join(DATA, "points.json"), {"cats": CATS, "munis": munis, "mpref": muni_pref, "cities": cities,
                                                    "prefs": PREFS, "pins": pins, "updated": today})
 
     # 自治体・種別ごとの件数表
@@ -267,6 +280,9 @@ select{{padding:6px 10px;border:1px solid var(--line);border-radius:8px;backgrou
   box-shadow:0 0 0 2px rgba(255,255,255,.9),0 1px 4px rgba(0,0,0,.35)}}
 .cl span{{background:#fff;color:#1c1b19;border-radius:50%;width:calc(100% - 12px);height:calc(100% - 12px);
   display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;letter-spacing:-.02em}}
+.ctip{{font-size:12px;line-height:1.6;max-width:260px;white-space:normal}}
+.ctip .cc{{margin-top:4px}}
+.ctip .d{{color:#666;font-size:11px;margin-top:2px}}
 .leaflet-popup-content{{font-family:inherit;font-size:13px;line-height:1.5;max-height:280px;overflow:auto;margin:10px 12px}}
 .pop h3{{font-size:13px;margin:0 0 4px}}
 .pop ul{{margin:0;padding-left:1.1em}}
@@ -392,19 +408,18 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
       const size = n < 10 ? 34 : n < 100 ? 40 : n < 1000 ? 48 : 56;
       let acc = 0; const stops = [];
       tally.forEach((v, i) => {{ if (!v) return; const a = acc / n * 100, b = (acc + v) / n * 100; stops.push(colors[i]+' '+a.toFixed(2)+'% '+b.toFixed(2)+'%'); acc += v; }});
-      const tip = tally.map((v, i) => v ? data.cats[i]+' '+v.toLocaleString()+'件' : '').filter(Boolean).join(' / ');
-      return L.divIcon({{html: '<div class="cl" title="'+tip+'" style="width:'+size+'px;height:'+size+'px;background:conic-gradient('+stops.join(',')+')">'
+      return L.divIcon({{html: '<div class="cl" style="width:'+size+'px;height:'+size+'px;background:conic-gradient('+stops.join(',')+')">'
         + '<span>'+n.toLocaleString()+'</span></div>', className: '', iconSize: [size, size]}});
     }}
   }});
 
   const markers = data.pins.map(p => {{
-    const [lat, lng, cat, muni, exact, items] = p;
+    const [lat, lng, cat, muni, exact, items, city] = p;
     const n = items.length;
     const size = n > 1 ? 16 : 12;
     const icon = L.divIcon({{className: '', iconSize: [size, size],
       html: '<div class="pin'+(exact ? '' : ' approx')+'" style="width:'+size+'px;height:'+size+'px;background:'+colors[cat]+'"></div>'}});
-    const m = L.marker([lat, lng], {{icon, n, cat, muni}});
+    const m = L.marker([lat, lng], {{icon, n, cat, muni, city}});
     m.bindPopup(() => {{
       const noLabel = ['届出番号', '認定番号', '許可番号', '許可番号'][cat];
       const list = items.map(it => '<li><b>'+esc(it[0] || '（施設名の記載なし）')+'</b><br>'+esc(it[1])
@@ -441,6 +456,19 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
   sel.addEventListener('change', () => {{
     if (sel.value === '') {{ map.setView([35.68, 139.76], 10); refresh(false); }} else refresh(true);
   }});
+  // 円にマウスを重ねたら、含まれる市区町村と種類ごとの件数を吹き出しで出す
+  cluster.on('clustermouseover', e => {{
+    const ms = e.layer.getAllChildMarkers();
+    const byCity = new Map(); const tally = [0,0,0,0]; let n = 0;
+    ms.forEach(m => {{ const c = data.cities[m.options.city]; byCity.set(c, (byCity.get(c) || 0) + m.options.n); tally[m.options.cat] += m.options.n; n += m.options.n; }});
+    const top = [...byCity.entries()].sort((a, b) => b[1] - a[1]);
+    const names = top.slice(0, 3).map(([c, v]) => '<b>'+esc(c)+'</b> '+v.toLocaleString()+'件').join('、')
+      + (top.length > 3 ? ' ほか'+(top.length - 3)+'市区町村' : '');
+    const cats = tally.map((v, i) => v ? '<span class="dot c'+i+'"></span>'+esc(data.cats[i])+' '+v.toLocaleString()+'件' : '').filter(Boolean).join('<br>');
+    e.layer.bindTooltip('<div class="ctip">'+names+'<div class="cc">'+cats+'</div><div class="d">合計 '+n.toLocaleString()+'件（押すと拡大）</div></div>',
+      {{direction: 'top', offset: [0, -14], opacity: 1}}).openTooltip();
+  }});
+  cluster.on('clustermouseout', e => e.layer.closeTooltip());
   map.addLayer(cluster);
   refresh(false);
 }})();
