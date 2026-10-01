@@ -295,8 +295,7 @@ select{{padding:6px 10px;border:1px solid var(--line);border-radius:8px;backgrou
 .dot{{display:inline-block;width:11px;height:11px;border-radius:50%;flex:none;vertical-align:-1px;margin-right:4px}}
 .c0{{background:var(--c0)}}.c1{{background:var(--c1)}}.c2{{background:var(--c2)}}.c3{{background:var(--c3)}}
 .basemap{{transition:filter .3s;filter:saturate(.25) contrast(.85) brightness(1.06)}}
-#map.zoomed .basemap{{filter:saturate(.2) contrast(.45) brightness(1.18)}}
-#map{{height:68vh;min-height:420px;border:1px solid var(--line);border-radius:12px;background:var(--chip)}}
+#map{{height:68vh;min-height:420px;border:1px solid var(--line);border-radius:12px;background:#fff}}
 .note{{font-size:.8rem;color:var(--sub);margin:6px 0}}
 .pin{{border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.3);
   color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}}
@@ -424,12 +423,13 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 <script>
 (async function(){{
   const map = L.map('map', {{preferCanvas:true}}).setView([35.68, 139.76], 10);
-  L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{{z}}/{{x}}/{{y}}.png', {{
+  const base = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{{z}}/{{x}}/{{y}}.png', {{
     maxZoom: 18, className: 'basemap',
     attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
   }}).addTo(map);
-  // 地理院の淡色地図は大きく拡大すると線や文字が濃くなるので、拡大時だけ背景を薄くしてピンを見やすくする
-  const soften = () => document.getElementById('map').classList.toggle('zoomed', map.getZoom() >= 15);
+  // 地理院の淡色地図は大きく拡大すると建物が灰色で塗られて暗く見えるので、
+  // 拡大するほど背景を透かして(下の白地を見せて)、どの倍率でも同じくらいの明るさにする
+  const soften = () => {{ const z = map.getZoom(); base.setOpacity(z <= 14 ? 1 : z === 15 ? 0.8 : z === 16 ? 0.6 : 0.45); }};
   map.on('zoomend', soften); soften();
 
   const css = getComputedStyle(document.documentElement);
