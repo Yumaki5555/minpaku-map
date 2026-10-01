@@ -86,14 +86,50 @@ def yahoo_appid() -> str:
     return ""
 
 
+KANJI_DIGITS = {c: i for i, c in enumerate("〇一二三四五六七八九")}
+
+
+def kanji_to_int(s: str) -> int:
+    """「二十三」→ 23 のように、99までの漢数字を数に直す。"""
+    if "十" in s:
+        tens, _, ones = s.partition("十")
+        return (KANJI_DIGITS.get(tens, 1) if tens else 1) * 10 + (KANJI_DIGITS.get(ones, 0) if ones else 0)
+    return KANJI_DIGITS.get(s, 0)
+
+
 def numbers(text: str) -> list[str]:
-    """住所の中の数字の並び(漢数字の丁目は除く)。番地が一致しているかの確認に使う。"""
+    """住所の中の数字の並び。番地が一致しているかの確認に使う。
+    「二丁目」と「2丁目」は同じものとして扱う。"""
     import unicodedata
-    return re.findall(r"\d+", unicodedata.normalize("NFKC", text))
+    text = unicodedata.normalize("NFKC", text)
+    text = re.sub(r"([〇一二三四五六七八九十]+)丁目", lambda m: f"{kanji_to_int(m.group(1))}丁目", text)
+    return [str(int(n)) for n in re.findall(r"\d+", text)]
 
 
-def yahoo_lookup(address: str, appid: str, session: requests.Session) -> list | None:
-    """Yahoo!の住所検索で番地(地番)まで一致したときだけ [緯度, 経度, 1, "y"] を返す。それ以外は None。"""
+def town_part(text: str) -> str:
+    """住所のうち、番地の数字より前の部分(都道府県・郡・「大字」は除く)。町名が一致しているかの確認に使う。"""
+    import unicodedata
+    text = unicodedata.normalize("NFKC", text)
+    text = re.sub(r"([〇一二三四五六七八九十]+)丁目", lambda m: f"{kanji_to_int(m.group(1))}丁目", text)
+    text = re.split(r"\d", text, maxsplit=1)[0]
+    text = re.sub(r"^(東京都|北海道|(京都|大阪)府|.{2,3}県)", "", text)
+    text = re.sub(r"^.{1,5}?郡(?=.+?[町村])", "", text)
+    text = re.sub(r"\(大字\)|大字", "", text)
+    return text.replace("澤", "沢").replace("ケ", "ヶ").replace("ノ", "の")
+
+
+def town_matches(address: str, found: str) -> bool:
+    """問い合わせた住所と、Yahoo!が返した住所の町名が同じか。
+    (「墨田区墨田3丁目」で問い合わせて「墨田区緑3丁目」が返るような、別の町への取り違えを防ぐ)"""
+    q, y = town_part(address), town_part(found)
+    if q == y:
+        return True
+    # 問い合わせ側にだけ「字○○」などの小さな地名が付いている場合は同じとみなす
+    return bool(y) and q.startswith(y) and re.match(r"^(字|大字|[一二三四五六七八九十〇ー―−-])", q[len(y):]) is not None
+
+
+def yahoo_query(address: str, appid: str, session: requests.Session) -> list | None:
+    """Yahoo!の住所検索の答え [一致の細かさ, 返ってきた住所, 緯度, 経度]。見つからなければ None。"""
     for attempt in range(3):
         try:
             resp = session.get(YAHOO_URL, params={"appid": appid, "query": address, "output": "json", "results": 1}, timeout=20)
@@ -111,34 +147,42 @@ def yahoo_lookup(address: str, appid: str, session: requests.Session) -> list | 
     if not feats:
         return None
     f = feats[0]
-    level = int(f.get("Property", {}).get("AddressMatchingLevel") or 0)
-    found = f.get("Property", {}).get("Address", "")
-    # 番地まで一致し(レベル5以上)、返ってきた住所の数字が問い合わせた住所の数字と同じときだけ使う
-    # (「豊岡5-2」で問い合わせて「豊岡815-2」が返るような、別の番地への取り違えを防ぐ)
-    if level < 5 or numbers(found) != numbers(address):
-        return None
     lng, lat = map(float, f["Geometry"]["Coordinates"].split(","))
-    return [round(lat, 6), round(lng, 6), 1, "y"]
+    return [int(f.get("Property", {}).get("AddressMatchingLevel") or 0), f.get("Property", {}).get("Address", ""),
+            round(lat, 6), round(lng, 6)]
+
+
+def yahoo_accept(address: str, answer: list | None) -> list | None:
+    """Yahoo!の答えが信用できるときだけ [緯度, 経度, 1, "y"] を返す。
+    番地まで一致し(レベル5以上)、町名も番地の数字も問い合わせた住所と同じときだけ使う
+    (「豊岡5-2」で問い合わせて「豊岡815-2」が返るような、別の番地への取り違えを防ぐ)。"""
+    if not answer:
+        return None
+    level, found, lat, lng = answer
+    if level < 5 or numbers(found) != numbers(address) or not town_matches(address, found):
+        return None
+    return [lat, lng, 1, "y"]
 
 
 def refine_with_yahoo(cache: dict, wanted: list[str], deadline: float | None) -> None:
-    """国土地理院では町名までしか分からなかった住所(地番など)を、Yahoo!の住所検索で調べ直す。
-    一度調べた住所は印("y-")を付けて覚えておき、次回からは問い合わせない。"""
+    """国土地理院で調べた住所を、Yahoo!の住所検索でも調べ、より細かい(建物単位の)位置が分かれば置き換える。
+    国土地理院は地番の住所が苦手で、番地が分かったと答えても数百m〜数kmずれていることがあるため。
+    一度調べた住所は印を付けて覚えておき("y" = Yahoo!の位置を使用、"y-" = 国土地理院の位置のまま)、次回からは問い合わせない。"""
     appid = yahoo_appid()
     if not appid:
-        print("Yahoo!の Client ID が無いので、地番の調べ直しは行いません")
+        print("Yahoo!の Client ID が無いので、Yahoo!での調べ直しは行いません")
         return
-    todo = [a for a in wanted if cache.get(a) and cache[a][2] == 0 and len(cache[a]) < 4]
+    todo = [a for a in wanted if cache.get(a) and len(cache[a]) < 4]
     if not todo:
         return
-    print(f"町名までしか分からなかった住所 {len(todo)}件を、Yahoo!の住所検索で調べ直します")
+    print(f"住所 {len(todo)}件を、Yahoo!の住所検索でも調べます")
     session = requests.Session()
     better = tried = 0
     for addr in todo:
         if deadline and time.time() > deadline:
             break
         try:
-            result = yahoo_lookup(addr, appid, session)
+            result = yahoo_accept(addr, yahoo_query(addr, appid, session))
         except PermissionError as e:
             print(f"  [警告] {e}")
             break
@@ -152,10 +196,10 @@ def refine_with_yahoo(cache: dict, wanted: list[str], deadline: float | None) ->
             cache[addr] = cache[addr][:3] + ["y-"]
         if tried % 200 == 0:
             save_cache(cache)
-            print(f"  {tried}/{len(todo)} 件確認(番地まで特定 {better}件)")
+            print(f"  {tried}/{len(todo)} 件確認(Yahoo!の位置を使用 {better}件)")
         time.sleep(0.2)  # 1日5万回までの決まりがあるので、控えめな速さで
     save_cache(cache)
-    print(f"Yahoo!で調べ直し: {tried}件中 {better}件を番地まで特定できました")
+    print(f"Yahoo!で調べ直し: {tried}件中 {better}件をYahoo!の位置に置き換えました")
 
 
 def main() -> None:
