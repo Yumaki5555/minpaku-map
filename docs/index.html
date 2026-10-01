@@ -59,6 +59,14 @@ select{padding:6px 10px;border:1px solid var(--line);border-radius:8px;backgroun
 .basemap{transition:filter .3s;filter:saturate(.25) contrast(.85) brightness(1.06)}
 #map{height:68vh;min-height:420px;border:1px solid var(--line);border-radius:12px;background:#fff}
 .note{font-size:.8rem;color:var(--sub);margin:6px 0}
+.method{font-size:.8rem;color:var(--sub);margin:6px 0 14px}
+.method summary{cursor:pointer;color:var(--accent);font-weight:600;padding:4px 0}
+.method p,.method ul{margin:6px 0}
+.method ul{padding-left:1.3em}
+.mtable{border-collapse:collapse;width:100%}
+.mtable th,.mtable td{border-top:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+.mtable th{font-weight:600;color:var(--ink);white-space:nowrap}
+.mtable td.num{text-align:right;white-space:nowrap}
 .pin{border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.3);
   color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}
 .pin.approx{border-style:dashed}
@@ -159,6 +167,22 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
 <div id="cinfo" class="cinfo" hidden aria-live="polite"><button type="button" class="cx" aria-label="閉じる">×</button><div class="cbody"></div></div>
 </div>
 <p class="note">点を押すと施設名・住所が出ます。大きい点は同じ場所に複数の施設があります。<br><b>点線の薄い点</b>は番地まで分からず、町の中心付近に置いたものです（実際の場所と離れていることがあります）。住所から位置を特定できなかった 9 件は地図に表示されていません。</p>
+<details class="method">
+<summary>地図上の位置の決め方と精度について（現時点での判断）</summary>
+<p>施設の位置は、公表されている住所から自動で推定しています。住所はまず国土地理院の住所検索で調べ、続けてYahoo!の住所検索でも調べて、次のように使い分けています（2026/10/01時点の件数）。</p>
+<div class="tablewrap"><table class="mtable">
+<tr><th>Yahoo!の位置</th><td class="num">45,242件</td><td class="num">86%</td><td>Yahoo!の答えの番地の数字と町名が、元の住所と一致したもの。建物単位の細かい位置です。</td></tr>
+<tr><th>国土地理院の位置</th><td class="num">5,744件</td><td class="num">11%</td><td>Yahoo!で見つからない、または番地が一致しなかったもの。街区（ブロック）の代表点なので、数十〜数百mずれることがあります。</td></tr>
+<tr><th>町の中心付近（薄い点）</th><td class="num">1,678件</td><td class="num">3%</td><td>どちらでも番地まで分からなかったもの。多くは地図データに載っていない地番の住所です。実際の場所と大きく離れていることがあります。</td></tr>
+<tr><th>地図に表示なし</th><td class="num">9件</td><td class="num">0%</td><td>どちらでも住所が見つからなかったもの（住所の書き誤りなど）。</td></tr>
+</table></div>
+<p><b>この使い分けにした理由</b></p>
+<ul>
+<li>2026年10月1日に全住所を両方で調べて比べたところ、国土地理院が「番地まで分かった」と答えた住所でも約900件が200m以上（最大で約13km）ずれていました。山あいや海沿いなどの地番の地域で、町の中心付近を返すことがあるためです。そこで、条件を満たすYahoo!の位置を優先しています。</li>
+<li>一方でYahoo!は、「墨田区墨田3丁目」で問い合わせると「墨田区緑3丁目」を返すなど、別の町や別の番地を答えることがあります。そのため、番地の数字と町名の両方が一致したときだけ使っています。</li>
+<li>新しく加わった住所も、毎週の更新で同じ方法で調べています。この判断は、今後の確認結果によって見直すことがあります。</li>
+</ul>
+</details>
 
 <h2>自治体ごとの件数</h2>
 <p class="note">「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。</p>

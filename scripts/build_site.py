@@ -122,11 +122,13 @@ def main() -> None:
     groups: dict[tuple, dict] = {}
     placed: dict[str, int] = {}
     not_found = 0
+    by_source = {"yahoo": 0, "gsi": 0, "approx": 0}  # 位置をどうやって決めたか(施設の数)
     for p in collected["points"]:
         loc = cache.get(p["geo"])
         if not loc:
             not_found += 1
             continue
+        by_source["approx" if not loc[2] else "yahoo" if loc[3:] == ["y"] else "gsi"] += 1
         lat, lng, exact = loc[0], loc[1], loc[2]
         muni = reg_by_code[p["code"]]["自治体名"]
         key = (lat, lng, p["cat"])
@@ -178,7 +180,7 @@ def main() -> None:
         ("民泊", "特区民泊を含む", 0, ranking(collected["points"], reg_by_code, {"民泊", "特区民泊"})),
         ("旅館・ホテル", "簡易宿所を含む", 2, ranking(collected["points"], reg_by_code, {"旅館・ホテル", "簡易宿所"})),
     ]
-    page = render(table, total, by_cat, today, prev["date"] if prev else "", not_found, ranks)
+    page = render(table, total, by_cat, today, prev["date"] if prev else "", not_found, ranks, by_source)
     with open_retry(os.path.join(DOCS, "index.html"), "w", encoding="utf-8") as f:
         f.write(page)
     open(os.path.join(DOCS, ".nojekyll"), "a").close()
@@ -201,7 +203,32 @@ def render_ranks(ranks) -> str:
     return "".join(out)
 
 
-def render(table, total, by_cat, today, prev_date, not_found, ranks) -> str:
+def render_method(by_source: dict, not_found: int, today: str) -> str:
+    """「位置の決め方と精度」の説明。件数は毎回の更新で数え直す。"""
+    all_ = sum(by_source.values()) + not_found
+
+    def row(label, n, desc):
+        return f'<tr><th>{label}</th><td class="num">{n:,}件</td><td class="num">{n / all_:.0%}</td><td>{desc}</td></tr>'
+
+    return f"""<details class="method">
+<summary>地図上の位置の決め方と精度について（現時点での判断）</summary>
+<p>施設の位置は、公表されている住所から自動で推定しています。住所はまず国土地理院の住所検索で調べ、続けてYahoo!の住所検索でも調べて、次のように使い分けています（{html.escape(today)}時点の件数）。</p>
+<div class="tablewrap"><table class="mtable">
+{row("Yahoo!の位置", by_source["yahoo"], "Yahoo!の答えの番地の数字と町名が、元の住所と一致したもの。建物単位の細かい位置です。")}
+{row("国土地理院の位置", by_source["gsi"], "Yahoo!で見つからない、または番地が一致しなかったもの。街区（ブロック）の代表点なので、数十〜数百mずれることがあります。")}
+{row("町の中心付近（薄い点）", by_source["approx"], "どちらでも番地まで分からなかったもの。多くは地図データに載っていない地番の住所です。実際の場所と大きく離れていることがあります。")}
+{row("地図に表示なし", not_found, "どちらでも住所が見つからなかったもの（住所の書き誤りなど）。")}
+</table></div>
+<p><b>この使い分けにした理由</b></p>
+<ul>
+<li>2026年10月1日に全住所を両方で調べて比べたところ、国土地理院が「番地まで分かった」と答えた住所でも約900件が200m以上（最大で約13km）ずれていました。山あいや海沿いなどの地番の地域で、町の中心付近を返すことがあるためです。そこで、条件を満たすYahoo!の位置を優先しています。</li>
+<li>一方でYahoo!は、「墨田区墨田3丁目」で問い合わせると「墨田区緑3丁目」を返すなど、別の町や別の番地を答えることがあります。そのため、番地の数字と町名の両方が一致したときだけ使っています。</li>
+<li>新しく加わった住所も、毎週の更新で同じ方法で調べています。この判断は、今後の確認結果によって見直すことがあります。</li>
+</ul>
+</details>"""
+
+
+def render(table, total, by_cat, today, prev_date, not_found, ranks, by_source) -> str:
     e = html.escape
     rows = []
     last_pref = None
@@ -232,7 +259,7 @@ def render(table, total, by_cat, today, prev_date, not_found, ranks) -> str:
     nf_note = f"住所から位置を特定できなかった {not_found:,} 件は地図に表示されていません。" if not_found else ""
     return TEMPLATE.format(
         total=f"{total:,}", today=e(today), cat_btns=cat_btns, rows="\n".join(rows),
-        diff_note=diff_note, nf_note=nf_note, site_url=SITE_URL, area=AREA, ranks=render_ranks(ranks),
+        diff_note=diff_note, nf_note=nf_note, method=render_method(by_source, not_found, today), site_url=SITE_URL, area=AREA, ranks=render_ranks(ranks),
     )
 
 
@@ -297,6 +324,14 @@ select{{padding:6px 10px;border:1px solid var(--line);border-radius:8px;backgrou
 .basemap{{transition:filter .3s;filter:saturate(.25) contrast(.85) brightness(1.06)}}
 #map{{height:68vh;min-height:420px;border:1px solid var(--line);border-radius:12px;background:#fff}}
 .note{{font-size:.8rem;color:var(--sub);margin:6px 0}}
+.method{{font-size:.8rem;color:var(--sub);margin:6px 0 14px}}
+.method summary{{cursor:pointer;color:var(--accent);font-weight:600;padding:4px 0}}
+.method p,.method ul{{margin:6px 0}}
+.method ul{{padding-left:1.3em}}
+.mtable{{border-collapse:collapse;width:100%}}
+.mtable th,.mtable td{{border-top:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}}
+.mtable th{{font-weight:600;color:var(--ink);white-space:nowrap}}
+.mtable td.num{{text-align:right;white-space:nowrap}}
 .pin{{border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.3);
   color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}}
 .pin.approx{{border-style:dashed}}
@@ -397,6 +432,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 <div id="cinfo" class="cinfo" hidden aria-live="polite"><button type="button" class="cx" aria-label="閉じる">×</button><div class="cbody"></div></div>
 </div>
 <p class="note">点を押すと施設名・住所が出ます。大きい点は同じ場所に複数の施設があります。<br><b>点線の薄い点</b>は番地まで分からず、町の中心付近に置いたものです（実際の場所と離れていることがあります）。{nf_note}</p>
+{method}
 
 <h2>自治体ごとの件数</h2>
 <p class="note">{diff_note}「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。</p>
