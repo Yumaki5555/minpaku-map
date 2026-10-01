@@ -112,10 +112,11 @@ tr.grp .sub{font-weight:400;color:var(--sub);font-size:.8rem;margin-left:8px}
   padding:10px 14px;margin:12px 0 4px;font-size:.85rem;line-height:1.7}
 .caution .ct{font-weight:700;margin:0 0 2px}
 .caution ul{margin:0;padding-left:1.2em}
-.countgrid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start}
+.countgrid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start;margin-top:28px}
+.countgrid h2{margin:0 0 8px}
 @media (max-width:900px){.countgrid{grid-template-columns:1fr}}
 .ranks{display:flex;flex-direction:column;gap:12px}
-.ranks .rt{margin:0;font-weight:700;font-size:.95rem}
+.ranks h2{margin:0}
 .rank{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
 .rank h3{font-size:.92rem;margin:0 0 6px;display:flex;align-items:center}
 .rank .rsub{font-weight:400;color:var(--sub);font-size:.78rem;margin-left:4px}
@@ -184,13 +185,14 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
 </ul>
 </details>
 
-<h2>自治体ごとの件数</h2>
-<p class="note">「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。</p>
 <div class="countgrid">
 <div class="ranks" aria-label="市区町村別の件数ランキング">
-<p class="rt">市区町村別ランキング 上位10</p>
+<h2>市区町村別ランキング 上位10</h2>
 <section class="rank"><h3><span class="dot c0"></span>民泊<span class="rsub">（特区民泊を含む）</span></h3><ol><li title="大阪市：11,098件"><span class="rk">1</span><span class="rn">大阪市</span><span class="rb"><span class="rf c0" style="width:100.0%"></span></span><span class="rv">11,098</span></li><li title="新宿区：3,928件"><span class="rk">2</span><span class="rn">新宿区</span><span class="rb"><span class="rf c0" style="width:35.4%"></span></span><span class="rv">3,928</span></li><li title="墨田区：2,285件"><span class="rk">3</span><span class="rn">墨田区</span><span class="rb"><span class="rf c0" style="width:20.6%"></span></span><span class="rv">2,285</span></li><li title="渋谷区：1,834件"><span class="rk">4</span><span class="rn">渋谷区</span><span class="rb"><span class="rf c0" style="width:16.5%"></span></span><span class="rv">1,834</span></li><li title="豊島区：1,826件"><span class="rk">5</span><span class="rn">豊島区</span><span class="rb"><span class="rf c0" style="width:16.5%"></span></span><span class="rv">1,826</span></li><li title="台東区：1,438件"><span class="rk">6</span><span class="rn">台東区</span><span class="rb"><span class="rf c0" style="width:13.0%"></span></span><span class="rv">1,438</span></li><li title="港区：873件"><span class="rk">7</span><span class="rn">港区</span><span class="rb"><span class="rf c0" style="width:7.9%"></span></span><span class="rv">873</span></li><li title="大田区：755件"><span class="rk">8</span><span class="rn">大田区</span><span class="rb"><span class="rf c0" style="width:6.8%"></span></span><span class="rv">755</span></li><li title="北区：612件"><span class="rk">9</span><span class="rn">北区</span><span class="rb"><span class="rf c0" style="width:5.5%"></span></span><span class="rv">612</span></li><li title="世田谷区：555件"><span class="rk">10</span><span class="rn">世田谷区</span><span class="rb"><span class="rf c0" style="width:5.0%"></span></span><span class="rv">555</span></li></ol></section><section class="rank"><h3><span class="dot c2"></span>旅館・ホテル<span class="rsub">（簡易宿所を含む）</span></h3><ol><li title="大阪市：1,861件"><span class="rk">1</span><span class="rn">大阪市</span><span class="rb"><span class="rf c2" style="width:100.0%"></span></span><span class="rv">1,861</span></li><li title="墨田区：1,136件"><span class="rk">2</span><span class="rn">墨田区</span><span class="rb"><span class="rf c2" style="width:61.0%"></span></span><span class="rv">1,136</span></li><li title="台東区：1,119件"><span class="rk">3</span><span class="rn">台東区</span><span class="rb"><span class="rf c2" style="width:60.1%"></span></span><span class="rv">1,119</span></li><li title="豊島区：984件"><span class="rk">4</span><span class="rn">豊島区</span><span class="rb"><span class="rf c2" style="width:52.9%"></span></span><span class="rv">984</span></li><li title="渋谷区：811件"><span class="rk">5</span><span class="rn">渋谷区</span><span class="rb"><span class="rf c2" style="width:43.6%"></span></span><span class="rv">811</span></li><li title="葛飾区：732件"><span class="rk">6</span><span class="rn">葛飾区</span><span class="rb"><span class="rf c2" style="width:39.3%"></span></span><span class="rv">732</span></li><li title="箱根町：728件"><span class="rk">7</span><span class="rn">箱根町</span><span class="rb"><span class="rf c2" style="width:39.1%"></span></span><span class="rv">728</span></li><li title="新宿区：716件"><span class="rk">8</span><span class="rn">新宿区</span><span class="rb"><span class="rf c2" style="width:38.5%"></span></span><span class="rv">716</span></li><li title="港区：604件"><span class="rk">9</span><span class="rn">港区</span><span class="rb"><span class="rf c2" style="width:32.5%"></span></span><span class="rv">604</span></li><li title="江東区：370件"><span class="rk">10</span><span class="rn">江東区</span><span class="rb"><span class="rf c2" style="width:19.9%"></span></span><span class="rv">370</span></li></ol></section>
 </div>
+<div>
+<h2>自治体ごとの件数</h2>
+<p class="note">「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。</p>
 <div class="tablewrap"><table>
 <thead><tr><th>自治体</th><th>種別</th><th style="text-align:right">件数</th><th style="text-align:right">増減</th><th>資料の日付</th><th>出典</th></tr></thead>
 <tbody id="tbody">
@@ -297,6 +299,7 @@ footer{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid
 <tr data-muni="寝屋川市" data-pref="5"><td>寝屋川市</td><td><span class="dot c0"></span>民泊</td><td class="num"><span class="none">データなし</span></td><td class="num"></td><td></td><td><a href="https://www.city.neyagawa.osaka.jp/organization_list/kenkou/hokeneisei/kankyou/kankyo01/sinnpouminnpaku.html" target="_blank" rel="noopener">自治体のページ</a><div class="memo">寝屋川市は住宅宿泊事業の届出住宅を公開しておらず、データなし(確認済み・対応不要)</div></td></tr>
 <tr data-muni="寝屋川市" data-pref="5"><td>寝屋川市</td><td><span class="dot c2"></span>旅館業</td><td class="num">25</td><td class="num"></td><td></td><td><a href="https://www.city.neyagawa.osaka.jp/organization_list/keieikikaku/johosuisinka/open_data/opendata/18213.html" target="_blank" rel="noopener">自治体のページ</a></td></tr>
 </tbody></table></div>
+</div>
 </div>
 
 <footer>

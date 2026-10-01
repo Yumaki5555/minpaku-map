@@ -377,10 +377,11 @@ tr.grp .sub{{font-weight:400;color:var(--sub);font-size:.8rem;margin-left:8px}}
   padding:10px 14px;margin:12px 0 4px;font-size:.85rem;line-height:1.7}}
 .caution .ct{{font-weight:700;margin:0 0 2px}}
 .caution ul{{margin:0;padding-left:1.2em}}
-.countgrid{{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start}}
+.countgrid{{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start;margin-top:28px}}
+.countgrid h2{{margin:0 0 8px}}
 @media (max-width:900px){{.countgrid{{grid-template-columns:1fr}}}}
 .ranks{{display:flex;flex-direction:column;gap:12px}}
-.ranks .rt{{margin:0;font-weight:700;font-size:.95rem}}
+.ranks h2{{margin:0}}
 .rank{{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}}
 .rank h3{{font-size:.92rem;margin:0 0 6px;display:flex;align-items:center}}
 .rank .rsub{{font-weight:400;color:var(--sub);font-size:.78rem;margin-left:4px}}
@@ -434,18 +435,20 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 <p class="note">点を押すと施設名・住所が出ます。大きい点は同じ場所に複数の施設があります。<br><b>点線の薄い点</b>は番地まで分からず、町の中心付近に置いたものです（実際の場所と離れていることがあります）。{nf_note}</p>
 {method}
 
-<h2>自治体ごとの件数</h2>
-<p class="note">{diff_note}「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。</p>
 <div class="countgrid">
 <div class="ranks" aria-label="市区町村別の件数ランキング">
-<p class="rt">市区町村別ランキング 上位10</p>
+<h2>市区町村別ランキング 上位10</h2>
 {ranks}
 </div>
+<div>
+<h2>自治体ごとの件数</h2>
+<p class="note">{diff_note}「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。</p>
 <div class="tablewrap"><table>
 <thead><tr><th>自治体</th><th>種別</th><th style="text-align:right">件数</th><th style="text-align:right">増減</th><th>資料の日付</th><th>出典</th></tr></thead>
 <tbody id="tbody">
 {rows}
 </tbody></table></div>
+</div>
 </div>
 
 <footer>
