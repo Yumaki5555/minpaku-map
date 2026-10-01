@@ -209,8 +209,8 @@ def render(table, total, by_cat, today, prev_date, not_found, ranks) -> str:
         if t["pref"] != last_pref:
             last_pref = t["pref"]
             sub = sum(x["count"] for x in table if x["pref"] == t["pref"])
-            rows.append(f'<tr class="grp" data-pref="{t["pref"]}"><th colspan="6">{e(PREFS[t["pref"]])}'
-                        f'<span class="sub">{sub:,}件</span></th></tr>')
+            rows.append(f'<tr class="grp" data-pref="{t["pref"]}"><th colspan="6"><button type="button" aria-expanded="false">'
+                        f'<span class="arw">▸</span>{e(PREFS[t["pref"]])}<span class="sub">{sub:,}件</span></button></th></tr>')
         link = f'<a href="{e(t["page"] or t["doc"])}" target="_blank" rel="noopener">自治体のページ</a>' if (t["page"] or t["doc"]) else ""
         if t["count"] == 0:
             num = '<span class="none">データなし</span>'
@@ -271,8 +271,8 @@ header{{padding:24px 0 8px}}
 h1{{font-size:1.6rem;margin:0 0 4px;letter-spacing:.02em}}
 h2{{font-size:1.15rem;margin:28px 0 8px}}
 .lead{{color:var(--sub);margin:0 0 10px;font-size:.95rem}}
-.stats{{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--sub)}}
-.stats b{{color:var(--ink);font-size:1.1rem}}
+.lead b{{color:var(--ink);font-size:1.1rem}}
+.red{{color:var(--up)}}
 .filters{{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0 8px}}
 .viewtabs{{display:flex;gap:0;margin:14px 0 0;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;width:max-content;max-width:100%}}
 .viewtab{{border:0;background:var(--card);color:var(--sub);padding:7px 16px;font-family:inherit;font-size:.92rem;font-weight:600;cursor:pointer;
@@ -335,6 +335,9 @@ td.num{{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}}
 .memo{{font-size:.78rem;color:var(--sub)}}
 tr.hide{{display:none}}
 tr.grp th{{background:var(--card);font-size:.95rem;padding-top:14px;border-bottom:2px solid var(--line)}}
+tr.grp button{{border:0;background:none;color:inherit;font:inherit;font-weight:700;cursor:pointer;padding:0;display:flex;align-items:center;width:100%}}
+tr.grp .arw{{display:inline-block;width:1.2em;transition:transform .15s}}
+tr.grp button[aria-expanded="true"] .arw{{transform:rotate(90deg)}}
 tr.grp .sub{{font-weight:400;color:var(--sub);font-size:.8rem;margin-left:8px}}
 .caution{{background:var(--card);border:1px solid var(--line);border-left:4px solid #d97706;border-radius:10px;
   padding:10px 14px;margin:12px 0 4px;font-size:.85rem;line-height:1.7}}
@@ -363,22 +366,21 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 <div class="wrap">
 <header>
   <h1>🏠 民泊・旅館業マップ</h1>
-  <p class="lead">{area}の自治体が公表している、民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。毎週月曜に自動で更新しています。</p>
-  <div class="stats"><span>掲載 <b>{total}</b> 件</span><span>最終更新 <b>{today}</b></span></div>
+  <p class="lead">首都圏・大阪の民泊・旅館業 <b>{total}件</b> を地図にしました。毎週月曜に自動更新（最終更新 {today}）。</p>
   <div class="caution">
     <p class="ct">このマップについて</p>
     <ul>
-      <li>身近な地域にどのくらい民泊や旅館・ホテルがあるのかを知っていただくため、数を「見える化」することを目的にしています。</li>
-      <li>見た目は同じような無人の宿泊施設でも、自治体によって「旅館・ホテル」「簡易宿所」など区分が異なる場合があります。</li>
-      <li>公表する範囲は自治体によって異なります（事業者の同意が得られた施設だけを公表している自治体もあります）。そのため、ここに載っているのがすべての施設ではありません。</li>
-      <li>掲載している施設が現在も営業しているかどうかは分かりません。営業状況は各自治体にお問い合わせください。</li>
-      <li>各自治体の公表資料を自動で読み取って作成しているため、内容や地図上の位置が誤っている場合があります。</li>
+      <li>身近な地域の民泊・旅館の<b>数を「見える化」</b>するのが目的です。</li>
+      <li><b class="red">すべての施設が載っているわけではありません</b>（公表範囲は自治体ごとに違います）。</li>
+      <li><b class="red">今も営業しているかは分かりません。</b></li>
+      <li>自動で読み取っているため、<b>内容や位置に誤りがある</b>ことがあります。</li>
+      <li>同じような施設でも、<b>自治体によって「旅館・ホテル」「簡易宿所」など区分が違います。</b></li>
     </ul>
   </div>
 </header>
 
 <div class="viewtabs" role="tablist" aria-label="地図の表示方法">
-  <button type="button" role="tab" class="viewtab" data-view="dots" aria-selected="true">点で見る<span>1件＝点1つ</span></button>
+  <button type="button" role="tab" class="viewtab" data-view="dots" aria-selected="true">点で見る<span>1か所＝点1つ</span></button>
   <button type="button" role="tab" class="viewtab" data-view="cluster" aria-selected="false">まとめて見る<span>近くの施設を数字の円に</span></button>
 </div>
 <div class="filters" role="group" aria-label="種別で絞り込み">
@@ -395,7 +397,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 <div id="map" role="region" aria-label="施設の地図"></div>
 <div id="cinfo" class="cinfo" hidden aria-live="polite"><button type="button" class="cx" aria-label="閉じる">×</button><div class="cbody"></div></div>
 </div>
-<p class="note">「点で見る」は1つの点が1件の施設です（同じ建物に複数ある場合は、その場所に施設の数だけ点を並べています）。「まとめて見る」は近くの施設を数字の円にまとめ、円の色の割合で種類の内訳を表します。点や円を押すと施設名・住所が見られます。点線のふちの薄い点は、番地まで特定できず町名（大字）の中心付近にまとめて置いた施設で、実際の場所とは離れていることがあります。{nf_note}</p>
+<p class="note">点を押すと施設名・住所が出ます。大きい点は同じ場所に複数の施設があります。<br><b>点線の薄い点</b>は番地まで分からず、町の中心付近に置いたものです（実際の場所と離れていることがあります）。{nf_note}</p>
 
 <h2>自治体ごとの件数</h2>
 <p class="note">{diff_note}「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。</p>
@@ -452,14 +454,12 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
   const renderer = L.canvas({{padding: 0.5, tolerance: 5}});
   const dotLayer = L.layerGroup();
   const touch = window.matchMedia('(hover: none)').matches;
-  // 施設1件につき点を1つ描く。同じ建物に複数の施設がある場合は、その場所にひまわりの種のように並べる。
-  // (民泊は同じマンションの別の部屋が1件ずつ届け出られているので、1つの点にまとめると実際より少なく見えてしまう。
-  //  1件1点にすると、どの倍率でも「点の量＝施設の数」になり、見た目が実際の件数と合う)
+  // 同じ場所の施設は点1つにまとめ、件数が多いほど点を少し大きくする
   // 拡大したときは「まとめて見る」のピン(直径22px)と同じくらいの大きさにする
   const radiusFor = z => (z <= 9 ? 2 : z <= 10 ? 2.5 : z <= 11 ? 3 : z <= 12 ? 4 : z <= 13 ? 5.5 : z <= 14 ? 8 : 11)
     + (touch && z >= 14 ? 1 : 0);
   const weightFor = z => z <= 11 ? 0.5 : z <= 13 ? 1 : 1.5;
-  const GOLDEN = Math.PI * (3 - Math.sqrt(5));
+  const grow = n => Math.min(2, 1 + 0.25 * Math.log2(n));
 
   const dots = [];
   // 押したときの一覧(施設名・住所・番号)。点で見る・まとめて見るの両方で使う
@@ -482,32 +482,22 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
     const [lat, lng, cat, muni, exact, items, city] = p;
     const n = items.length;
     const popup = popupFor(p);
-    for (let k = 0; k < n; k++) {{
-      const m = L.circleMarker([lat, lng], {{renderer, radius: 3, color: '#fff', weight: 1, fillColor: colors[cat],
-        fillOpacity: exact ? 0.9 : 0.5, dashArray: exact ? null : '2 2', n, k, cat, muni, city, base: L.latLng(lat, lng)}});
-      m.bindPopup(popup);
-      dots.push(m);
-    }}
+    const m = L.circleMarker([lat, lng], {{renderer, radius: 3, color: '#fff', weight: 1, fillColor: colors[cat],
+      fillOpacity: exact ? 0.9 : 0.5, dashArray: exact ? null : '2 2', n, cat, muni, city}});
+    m.bindPopup(popup);
+    dots.push(m);
   }});
   // 描く順番を種類に関係なく混ぜる(ある種類をまとめて上に描くと、重なった所でその色ばかり目立つため)
   let seed = 12345;
   const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   for (let i = dots.length - 1; i > 0; i--) {{ const j = Math.floor(rnd() * (i + 1)); [dots[i], dots[j]] = [dots[j], dots[i]]; }}
 
-  // 倍率に合わせて点の大きさと、同じ建物の点の並び(画面上の間隔)を決め直す
+  // 倍率に合わせて点の大きさを決め直す
   function place() {{
     if (view !== 'dots') return;
     const z = map.getZoom(), r = radiusFor(z), w = weightFor(z);
-    // 件数の多い建物で点が遠くまで広がらないよう、広がる範囲(画面上の半径)に上限を設ける
-    const maxSpread = z <= 12 ? 30 : z <= 14 ? 36 : 45;
     dots.forEach(m => {{
-      const o = m.options;
-      if (o.n > 1) {{
-        const gap = Math.min(r * 1.8, maxSpread / Math.sqrt(o.n - 1));
-        const d = gap * Math.sqrt(o.k), a = o.k * GOLDEN;
-        m.setLatLng(map.unproject(map.project(o.base, z).add([d * Math.cos(a), d * Math.sin(a)]), z));
-      }}
-      m.setRadius(r);
+      m.setRadius(r * grow(m.options.n));
       m.setStyle({{weight: w}});
     }});
   }}
@@ -599,14 +589,31 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
       cluster.addLayers(shown);
     }}
     if (fit && shown.length) map.fitBounds(L.latLngBounds(shown.map(m => m.getLatLng())), {{padding: [20, 20], maxZoom: 15}});
+    // 都府県や自治体を選んだときは、件数表のその都府県を開く
+    if (pref !== null) openPrefs.add(pref);
+    if (muni !== null) openPrefs.add(data.mpref[muni]);
+    foldTable(pref, muni);
+  }}
+  // 件数表は都府県ごとに折りたたむ(見出しを押すと開く)
+  const openPrefs = new Set();
+  let lastPref = null, lastMuni = null;
+  function foldTable(pref, muni) {{
+    lastPref = pref; lastMuni = muni;
     document.querySelectorAll('#tbody tr').forEach(tr => {{
       const tp = +tr.dataset.pref;
-      const show = tr.classList.contains('grp')
+      const isGrp = tr.classList.contains('grp');
+      const show = isGrp
         ? (pref === null || tp === pref) && (muni === null || data.mpref[muni] === tp)
-        : (pref === null || tp === pref) && (muni === null || tr.dataset.muni === data.munis[muni]);
+        : openPrefs.has(tp) && (pref === null || tp === pref) && (muni === null || tr.dataset.muni === data.munis[muni]);
       tr.classList.toggle('hide', !show);
+      if (isGrp) tr.querySelector('button').setAttribute('aria-expanded', openPrefs.has(tp) ? 'true' : 'false');
     }});
   }}
+  document.querySelectorAll('#tbody tr.grp button').forEach(b => b.addEventListener('click', () => {{
+    const tp = +b.closest('tr').dataset.pref;
+    openPrefs.has(tp) ? openPrefs.delete(tp) : openPrefs.add(tp);
+    foldTable(lastPref, lastMuni);
+  }}));
   btns.forEach(b => b.addEventListener('click', () => {{
     b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); refresh(false);
   }}));
