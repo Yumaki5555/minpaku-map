@@ -210,7 +210,7 @@ def render_method(by_source: dict, not_found: int, today: str) -> str:
     def row(label, n, desc):
         return f'<tr><th>{label}</th><td class="num">{n:,}件</td><td class="num">{n / all_:.0%}</td><td>{desc}</td></tr>'
 
-    return f"""<details class="method">
+    return f"""<details class="method" id="method">
 <summary>地図上の位置の決め方と精度について（現時点での判断）</summary>
 <p>施設の位置は、公表されている住所から自動で推定しています。住所はまず国土地理院の住所検索で調べ、続けてYahoo!の住所検索でも調べて、次のように使い分けています（{html.escape(today)}時点の件数）。</p>
 <div class="tablewrap"><table class="mtable">
@@ -407,7 +407,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
       <li>身近な地域の民泊・旅館の<b>数を「見える化」</b>するのが目的です。</li>
       <li><b class="red">すべての施設が載っているわけではありません</b>（公表範囲は自治体ごとに違います）。</li>
       <li><b class="red">今も営業しているかは分かりません。</b></li>
-      <li>自動で読み取っているため、<b>内容や位置に誤りがある</b>ことがあります。</li>
+      <li>自動で読み取っているため、<b>内容や位置に誤りがある</b>ことがあります。<br>位置の決め方や精度の詳細は、<a href="#method" onclick="document.getElementById('method').open=true">地図の下の説明「地図上の位置の決め方と精度について」</a>をご覧ください。</li>
       <li>同じような施設でも、<b>自治体によって「旅館・ホテル」「簡易宿所」など区分が違います。</b></li>
     </ul>
   </div>
