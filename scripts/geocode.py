@@ -72,6 +72,92 @@ def lookup(address: str, session: requests.Session) -> list | None:
     return [round(lat, 6), round(lng, 6), exact]
 
 
+YAHOO_URL = "https://map.yahooapis.jp/geocode/V1/geoCoder"
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.json")
+
+
+def yahoo_appid() -> str:
+    """Yahoo!ジオコーダAPIの Client ID。GitHubでは秘密の保管庫(環境変数)から、パソコンでは config.json から読む。"""
+    if os.environ.get("YAHOO_APPID"):
+        return os.environ["YAHOO_APPID"].strip()
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, encoding="utf-8") as f:
+            return json.load(f).get("yahoo_appid", "").strip()
+    return ""
+
+
+def numbers(text: str) -> list[str]:
+    """住所の中の数字の並び(漢数字の丁目は除く)。番地が一致しているかの確認に使う。"""
+    import unicodedata
+    return re.findall(r"\d+", unicodedata.normalize("NFKC", text))
+
+
+def yahoo_lookup(address: str, appid: str, session: requests.Session) -> list | None:
+    """Yahoo!の住所検索で番地(地番)まで一致したときだけ [緯度, 経度, 1, "y"] を返す。それ以外は None。"""
+    for attempt in range(3):
+        try:
+            resp = session.get(YAHOO_URL, params={"appid": appid, "query": address, "output": "json", "results": 1}, timeout=20)
+            if resp.status_code == 403:
+                raise PermissionError("Yahoo!から利用を断られました(Client IDを確認してください)")
+            resp.raise_for_status()
+            feats = resp.json().get("Feature") or []
+            break
+        except PermissionError:
+            raise
+        except Exception:  # noqa: BLE001
+            time.sleep(2 * (attempt + 1))
+    else:
+        raise RuntimeError("問い合わせに失敗")
+    if not feats:
+        return None
+    f = feats[0]
+    level = int(f.get("Property", {}).get("AddressMatchingLevel") or 0)
+    found = f.get("Property", {}).get("Address", "")
+    # 番地まで一致し(レベル5以上)、返ってきた住所の数字が問い合わせた住所の数字と同じときだけ使う
+    # (「豊岡5-2」で問い合わせて「豊岡815-2」が返るような、別の番地への取り違えを防ぐ)
+    if level < 5 or numbers(found) != numbers(address):
+        return None
+    lng, lat = map(float, f["Geometry"]["Coordinates"].split(","))
+    return [round(lat, 6), round(lng, 6), 1, "y"]
+
+
+def refine_with_yahoo(cache: dict, wanted: list[str], deadline: float | None) -> None:
+    """国土地理院では町名までしか分からなかった住所(地番など)を、Yahoo!の住所検索で調べ直す。
+    一度調べた住所は印("y-")を付けて覚えておき、次回からは問い合わせない。"""
+    appid = yahoo_appid()
+    if not appid:
+        print("Yahoo!の Client ID が無いので、地番の調べ直しは行いません")
+        return
+    todo = [a for a in wanted if cache.get(a) and cache[a][2] == 0 and len(cache[a]) < 4]
+    if not todo:
+        return
+    print(f"町名までしか分からなかった住所 {len(todo)}件を、Yahoo!の住所検索で調べ直します")
+    session = requests.Session()
+    better = tried = 0
+    for addr in todo:
+        if deadline and time.time() > deadline:
+            break
+        try:
+            result = yahoo_lookup(addr, appid, session)
+        except PermissionError as e:
+            print(f"  [警告] {e}")
+            break
+        except RuntimeError:
+            continue
+        tried += 1
+        if result:
+            cache[addr] = result
+            better += 1
+        else:
+            cache[addr] = cache[addr][:3] + ["y-"]
+        if tried % 200 == 0:
+            save_cache(cache)
+            print(f"  {tried}/{len(todo)} 件確認(番地まで特定 {better}件)")
+        time.sleep(0.2)  # 1日5万回までの決まりがあるので、控えめな速さで
+    save_cache(cache)
+    print(f"Yahoo!で調べ直し: {tried}件中 {better}件を番地まで特定できました")
+
+
 def main() -> None:
     max_minutes = float(os.environ.get("GEOCODE_MAX_MINUTES", "0") or 0)
     deadline = time.time() + max_minutes * 60 if max_minutes > 0 else None
@@ -81,6 +167,7 @@ def main() -> None:
     todo = [a for a in wanted if a not in cache]
     print(f"住所 {len(wanted)}件のうち、未変換 {len(todo)}件を調べます")
     if not todo:
+        refine_with_yahoo(cache, wanted, deadline)
         return
 
     lock = threading.Lock()
@@ -114,6 +201,7 @@ def main() -> None:
         list(ex.map(work, todo))
 
     save_cache(cache)
+    refine_with_yahoo(cache, wanted, deadline)
     not_found = sum(1 for a in wanted if a in cache and cache[a] is None)
     rest = sum(1 for a in wanted if a not in cache)
     print(f"今回 {done}件を変換 / 通信エラー {failed}件 / 位置が見つからない住所 {not_found}件 / 次回へ持ち越し {rest}件")

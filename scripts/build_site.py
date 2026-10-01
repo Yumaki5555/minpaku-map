@@ -127,7 +127,7 @@ def main() -> None:
         if not loc:
             not_found += 1
             continue
-        lat, lng, exact = loc
+        lat, lng, exact = loc[0], loc[1], loc[2]
         muni = reg_by_code[p["code"]]["自治体名"]
         key = (lat, lng, p["cat"])
         if key not in groups:
@@ -413,7 +413,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 
 <footer>
   <p>各自治体が公表している一覧（PDF・Excel・CSV）をもとに自動で作成しています。地図上の位置は住所から自動で推定したもので、ずれている場合があります。正確な情報は各自治体の公表資料をご確認ください。</p>
-  <p>個人の氏名・電話番号は掲載していません。地図：<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>／位置の推定：国土地理院 住所検索</p>
+  <p>個人の氏名・電話番号は掲載していません。地図：<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>／位置の推定：国土地理院 住所検索、<a href="https://developer.yahoo.co.jp/sitemap/" target="_blank" rel="noopener">Web Services by Yahoo! JAPAN</a></p>
 </footer>
 </div>
 

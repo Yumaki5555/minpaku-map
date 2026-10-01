@@ -31,6 +31,7 @@ jobs:
       - name: 新しい住所の位置を調べる
         run: python -u scripts/geocode.py
         env:
+          YAHOO_APPID: ${{ secrets.YAHOO_APPID }}   # 地番の住所をYahoo!の住所検索で調べ直すため
           GEOCODE_MAX_MINUTES: "60"   # 終わらなかった分は次回へ持ち越し
       - name: 地図ページを作る
         run: python -u scripts/build_site.py
