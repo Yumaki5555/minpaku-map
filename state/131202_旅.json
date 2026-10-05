@@ -1,6 +1,6 @@
 {
   "row_count": 22,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "番号",
     "種 別",
@@ -14,6 +14,6 @@
   ],
   "source_url": "https://www.city.nerima.tokyo.jp/hokenfukushi/eisei/kankyoeisei/hotel.files/20260814ryokan.pdf",
   "normalized_files": [
-    "data/練馬区/旅館業/整形済み/20260930_練馬区_旅館業_normalized.csv"
+    "data/練馬区/旅館業/整形済み/20261005_練馬区_旅館業_normalized.csv"
   ]
 }

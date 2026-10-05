@@ -1,6 +1,6 @@
 {
   "row_count": 12,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "商号、名称又は氏名",
     "施設所在地",
@@ -15,6 +15,6 @@
   ],
   "source_url": "https://www.city.arakawa.tokyo.jp/documents/21504/r080915_jutakushukuhakujigyo.xlsx",
   "normalized_files": [
-    "data/荒川区/民泊/整形済み/20260930_荒川区_民泊_normalized.csv"
+    "data/荒川区/民泊/整形済み/20261005_荒川区_民泊_normalized.csv"
   ]
 }

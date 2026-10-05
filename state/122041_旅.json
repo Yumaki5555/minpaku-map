@@ -1,6 +1,6 @@
 {
   "row_count": 82,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "業態",
     "施設_名称",
@@ -15,6 +15,6 @@
   ],
   "source_url": "https://data.bodik.jp/dataset/b8545c67-0051-4b47-b73b-feffd3a79d87/resource/46780ab9-e4c9-451f-93bb-11c1808de7d4/download/ryokann2026071.csv",
   "normalized_files": [
-    "data/船橋市/旅館業/整形済み/20260930_船橋市_旅館業_normalized.csv"
+    "data/船橋市/旅館業/整形済み/20261005_船橋市_旅館業_normalized.csv"
   ]
 }

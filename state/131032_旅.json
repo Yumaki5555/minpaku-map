@@ -1,6 +1,6 @@
 {
   "row_count": 605,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "施設名称",
     "施設郵便番号",
@@ -14,7 +14,7 @@
   ],
   "source_url": "https://opendata.city.minato.tokyo.jp/dataset/6adb6ec4-6cf8-4d4c-b68a-96c095728b0b/resource/71b05077-1f8c-459e-a17a-3789273bca08/download/ryokan.csv",
   "normalized_files": [
-    "data/港区/旅館業/整形済み/20260930_港区_旅館業_旅館ホテル等_normalized.csv",
-    "data/港区/旅館業/整形済み/20260930_港区_旅館業_簡易宿所_normalized.csv"
+    "data/港区/旅館業/整形済み/20261005_港区_旅館業_旅館ホテル等_normalized.csv",
+    "data/港区/旅館業/整形済み/20261005_港区_旅館業_簡易宿所_normalized.csv"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "row_count": 257,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "HP番号",
     "所在地",
@@ -10,6 +10,6 @@
   ],
   "source_url": "https://www.city.ota.tokyo.jp/seikatsu/hoken/minpaku/minpaku.files/0916todokede.pdf",
   "normalized_files": [
-    "data/大田区/民泊/整形済み/20260930_大田区_民泊_normalized.csv"
+    "data/大田区/民泊/整形済み/20261005_大田区_民泊_normalized.csv"
   ]
 }

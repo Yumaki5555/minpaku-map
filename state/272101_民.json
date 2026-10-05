@@ -1,11 +1,11 @@
 {
   "row_count": 28,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "施設所在地"
   ],
   "source_url": "https://www.city.hirakata.osaka.jp/cmsfiles/contents/0000025/25284/zyuhakuall.xlsx",
   "normalized_files": [
-    "data/枚方市/民泊/整形済み/20260930_枚方市_民泊_normalized.csv"
+    "data/枚方市/民泊/整形済み/20261005_枚方市_民泊_normalized.csv"
   ]
 }

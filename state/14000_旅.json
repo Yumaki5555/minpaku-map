@@ -1,6 +1,6 @@
 {
   "row_count": 1741,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "No",
     "許可番号",
@@ -10,6 +10,6 @@
   ],
   "source_url": "https://www.pref.kanagawa.jp/documents/26256/20260630_ryokan_yamato.pdf",
   "normalized_files": [
-    "data/神奈川県/旅館業/整形済み/20260930_神奈川県_旅館業_normalized.csv"
+    "data/神奈川県/旅館業/整形済み/20261005_神奈川県_旅館業_normalized.csv"
   ]
 }

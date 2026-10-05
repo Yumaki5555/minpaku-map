@@ -1,6 +1,6 @@
 {
   "row_count": 264,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "No.",
     "届出番号",
@@ -13,6 +13,6 @@
   ],
   "source_url": "https://www.city.shinagawa.tokyo.jp/ct/pdf/hpg000033251_241.pdf",
   "normalized_files": [
-    "data/品川区/民泊/整形済み/20260930_品川区_民泊_normalized.csv"
+    "data/品川区/民泊/整形済み/20261005_品川区_民泊_normalized.csv"
   ]
 }

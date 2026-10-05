@@ -1,6 +1,6 @@
 {
   "row_count": 186,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "1",
     "第M140000250号",
@@ -9,6 +9,6 @@
   ],
   "source_url": "https://www.city.kawasaki.jp/280/cmsfiles/contents/0000173/173594/260826.csv",
   "normalized_files": [
-    "data/川崎市/民泊/整形済み/20260930_川崎市_民泊_normalized.csv"
+    "data/川崎市/民泊/整形済み/20261005_川崎市_民泊_normalized.csv"
   ]
 }

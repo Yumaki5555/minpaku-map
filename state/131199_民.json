@@ -1,14 +1,14 @@
 {
   "row_count": 449,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "nan",
     "届出番号",
     "届出年月日",
     "住宅の所在地"
   ],
-  "source_url": "https://www.city.itabashi.tokyo.jp/_res/projects/default_project/_page_/001/003/881/20260831minapaku.xlsx",
+  "source_url": "https://www.city.itabashi.tokyo.jp/_res/projects/default_project/_page_/001/003/881/20261001minpaku.xlsx",
   "normalized_files": [
-    "data/板橋区/民泊/整形済み/20260930_板橋区_民泊_normalized.csv"
+    "data/板橋区/民泊/整形済み/20261005_板橋区_民泊_normalized.csv"
   ]
 }

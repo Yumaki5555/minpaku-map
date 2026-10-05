@@ -1,6 +1,6 @@
 {
   "row_count": 3928,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "No",
     "施設所在地",
@@ -15,6 +15,6 @@
   ],
   "source_url": "https://www.city.shinjuku.lg.jp/content/000454692.pdf",
   "normalized_files": [
-    "data/新宿区/民泊/整形済み/20260930_新宿区_民泊_normalized.csv"
+    "data/新宿区/民泊/整形済み/20261005_新宿区_民泊_normalized.csv"
   ]
 }

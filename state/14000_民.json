@@ -1,6 +1,6 @@
 {
   "row_count": 522,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "No.",
     "届出番号",
@@ -8,6 +8,6 @@
   ],
   "source_url": "https://www.pref.kanagawa.jp/documents/26258/20260630_jyutakusyukuhakujigyou_sisetuitiran.pdf",
   "normalized_files": [
-    "data/神奈川県/民泊/整形済み/20260930_神奈川県_民泊_normalized.csv"
+    "data/神奈川県/民泊/整形済み/20261005_神奈川県_民泊_normalized.csv"
   ]
 }

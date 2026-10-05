@@ -1,6 +1,6 @@
 {
-  "row_count": 326,
-  "date": "20260930",
+  "row_count": 330,
+  "date": "20261005",
   "header": [
     "",
     "No",
@@ -12,8 +12,8 @@
     "届出住宅の所在地",
     ""
   ],
-  "source_url": "https://www.pref.ibaraki.jp/hokenfukushi/seiei/kankyo/seiei/minpaku/documents/20260917todokedejyouhou.pdf",
+  "source_url": "https://www.pref.ibaraki.jp/hokenfukushi/seiei/kankyo/seiei/minpaku/documents/20261001todokedejyouhou.pdf",
   "normalized_files": [
-    "data/茨城県/民泊/整形済み/20260930_茨城県_民泊_normalized.csv"
+    "data/茨城県/民泊/整形済み/20261005_茨城県_民泊_normalized.csv"
   ]
 }

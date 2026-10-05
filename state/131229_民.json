@@ -1,6 +1,6 @@
 {
   "row_count": 370,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "No",
     "(受付・届出情報)届出番号",
@@ -10,6 +10,6 @@
   ],
   "source_url": "https://www.city.katsushika.lg.jp/_res/projects/default_project/_page_/001/026/096/minpaku-r8.9.3.pdf",
   "normalized_files": [
-    "data/葛飾区/民泊/整形済み/20260930_葛飾区_民泊_normalized.csv"
+    "data/葛飾区/民泊/整形済み/20261005_葛飾区_民泊_normalized.csv"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "row_count": 95,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "所在地_住所",
     "屋号",
@@ -15,6 +15,6 @@
   ],
   "source_url": "https://www.city.mito.lg.jp/uploaded/attachment/70973.xlsx",
   "normalized_files": [
-    "data/水戸市/旅館業/整形済み/20260930_水戸市_旅館業_normalized.csv"
+    "data/水戸市/旅館業/整形済み/20261005_水戸市_旅館業_normalized.csv"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "row_count": 984,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "No.",
     "施設名称",
@@ -11,7 +11,7 @@
   ],
   "source_url": "https://www.city.toshima.lg.jp/documents/21284/r80831_ryokanlist.pdf",
   "normalized_files": [
-    "data/豊島区/旅館業/整形済み/20260930_豊島区_旅館業_旅館ホテル等_normalized.csv",
-    "data/豊島区/旅館業/整形済み/20260930_豊島区_旅館業_簡易宿所_normalized.csv"
+    "data/豊島区/旅館業/整形済み/20261005_豊島区_旅館業_旅館ホテル等_normalized.csv",
+    "data/豊島区/旅館業/整形済み/20261005_豊島区_旅館業_簡易宿所_normalized.csv"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "row_count": 1870,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "届出番号",
     "届出日",
@@ -17,6 +17,6 @@
   ],
   "source_url": "https://files.city.shibuya.tokyo.jp/assets/12995aba8b194961be709ba879857f70/01f647cd9e6d4505856f36f1b14919bf/minpaku_list_minpaku.pdf",
   "normalized_files": [
-    "data/渋谷区/民泊/整形済み/20260930_渋谷区_民泊_normalized.csv"
+    "data/渋谷区/民泊/整形済み/20261005_渋谷区_民泊_normalized.csv"
   ]
 }

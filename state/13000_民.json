@@ -1,6 +1,6 @@
 {
   "row_count": 532,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "届 出 年 月 日",
     "届 出 番 号",
@@ -8,6 +8,6 @@
   ],
   "source_url": "https://www.sangyo-rodo.metro.tokyo.lg.jp/documents/d/sangyo-rodo/tokyo080902_todokedezyun",
   "normalized_files": [
-    "data/東京都(多摩)/民泊/整形済み/20260930_東京都(多摩)_民泊_normalized.csv"
+    "data/東京都(多摩)/民泊/整形済み/20261005_東京都(多摩)_民泊_normalized.csv"
   ]
 }

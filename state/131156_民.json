@@ -1,6 +1,6 @@
 {
   "row_count": 439,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "届出年月日",
     "届出番号",
@@ -9,6 +9,6 @@
   ],
   "source_url": "https://www.city.suginami.tokyo.jp/documents/871/todokede.pdf",
   "normalized_files": [
-    "data/杉並区/民泊/整形済み/20260930_杉並区_民泊_normalized.csv"
+    "data/杉並区/民泊/整形済み/20261005_杉並区_民泊_normalized.csv"
   ]
 }

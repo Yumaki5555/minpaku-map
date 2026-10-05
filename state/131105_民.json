@@ -1,6 +1,6 @@
 {
   "row_count": 24,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "No",
     "施設所在地",
@@ -8,6 +8,6 @@
   ],
   "source_url": "https://www.city.meguro.tokyo.jp/documents/3159/jyuutakusyukuhaku-r8831-.docx",
   "normalized_files": [
-    "data/目黒区/民泊/整形済み/20260930_目黒区_民泊_normalized.csv"
+    "data/目黒区/民泊/整形済み/20261005_目黒区_民泊_normalized.csv"
   ]
 }

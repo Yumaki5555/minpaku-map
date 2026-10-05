@@ -1,6 +1,6 @@
 {
   "row_count": 142,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "番号",
     "日本語",
@@ -11,6 +11,6 @@
   ],
   "source_url": "https://www.pref.osaka.lg.jp/documents/34853/tokku080731.xlsx",
   "normalized_files": [
-    "data/大阪府/民泊/整形済み/20260930_大阪府_民泊_特区_normalized.csv"
+    "data/大阪府/民泊/整形済み/20261005_大阪府_民泊_特区_normalized.csv"
   ]
 }

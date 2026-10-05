@@ -1,6 +1,6 @@
 {
   "row_count": 347,
-  "date": "20260930",
+  "date": "20261005",
   "header": [
     "No.",
     "届出番号",
@@ -8,6 +8,6 @@
   ],
   "source_url": "https://www.city.yokohama.lg.jp/kurashi/sumai-kurashi/seikatsu/kaiteki/20180222105955.files/0175_20260903.pdf",
   "normalized_files": [
-    "data/横浜市/民泊/整形済み/20260930_横浜市_民泊_normalized.csv"
+    "data/横浜市/民泊/整形済み/20261005_横浜市_民泊_normalized.csv"
   ]
 }

@@ -1,16 +1,15 @@
 {
-  "row_count": 8887,
-  "date": "20260930",
+  "row_count": 10132,
+  "date": "20261005",
   "header": [
     "No",
     "施設名称",
     "施設所在地",
     "営業者名",
-    "対応する外国語",
-    "nan"
+    "民泊施設＿対応言語"
   ],
-  "source_url": "https://www.city.osaka.lg.jp/kenko/cmsfiles/contents/0000382/382418/20260531tokku.csv",
+  "source_url": "https://www.city.osaka.lg.jp/kenko/cmsfiles/contents/0000382/382418/20260630tokku.csv",
   "normalized_files": [
-    "data/大阪市/民泊/整形済み/20260930_大阪市_民泊_特区_normalized.csv"
+    "data/大阪市/民泊/整形済み/20261005_大阪市_民泊_特区_normalized.csv"
   ]
 }
