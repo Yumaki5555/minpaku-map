@@ -1,6 +1,6 @@
 {
-  "row_count": 555,
-  "date": "20261005",
+  "row_count": 570,
+  "date": "20261012",
   "header": [
     "No",
     "（受付・届出情報）届出年月日",
@@ -8,8 +8,8 @@
     "施設方書",
     "（住宅に関する事項）条例第２条ただし書きの規定適用"
   ],
-  "source_url": "https://www.city.setagaya.lg.jp/documents/3248/0831.xlsx",
+  "source_url": "https://www.city.setagaya.lg.jp/documents/3248/0930.xlsx",
   "normalized_files": [
-    "data/世田谷区/民泊/整形済み/20261005_世田谷区_民泊_normalized.csv"
+    "data/世田谷区/民泊/整形済み/20261012_世田谷区_民泊_normalized.csv"
   ]
 }

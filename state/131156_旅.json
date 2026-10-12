@@ -1,6 +1,6 @@
 {
-  "row_count": 174,
-  "date": "20261005",
+  "row_count": 178,
+  "date": "20261012",
   "header": [
     "No",
     "施設名称",
@@ -12,8 +12,8 @@
     "許可番号",
     "施設(種\n別)"
   ],
-  "source_url": "https://www.city.suginami.tokyo.jp/documents/870/ryokan202608.pdf",
+  "source_url": "https://www.city.suginami.tokyo.jp/documents/870/ryokan.pdf",
   "normalized_files": [
-    "data/杉並区/旅館業/整形済み/20261005_杉並区_旅館業_normalized.csv"
+    "data/杉並区/旅館業/整形済み/20261012_杉並区_旅館業_normalized.csv"
   ]
 }

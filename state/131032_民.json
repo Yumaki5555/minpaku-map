@@ -1,6 +1,6 @@
 {
-  "row_count": 905,
-  "date": "20261005",
+  "row_count": 970,
+  "date": "20261012",
   "header": [
     "No",
     "届出年月日",
@@ -13,8 +13,8 @@
     "【家主居住\n型の別】",
     "【制限区\n域の別】"
   ],
-  "source_url": "https://www.city.minato.tokyo.jp/documents/84144/2026091402.pdf",
+  "source_url": "https://www.city.minato.tokyo.jp/documents/84144/2026100702.pdf",
   "normalized_files": [
-    "data/港区/民泊/整形済み/20261005_港区_民泊_normalized.csv"
+    "data/港区/民泊/整形済み/20261012_港区_民泊_normalized.csv"
   ]
 }

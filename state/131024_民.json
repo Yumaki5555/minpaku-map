@@ -1,6 +1,6 @@
 {
-  "row_count": 107,
-  "date": "20261005",
+  "row_count": 126,
+  "date": "20261012",
   "header": [
     "",
     "届出住宅所在地",
@@ -9,8 +9,8 @@
     "届出番号",
     "住宅宿泊事業の\n開始日"
   ],
-  "source_url": "https://www.city.chuo.lg.jp/documents/3395/20260717minpaku.pdf",
+  "source_url": "https://www.city.chuo.lg.jp/documents/3395/20261001minpaku.pdf",
   "normalized_files": [
-    "data/中央区/民泊/整形済み/20261005_中央区_民泊_normalized.csv"
+    "data/中央区/民泊/整形済み/20261012_中央区_民泊_normalized.csv"
   ]
 }
