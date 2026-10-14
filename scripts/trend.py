@@ -151,8 +151,8 @@ def _months(x0: datetime, x1: datetime) -> list[datetime]:
 
 def chart_svg(vs: list[dict], x0: datetime, x1: datetime, label: str) -> str:
     """1つの自治体・種別のグラフ。横軸(資料の日付)は全グラフ共通の x0〜x1。
-    線は資料の日付が新しくなったときだけ動く階段の形にし、一番新しい資料の日付で終える。
-    x0 より前の資料は、一番新しいものだけを左端に◀で置く。"""
+    点は一覧の版(資料の日付)ごとに1つ打ち、点と点をまっすぐ結ぶ折れ線にして、一番新しい資料の日付で終える。
+    x0 より前の資料は、一番新しいものだけを左端に◀で置き、そこからの線は点線にする(本当の日付は左端より前のため)。"""
     e = html.escape
     days = (x1 - x0).days
     diffs = [None] + [v["count"] - p["count"] for p, v in zip(vs, vs[1:])]
@@ -174,7 +174,9 @@ def chart_svg(vs: list[dict], x0: datetime, x1: datetime, label: str) -> str:
     months = "".join(f'<line class="tk" x1="{fx(m):.1f}" x2="{fx(m):.1f}" y1="{H - PB}" y2="{H - PB + 3}"/>'
                      for m in _months(x0, x1))
     pts = [(fx(_day(v["date"])), fy(v["count"])) for v, _ in shown]
-    path = f"M{pts[0][0]:.1f},{pts[0][1]:.1f}" + "".join(f" H{x:.1f} V{y:.1f}" for x, y in pts[1:])
+    seg = lambda p, q: f"M{p[0]:.1f},{p[1]:.1f} L{q[0]:.1f},{q[1]:.1f}"  # noqa: E731
+    segs = "".join(f'<path class="line{" dash" if old and i == 0 else ""}" d="{seg(p, q)}"/>'
+                   for i, (p, q) in enumerate(zip(pts, pts[1:])))
     marks = "".join(
         f'<path class="old" d="M{x - 1:.1f},{y:.1f} l7,-4.5 v9 z"/>' if old and i == 0
         else f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4"/>'
@@ -192,7 +194,7 @@ def chart_svg(vs: list[dict], x0: datetime, x1: datetime, label: str) -> str:
         f' data-p=\'{e(json.dumps(data, ensure_ascii=False))}\'>'
         f'<g class="grid">{grid}{months}</g>'
         f'<line class="cross" x1="0" x2="0" y1="{PT}" y2="{H - PB}" visibility="hidden"/>'
-        f'<path class="line" d="{path}"/><g class="dots">{marks}</g>'
+        f'{segs}<g class="dots">{marks}</g>'
         f'<circle class="hl" r="6" cx="0" cy="0" visibility="hidden"/>'
         f'<text x="{PL}" y="{H - 5}" text-anchor="start">{x0:%Y/%m/%d}</text>'
         f'<text x="{W - PR}" y="{H - 5}" text-anchor="end">{x1:%Y/%m/%d}</text>'
@@ -256,7 +258,7 @@ def render_hero(per_code: dict[str, list[dict]], names: dict[str, str], x0: date
 </div>
 <div class="hchart" data-d='{e(json.dumps(data, ensure_ascii=False))}'></div>
 <div class="tip" hidden></div>
-<p class="note hnote">地図に載せている全自治体の件数の合計です。横軸は下の自治体ごとのグラフと同じ<b>資料の日付</b>で、どこかの自治体の資料の日付が新しくなり件数が変わったときだけ線が動きます（点にマウスを重ねると、その日に件数が変わった自治体が出ます）。前の版が分からない自治体は、分かっている一番古い件数のままとして足しています。種別ごとの内訳の増減は、グラフの期間のものです。</p>
+<p class="note hnote">地図に載せている全自治体の件数の合計です。横軸は下の自治体ごとのグラフと同じ<b>資料の日付</b>で、どこかの自治体の資料の日付が新しくなり件数が変わった日に点を打ち、点と点を線で結んでいます（点にマウスを重ねると、その日に件数が変わった自治体が出ます）。前の版が分からない自治体は、分かっている一番古い件数のままとして足しています。種別ごとの内訳の増減は、グラフの期間のものです。</p>
 </section>"""
     rows = []
     prev = None
@@ -430,6 +432,7 @@ svg.ch:focus-visible{{outline:2px solid var(--accent);outline-offset:2px;border-
 svg.ch .grid line{{stroke:var(--line);stroke-width:1}}
 svg.ch text{{fill:var(--sub);font-size:11px;font-variant-numeric:tabular-nums}}
 svg.ch .line{{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}}
+svg.ch .line.dash{{stroke-dasharray:2 4;opacity:.7}}
 svg.ch .old{{stroke:var(--card);stroke-width:1.5;stroke-linejoin:round}}
 svg.ch .dots circle{{stroke:var(--card);stroke-width:2}}
 svg.ch .cross{{stroke:var(--sub);stroke-width:1}}
@@ -470,7 +473,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
   <div class="summary" aria-label="直近の一覧での増減">
     <span>直近の一覧で 増えた <b class="up">{up}</b></span><span>減った <b class="down">{down}</b></span><span>変わらない・変化の記録なし <b>{flat}</b></span><span class="note" style="margin:0">（自治体・種別の数）</span>
   </div>
-  <p class="note">グラフの横軸は<b>全グラフ共通の資料の日付</b>（自治体の一覧が「いつ時点」のものか。{x0}〜{x1}）です。線は、その自治体の資料の日付が新しくなったときだけ動き、一番新しい資料の日付で終わります。{x0}より前の古い資料は、左端に◀で置いています。縦軸はグラフごとに目盛りが違い、小さな増減も見えるよう0から始めていません（数字は目盛りでご確認ください）。点にマウスを重ねる（スマホは押す）と、その時点の件数が出ます。<br>
+  <p class="note">グラフの横軸は<b>全グラフ共通の資料の日付</b>（自治体の一覧が「いつ時点」のものか。{x0}〜{x1}）です。点は、その自治体の資料の日付が新しくなったときだけ増え（資料1つにつき点1つ）、点と点を線で結んで、一番新しい資料の日付で終わります。{x0}より前の古い資料は、左端に◀で置き、そこからの線は点線にしています。縦軸はグラフごとに目盛りが違い、小さな増減も見えるよう0から始めていません（数字は目盛りでご確認ください）。点にマウスを重ねる（スマホは押す）と、その時点の件数が出ます。<br>
   自動で読み取っているため、同じ日付の一覧の読み取りを直したときは、記録も直した件数に置き換えています。すべての記録は <a href="data/{csv}" download>表（CSV・エクセルで開けます）</a> でダウンロードできます。</p>
 </section>
 
@@ -609,9 +612,8 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
         m = Date.UTC(md.getUTCFullYear(), md.getUTCMonth() + 1, 1);
       }}
       s += '<line class="cross" x1="0" x2="0" y1="' + pt + '" y2="' + (h - pb) + '" visibility="hidden"/>';
-      // 合計は資料の日付が新しくなったときだけ変わるので階段の形にし、一番新しい資料の日付までのばす
-      const steps = P.slice(1).map(p => ' H' + p[0] + ' V' + p[1]).join('');
-      s += '<path class="line" d="M' + P[0][0] + ',' + P[0][1] + steps + ' H' + (w - pr) + '"/>'
+      // 件数が変わった日ごとの点を、まっすぐ結ぶ折れ線にする
+      s += '<path class="line" d="M' + P.map(p => p[0] + ',' + p[1]).join(' L') + '"/>'
         + '<g class="dots">' + P.map(p => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.5"/>').join('') + '</g>'
         + '<circle class="hl" r="6" cx="0" cy="0" visibility="hidden"/>'
         + '<text x="' + pl + '" y="' + (h - 6) + '" text-anchor="start">' + D.start + '</text>'
