@@ -1,6 +1,6 @@
 {
   "row_count": 551,
-  "date": "20261012",
+  "date": "20261014",
   "header": [
     "No",
     "届出受理日",
@@ -12,6 +12,6 @@
   ],
   "source_url": "https://www.city.edogawa.tokyo.jp/documents/51159/r0809_mimpaku_ichiran.xlsx",
   "normalized_files": [
-    "data/江戸川区/民泊/整形済み/20261012_江戸川区_民泊_normalized.csv"
+    "data/江戸川区/民泊/整形済み/20261014_江戸川区_民泊_normalized.csv"
   ]
 }

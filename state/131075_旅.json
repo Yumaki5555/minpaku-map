@@ -1,6 +1,6 @@
 {
   "row_count": 1199,
-  "date": "20261012",
+  "date": "20261014",
   "header": [
     "業種",
     "施設名称",
@@ -14,6 +14,6 @@
   ],
   "source_url": "https://www.city.sumida.lg.jp/kenko_fukushi/eisei/kankyo_eisei/taa0200020220216.files/kk080413.xlsx",
   "normalized_files": [
-    "data/墨田区/旅館業/整形済み/20261012_墨田区_旅館業_normalized.csv"
+    "data/墨田区/旅館業/整形済み/20261014_墨田区_旅館業_normalized.csv"
   ]
 }

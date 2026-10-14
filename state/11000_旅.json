@@ -1,6 +1,6 @@
 {
   "row_count": 612,
-  "date": "20261012",
+  "date": "20261014",
   "header": [
     "業種",
     "営業の種類",
@@ -12,6 +12,6 @@
   ],
   "source_url": "https://www.pref.saitama.lg.jp/documents/232288/r7nenndo.zip",
   "normalized_files": [
-    "data/埼玉県/旅館業/整形済み/20261012_埼玉県_旅館業_normalized.csv"
+    "data/埼玉県/旅館業/整形済み/20261014_埼玉県_旅館業_normalized.csv"
   ]
 }

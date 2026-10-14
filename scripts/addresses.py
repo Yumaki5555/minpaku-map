@@ -277,12 +277,14 @@ def parse_file(path: str, reg: dict) -> tuple[list[dict], int]:
 def latest_files(reg: dict) -> list[str]:
     """その行の最新の整形済みCSV。state/に記録があればそれを使い、無ければフォルダから探す。"""
     state_path = os.path.join(STATE_DIR, f"{reg['自治体コード']}.json")
+    recorded = ""
     if os.path.exists(state_path):
         with open(state_path, encoding="utf-8") as f:
             st = json.load(f)
         files = [os.path.join(BASE_DIR, p) for p in st.get("normalized_files", [])]
         if files and all(os.path.exists(p) for p in files):
             return files
+        recorded = st.get("date", "")
     folder = os.path.join(DATA_DIR, reg["自治体名"], reg["種別"], "整形済み")
     found = sorted(glob.glob(os.path.join(folder, "*_normalized.csv")))
     if not found:
@@ -292,6 +294,9 @@ def latest_files(reg: dict) -> list[str]:
     if not found:
         return []
     newest = max(os.path.basename(p)[:8] for p in found)
+    # GitHubの自動更新で作られた新しいCSVが手元に無いときは、手元の古いCSVで地図を巻き戻さない(控えを使う)
+    if recorded and newest < recorded:
+        return []
     return [p for p in found if os.path.basename(p).startswith(newest)]
 
 
