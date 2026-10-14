@@ -10,6 +10,7 @@ build_site.py から呼ばれる。
 """
 from __future__ import annotations
 
+import calendar
 import csv
 import html
 import io
@@ -57,14 +58,17 @@ def full_snapshots(history: list[dict]) -> list[dict]:
     return [s for s in history if not s.get("partial")]
 
 
+AXIS_MONTHS = 3  # グラフの横軸の長さ(最近何か月分か)
+
+
 def axis_range(all_versions: list[list[dict]]) -> tuple[datetime, datetime]:
     """全グラフ共通の横軸(資料の日付)の範囲。
-    終わりは一番新しい資料の日付。始まりは、それより1年以内で一番古い資料の日付の月初め
-    (1年以上前の古い資料は、グラフの左端に置く)。"""
-    dates = [_day(v["date"]) for vs in all_versions for v in vs]
-    end = max(dates)
-    start = min(d for d in dates if d >= end - timedelta(days=365))
-    return start.replace(day=1), end
+    終わりは一番新しい資料の日付。始まりは、その AXIS_MONTHS か月前の同じ日
+    (それより前の古い資料は、グラフの左端に◀で置く)。"""
+    end = max(_day(v["date"]) for vs in all_versions for v in vs)
+    y, m = divmod(end.year * 12 + end.month - 1 - AXIS_MONTHS, 12)
+    start = datetime(y, m + 1, min(end.day, calendar.monthrange(y, m + 1)[1]))
+    return start, end
 
 
 def totals(per_code: dict[str, list[dict]], start: datetime) -> list[dict]:
@@ -189,12 +193,15 @@ def chart_svg(vs: list[dict], x0: datetime, x1: datetime, label: str) -> str:
             lines.append(f"前の版から {d:+,}")
         data.append([round(x, 1), round(y, 1), v["date"], v["count"], lines])
     desc = "、".join(f'{v["date"]} {v["count"]:,}件' for v in vs)
+    # 期間内に点が無い(一番新しい資料も期間より前)ときは、空のグラフに見えないよう一言そえる
+    none = (f'<text x="{(PL + W - PR) / 2:.1f}" y="{pts[0][1] - 10:.1f}" text-anchor="middle">この期間に新しい資料なし</text>'
+            if old and len(shown) == 1 else "")
     return (
         f'<svg class="ch" viewBox="0 0 {W} {H}" tabindex="0" role="img" aria-label="{e(label)}の件数の推移：{e(desc)}"'
         f' data-p=\'{e(json.dumps(data, ensure_ascii=False))}\'>'
         f'<g class="grid">{grid}{months}</g>'
         f'<line class="cross" x1="0" x2="0" y1="{PT}" y2="{H - PB}" visibility="hidden"/>'
-        f'{segs}<g class="dots">{marks}</g>'
+        f'{segs}<g class="dots">{marks}</g>{none}'
         f'<circle class="hl" r="6" cx="0" cy="0" visibility="hidden"/>'
         f'<text x="{PL}" y="{H - 5}" text-anchor="start">{x0:%Y/%m/%d}</text>'
         f'<text x="{W - PR}" y="{H - 5}" text-anchor="end">{x1:%Y/%m/%d}</text>'
