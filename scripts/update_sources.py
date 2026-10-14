@@ -23,7 +23,8 @@ import sys
 import time
 import unicodedata
 import zipfile
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from urllib.parse import urljoin, urlparse
 
 import pandas as pd
@@ -31,10 +32,10 @@ import requests
 from bs4 import BeautifulSoup
 
 sys.path.insert(0, os.path.dirname(__file__))
+from doc_dates import combine_dates, document_date  # noqa: E402
 from extractors import (  # noqa: E402
     ExtractResult,
     extract,
-    find_source_date,
     split_kani_shukusho,
     split_minpaku_ryokan,
 )
@@ -45,6 +46,7 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 STATE_DIR = os.path.join(BASE_DIR, "state")
 
 TODAY = datetime.now().strftime("%Y%m%d")
+JST = timezone(timedelta(hours=9))
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) minpaku-map-updater/0.1"
@@ -298,16 +300,17 @@ def squash(v) -> str:
     return re.sub(r"\s+", "", unicodedata.normalize("NFKC", str(v or "")))
 
 
-def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base_url: str) -> tuple[list, str]:
+def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base_url: str) -> tuple[list, str, list]:
     """「基準日の全体一覧」+「毎月の新規・廃止」で公表している自治体(台東区・墨田区・目黒区・港区など)向け。
     追加情報のファイルを順に読み、新規の施設を足し、廃止の施設を取り除く。
     廃止の照合は、許可番号があればそれで、無ければ施設名・所在地・方書で行う。
+    返り値の3つ目は、反映した追加情報のファイルの (場所, 形式)。
     """
     pattern = row.get("追加情報文字", "").strip()
     if not pattern or not header:
-        return rows, ""
+        return rows, "", []
     if not (key_col(header, "名称") or key_col(header, "所在地")):
-        return rows, ""  # 列の名前が分からないと照合できない(列名指定を使う)
+        return rows, "", []  # 列の名前が分からないと照合できない(列名指定を使う)
     # 全体一覧の日付。URLに無ければ、ページ上のリンクの文字(「令和8年6月30日終了時点」など)から読む
     base_date = link_date(base_url)
     if not base_date and row.get("リンク文字"):
@@ -315,6 +318,7 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
     rows = [list(r) for r in rows]
     recs = [dict(zip(header, r)) for r in rows]
     added = removed = used = 0
+    used_files = []
 
     def same(x: dict, rec: dict) -> bool:
         no = squash(rec.get("許可番号"))
@@ -338,6 +342,7 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
         if not path:
             continue
         used += 1
+        used_files.append((path, link_format(url, text)))
         hint = "廃止" if re.search(r"廃止|haishi", text + url) else "新規"
         for sheet, table in read_tables(path, row.get("ZIP内ファイル", "").strip()):
             section = "廃止" if "廃止" in sheet else "新規" if "新規" in sheet else hint
@@ -373,7 +378,7 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
                     removed += keep.count(False)
                     rows = [r for r, k in zip(rows, keep) if k]
                     recs = [x for x, k in zip(recs, keep) if k]
-    return rows, f"(毎月の追加情報{used}件を反映: 新規+{added} 廃止-{removed})"
+    return rows, f"(毎月の追加情報{used}件を反映: 新規+{added} 廃止-{removed})", used_files
 
 
 def infer_format(url: str) -> str:
@@ -428,9 +433,33 @@ def download(url: str, dest_dir: str, basename_hint: str) -> str | None:
     except Exception as e:  # noqa: BLE001
         print(f"  [失敗] ダウンロードできませんでした: {e}")
         return None
+    # 茨城県のようにサイトの障害中は、ファイルの代わりに「臨時ページ」が返ってくる。表として読むと0件になってしまう
+    if resp.content[:200].lstrip().lower().startswith((b"<!doctype html", b"<html")):
+        print("  [失敗] ファイルではなくホームページが返ってきました(サイトの障害・移転の可能性)")
+        return None
     with open_with_retry(dest_path, "wb") as f:
         f.write(resp.content)
+    # 資料に日付が書かれていないときのために、自治体のサイトに記録されたファイルの更新日時を覚えておく
+    if resp.headers.get("Last-Modified"):
+        try:
+            SERVER_DATES[dest_path] = parsedate_to_datetime(resp.headers["Last-Modified"]).astimezone(JST).strftime("%Y/%m/%d")
+        except (TypeError, ValueError):
+            pass
     return dest_path
+
+
+SERVER_DATES: dict[str, str] = {}
+
+
+def source_date(path: str, fmt: str, row: dict) -> tuple[str, str] | None:
+    """資料の日付と根拠。資料から分からなければ、自治体のサイト上のファイルの更新日時を使う。"""
+    inner = unzip(path, row.get("ZIP内ファイル", "").strip()) if fmt == "zip" else None
+    found = document_date(path, fmt, inner)
+    if found:
+        return found
+    if path in SERVER_DATES:
+        return SERVER_DATES[path], "資料に日付の記載がないため、自治体のサイト上のファイルの更新日"
+    return None
 
 
 def file_tag(row: dict) -> str:
@@ -503,7 +532,7 @@ def process_row(row: dict) -> dict:
         targets = [(u, link_format(u, t)) for u, t in (same or links)]
     else:
         targets = [(url, fmt)]
-    results, path = [], None
+    results, dates, path = [], [], None
     for t_url, t_fmt in targets:
         if len(targets) > 1:
             print(f"[{ward}/{kind}] ダウンロード中: {t_url}")
@@ -518,6 +547,7 @@ def process_row(row: dict) -> dict:
             summary["detail"] = "ダウンロード失敗"
             return summary
         results.append(load_source(path, t_fmt, row, kind))
+        dates.append(source_date(path, t_fmt, row))
     result = results[0] if len(results) == 1 else combine_results(results)
 
     # 目黒区のように、1つのマスにタブ区切りで全部の列が入っている表を直す
@@ -531,7 +561,7 @@ def process_row(row: dict) -> dict:
         result.rows = [list(result.header)] + list(result.rows)
         result.header = names
 
-    diff_rows, diff_note = apply_monthly_diffs(row, result.header, result.rows, dest_dir, url)
+    diff_rows, diff_note, diff_files = apply_monthly_diffs(row, result.header, result.rows, dest_dir, url)
     if diff_note:
         result.rows, result.row_count = diff_rows, len(diff_rows)
         result.note += diff_note
@@ -651,13 +681,18 @@ def process_row(row: dict) -> dict:
 
     row["登録件数"] = str(result.row_count)
 
-    source_date = find_source_date(result.raw_text, allow_unanchored=False) or find_source_date(
-        row.get("文書タイトル"), allow_unanchored=True
-    )
-    if source_date:
-        row["元データ日付"] = source_date
-        summary["source_date"] = source_date
-    # 見つからなかった場合は、前回までにわかっている値をそのまま残す
+    # 資料の日付は、ダウンロードした資料(PDF・エクセルなど)の中身から読む
+    found = [d for d in dates if d]
+    doc_date = combine_dates(found) if found else None
+    # 「全体一覧+毎月の追加分」の自治体は、反映した追加分のうち一番新しいものの日付にする
+    diff_dates = [d for d in (source_date(p, f, row) for p, f in diff_files) if d]
+    if diff_dates and (not doc_date or max(diff_dates)[0] > doc_date[0]):
+        newest = max(diff_dates)
+        doc_date = newest[0], f"全体一覧に毎月の追加分を反映(一番新しい追加分: {newest[1]})"
+    if doc_date:
+        row["元データ日付"], row["日付の根拠"] = doc_date
+        summary["source_date"] = doc_date[0]
+    # 分からなかった場合は、前回までにわかっている値をそのまま残す
 
     return summary
 

@@ -155,7 +155,7 @@ def main() -> None:
             "code": code, "muni": r["自治体名"], "pref": pref_index(code),
             "kind": "特区民泊" if code.endswith("民特") else r["種別"],
             "count": st.get("with_addr", 0), "placed": placed.get(code, 0),
-            "src_date": r.get("元データ日付", ""), "page": r.get("元HP", ""), "doc": r.get("文書リンク", ""),
+            "src_date": r.get("元データ日付", ""), "date_basis": r.get("日付の根拠", ""), "page": r.get("元HP", ""), "doc": r.get("文書リンク", ""),
             "mymap": r.get("Googleマイマップ", ""), "memo": r.get("メモ", "") if not st.get("with_addr") else "",
         })
 
@@ -185,6 +185,21 @@ def main() -> None:
         f.write(page)
     open(os.path.join(DOCS, ".nojekyll"), "a").close()
     print(f"地図ページを作りました: ピン {len(pins)}個 / 施設 {sum(by_cat.values())}件 / 位置不明 {not_found}件")
+
+
+def render_src_date(src_date: str, basis: str) -> str:
+    """資料の日付。資料に書かれていない日付(ファイルの保存日など)には、その旨を小さく添える。"""
+    e = html.escape
+    if not src_date:
+        return ""
+    if "記載がない" in basis:
+        label = "ファイルの日付"
+    elif "毎月の追加分" in basis:
+        label = "追加分の日付"
+    else:
+        label = ""
+    sub = f'<div class="memo">{label}</div>' if label else ""
+    return f'<span title="{e(basis)}">{e(src_date)}</span>{sub}'
 
 
 def render_ranks(ranks) -> str:
@@ -247,9 +262,10 @@ def render(table, total, by_cat, today, prev_date, not_found, ranks, by_source) 
         if t["diff"]:
             diff = f'<span class="{"up" if t["diff"] > 0 else "down"}">{t["diff"]:+,}</span>'
         note = f'<div class="memo">{e(t["memo"])}</div>' if t["memo"] else ""
+        src_date = render_src_date(t["src_date"], t["date_basis"])
         rows.append(
             f'<tr data-muni="{e(t["muni"])}" data-pref="{t["pref"]}"><td>{e(t["muni"])}</td><td><span class="dot c{CATS.index(t["kind"]) if t["kind"] in CATS else 2}"></span>{e(t["kind"])}</td>'
-            f'<td class="num">{num}</td><td class="num">{diff}</td><td>{e(t["src_date"])}</td><td>{link}{note}</td></tr>'
+            f'<td class="num">{num}</td><td class="num">{diff}</td><td>{src_date}</td><td>{link}{note}</td></tr>'
         )
     cat_btns = "".join(
         f'<button class="tagbtn" data-cat="{i}" aria-pressed="true"><span class="dot c{i}"></span>{e(c)}<span class="n">{by_cat[c]:,}</span></button>'
@@ -442,7 +458,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 </div>
 <div>
 <h2>自治体ごとの件数</h2>
-<p class="note">{diff_note}「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。</p>
+<p class="note">{diff_note}「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。<br>「資料の日付」は、各自治体の資料（PDF・エクセルなど）に書かれた「〇年〇月〇日現在」などの日付です。資料に日付が書かれていないものは、ファイル自体に記録された保存日（「ファイルの日付」と表示）を載せています。</p>
 <div class="tablewrap"><table>
 <thead><tr><th>自治体</th><th>種別</th><th style="text-align:right">件数</th><th style="text-align:right">増減</th><th>資料の日付</th><th>出典</th></tr></thead>
 <tbody id="tbody">

@@ -18,14 +18,15 @@
     "自治体名": "千代田区",
     "種別": "旅館業",
     "status": "OK",
-    "detail": "172件 / 前回(173件)から-1件 / pdfplumberで173行検出",
+    "detail": "172件 / 前回から変化なし / pdfplumberで173行検出",
     "row_count": 172,
     "normalized_path": "data/千代田区/旅館業/整形済み/20261014_千代田区_旅館業_旅館ホテル等_normalized.csv (旅館・ホテル等 152件) / data/千代田区/旅館業/整形済み/20261014_千代田区_旅館業_簡易宿所_normalized.csv (簡易宿所 20件)",
     "normalized_paths": [
       "data/千代田区/旅館業/整形済み/20261014_千代田区_旅館業_旅館ホテル等_normalized.csv",
       "data/千代田区/旅館業/整形済み/20261014_千代田区_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/千代田区/旅館業/元データ/20261014_r809ryokangyo.pdf"
+    "source_path": "data/千代田区/旅館業/元データ/20261014_r809ryokangyo.pdf",
+    "source_date": "2026/10/08"
   },
   {
     "自治体コード": "131024_民",
@@ -52,7 +53,8 @@
     "normalized_paths": [
       "data/中央区/旅館業/整形済み/20261014_中央区_旅館業_normalized.csv"
     ],
-    "source_path": "data/中央区/旅館業/元データ/20261014_260930ryokan.xlsx"
+    "source_path": "data/中央区/旅館業/元データ/20261014_260930ryokan.xlsx",
+    "source_date": "2026/09/30"
   },
   {
     "自治体コード": "131032_民",
@@ -66,7 +68,7 @@
       "data/港区/民泊/整形済み/20261014_港区_民泊_normalized.csv"
     ],
     "source_path": "data/港区/民泊/元データ/20261014_2026100702.pdf",
-    "source_date": "2026/08/31"
+    "source_date": "2026/09/30"
   },
   {
     "自治体コード": "131032_旅",
@@ -80,34 +82,37 @@
       "data/港区/旅館業/整形済み/20261014_港区_旅館業_旅館ホテル等_normalized.csv",
       "data/港区/旅館業/整形済み/20261014_港区_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/港区/旅館業/元データ/20261014_ryokan.csv"
+    "source_path": "data/港区/旅館業/元データ/20261014_ryokan.csv",
+    "source_date": "2026/03/31"
   },
   {
     "自治体コード": "131041_民",
     "自治体名": "新宿区",
     "種別": "民泊",
     "status": "OK",
-    "detail": "4050件 / 前回(3928件)から+122件 / pdfplumberで4253行検出",
+    "detail": "4050件 / 前回から変化なし / pdfplumberで4253行検出",
     "row_count": 4050,
     "normalized_path": "data/新宿区/民泊/整形済み/20261014_新宿区_民泊_normalized.csv",
     "normalized_paths": [
       "data/新宿区/民泊/整形済み/20261014_新宿区_民泊_normalized.csv"
     ],
-    "source_path": "data/新宿区/民泊/元データ/20261014_000454692.pdf"
+    "source_path": "data/新宿区/民泊/元データ/20261014_000454692.pdf",
+    "source_date": "2026/09/30"
   },
   {
     "自治体コード": "131041_旅",
     "自治体名": "新宿区",
     "種別": "旅館業",
     "status": "OK",
-    "detail": "728件 / 前回(716件)から+12件 / pdfplumberで777行検出(毎月の追加情報0件を反映: 新規+0 廃止-0)",
+    "detail": "728件 / 前回から変化なし / pdfplumberで777行検出(毎月の追加情報0件を反映: 新規+0 廃止-0)",
     "row_count": 728,
     "normalized_path": "data/新宿区/旅館業/整形済み/20261014_新宿区_旅館業_旅館ホテル等_normalized.csv (旅館・ホテル等 677件) / data/新宿区/旅館業/整形済み/20261014_新宿区_旅館業_簡易宿所_normalized.csv (簡易宿所 51件)",
     "normalized_paths": [
       "data/新宿区/旅館業/整形済み/20261014_新宿区_旅館業_旅館ホテル等_normalized.csv",
       "data/新宿区/旅館業/整形済み/20261014_新宿区_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/新宿区/旅館業/元データ/20261014_000452996.pdf"
+    "source_path": "data/新宿区/旅館業/元データ/20261014_000452996.pdf",
+    "source_date": "2026/09/30"
   },
   {
     "自治体コード": "131059_民",
@@ -135,14 +140,15 @@
       "data/文京区/旅館業/整形済み/20261014_文京区_旅館業_旅館ホテル等_normalized.csv",
       "data/文京区/旅館業/整形済み/20261014_文京区_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/文京区/旅館業/元データ/20261014_2609_ryokanngyou.xlsx"
+    "source_path": "data/文京区/旅館業/元データ/20261014_2609_ryokanngyou.xlsx",
+    "source_date": "2026/10/01"
   },
   {
     "自治体コード": "131067_民",
     "自治体名": "台東区",
     "種別": "民泊",
     "status": "OK",
-    "detail": "1566件 / 前回(1488件)から+78件 / pdfplumberで1619行検出",
+    "detail": "1566件 / 前回から変化なし / pdfplumberで1619行検出",
     "row_count": 1566,
     "normalized_path": "data/台東区/民泊/整形済み/20261014_台東区_民泊_normalized.csv",
     "normalized_paths": [
@@ -156,14 +162,15 @@
     "自治体名": "台東区",
     "種別": "旅館業",
     "status": "OK",
-    "detail": "1136件 / 前回(1119件)から+17件 / encoding=cp932, sep=','(毎月の追加情報6件を反映: 新規+98 廃止-11)",
+    "detail": "1136件 / 前回から変化なし / encoding=cp932, sep=','(毎月の追加情報6件を反映: 新規+98 廃止-11)",
     "row_count": 1136,
     "normalized_path": "data/台東区/旅館業/整形済み/20261014_台東区_旅館業_旅館ホテル等_normalized.csv (旅館・ホテル等 938件) / data/台東区/旅館業/整形済み/20261014_台東区_旅館業_簡易宿所_normalized.csv (簡易宿所 198件)",
     "normalized_paths": [
       "data/台東区/旅館業/整形済み/20261014_台東区_旅館業_旅館ホテル等_normalized.csv",
       "data/台東区/旅館業/整形済み/20261014_台東区_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/台東区/旅館業/元データ/20261014_202603ryokan_all.csv"
+    "source_path": "data/台東区/旅館業/元データ/20261014_202603ryokan_all.csv",
+    "source_date": "2026/10/02"
   },
   {
     "自治体コード": "131075_民",
@@ -177,7 +184,7 @@
       "data/墨田区/民泊/整形済み/20261014_墨田区_民泊_normalized.csv"
     ],
     "source_path": "data/墨田区/民泊/元データ/20261014_jj080916.pdf",
-    "source_date": "2026/03/01"
+    "source_date": "2026/09/16"
   },
   {
     "自治体コード": "131075_旅",
@@ -191,7 +198,7 @@
       "data/墨田区/旅館業/整形済み/20261014_墨田区_旅館業_normalized.csv"
     ],
     "source_path": "data/墨田区/旅館業/元データ/20261014_kk080413.xlsx",
-    "source_date": "2026/04/01"
+    "source_date": "2026/09/30"
   },
   {
     "自治体コード": "131083_民",
@@ -247,7 +254,8 @@
       "data/品川区/旅館業/整形済み/20261014_品川区_旅館業_旅館ホテル等_normalized.csv",
       "data/品川区/旅館業/整形済み/20261014_品川区_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/品川区/旅館業/元データ/20261014_20251210150540_3.csv"
+    "source_path": "data/品川区/旅館業/元データ/20261014_20251210150540_3.csv",
+    "source_date": "2026/04/15"
   },
   {
     "自治体コード": "131105_民",
@@ -261,7 +269,7 @@
       "data/目黒区/民泊/整形済み/20261014_目黒区_民泊_normalized.csv"
     ],
     "source_path": "data/目黒区/民泊/元データ/20261014_jyuutakusyukuhaku-r8831-.docx",
-    "source_date": "2026/03/31"
+    "source_date": "2026/09/02"
   },
   {
     "自治体コード": "131105_旅",
@@ -276,7 +284,7 @@
       "data/目黒区/旅館業/整形済み/20261014_目黒区_旅館業_簡易宿所_normalized.csv"
     ],
     "source_path": "data/目黒区/旅館業/元データ/20261014_131105_ryokan_20260331.csv",
-    "source_date": "2026/03/31"
+    "source_date": "2026/10/09"
   },
   {
     "自治体コード": "131113_民",
@@ -289,7 +297,8 @@
     "normalized_paths": [
       "data/大田区/民泊/整形済み/20261014_大田区_民泊_normalized.csv"
     ],
-    "source_path": "data/大田区/民泊/元データ/20261014_0916todokede.pdf"
+    "source_path": "data/大田区/民泊/元データ/20261014_0916todokede.pdf",
+    "source_date": "2026/09/16"
   },
   {
     "自治体コード": "131113_民特",
@@ -331,7 +340,7 @@
       "data/世田谷区/民泊/整形済み/20261014_世田谷区_民泊_normalized.csv"
     ],
     "source_path": "data/世田谷区/民泊/元データ/20261014_0930.xlsx",
-    "source_date": "2026/02/28"
+    "source_date": "2026/10/02"
   },
   {
     "自治体コード": "131121_旅",
@@ -353,20 +362,21 @@
     "自治体名": "渋谷区",
     "種別": "民泊",
     "status": "OK",
-    "detail": "1867件 / 前回(1870件)から-3件 / pdfplumberで1903行検出",
+    "detail": "1867件 / 前回から変化なし / pdfplumberで1903行検出",
     "row_count": 1867,
     "normalized_path": "data/渋谷区/民泊/整形済み/20261014_渋谷区_民泊_normalized.csv",
     "normalized_paths": [
       "data/渋谷区/民泊/整形済み/20261014_渋谷区_民泊_normalized.csv"
     ],
-    "source_path": "data/渋谷区/民泊/元データ/20261014_minpaku_list_minpaku.pdf"
+    "source_path": "data/渋谷区/民泊/元データ/20261014_minpaku_list_minpaku.pdf",
+    "source_date": "2026/09/30"
   },
   {
     "自治体コード": "131130_旅",
     "自治体名": "渋谷区",
     "種別": "旅館業",
     "status": "OK",
-    "detail": "823件 / 前回(811件)から+12件 / pdfplumberで882行検出",
+    "detail": "823件 / 前回から変化なし / pdfplumberで882行検出",
     "row_count": 823,
     "normalized_path": "data/渋谷区/旅館業/整形済み/20261014_渋谷区_旅館業_旅館ホテル等_normalized.csv (旅館・ホテル等 804件) / data/渋谷区/旅館業/整形済み/20261014_渋谷区_旅館業_簡易宿所_normalized.csv (簡易宿所 19件)",
     "normalized_paths": [
@@ -387,7 +397,8 @@
     "normalized_paths": [
       "data/中野区/民泊/整形済み/20261014_中野区_民泊_normalized.csv"
     ],
-    "source_path": "data/中野区/民泊/元データ/20261014_R8.09itirann.pdf"
+    "source_path": "data/中野区/民泊/元データ/20261014_R8.09itirann.pdf",
+    "source_date": "2026/09/17"
   },
   {
     "自治体コード": "131148_旅",
@@ -400,7 +411,8 @@
     "normalized_paths": [
       "data/中野区/旅館業/整形済み/20261014_中野区_旅館業_normalized.csv"
     ],
-    "source_path": "data/中野区/旅館業/元データ/20261014_opendata_5000793.csv"
+    "source_path": "data/中野区/旅館業/元データ/20261014_opendata_5000793.csv",
+    "source_date": "2026/07/06"
   },
   {
     "自治体コード": "131156_民",
@@ -413,7 +425,8 @@
     "normalized_paths": [
       "data/杉並区/民泊/整形済み/20261014_杉並区_民泊_normalized.csv"
     ],
-    "source_path": "data/杉並区/民泊/元データ/20261014_todokede.pdf"
+    "source_path": "data/杉並区/民泊/元データ/20261014_todokede.pdf",
+    "source_date": "2026/09/30"
   },
   {
     "自治体コード": "131156_旅",
@@ -426,7 +439,8 @@
     "normalized_paths": [
       "data/杉並区/旅館業/整形済み/20261014_杉並区_旅館業_normalized.csv"
     ],
-    "source_path": "data/杉並区/旅館業/元データ/20261014_ryokan.pdf"
+    "source_path": "data/杉並区/旅館業/元データ/20261014_ryokan.pdf",
+    "source_date": "2026/10/01"
   },
   {
     "自治体コード": "131164_民",
@@ -447,7 +461,7 @@
     "自治体名": "豊島区",
     "種別": "旅館業",
     "status": "OK",
-    "detail": "1013件 / 前回(984件)から+29件 / pdfplumberで1014行検出",
+    "detail": "1013件 / 前回から変化なし / pdfplumberで1014行検出",
     "row_count": 1013,
     "normalized_path": "data/豊島区/旅館業/整形済み/20261014_豊島区_旅館業_旅館ホテル等_normalized.csv (旅館・ホテル等 983件) / data/豊島区/旅館業/整形済み/20261014_豊島区_旅館業_簡易宿所_normalized.csv (簡易宿所 30件)",
     "normalized_paths": [
@@ -455,7 +469,7 @@
       "data/豊島区/旅館業/整形済み/20261014_豊島区_旅館業_簡易宿所_normalized.csv"
     ],
     "source_path": "data/豊島区/旅館業/元データ/20261014_r80930_ryokanlist.pdf",
-    "source_date": "2026/03/31"
+    "source_date": "2026/09/30"
   },
   {
     "自治体コード": "131172_民",
@@ -497,7 +511,8 @@
     "normalized_paths": [
       "data/荒川区/民泊/整形済み/20261014_荒川区_民泊_normalized.csv"
     ],
-    "source_path": "data/荒川区/民泊/元データ/20261014_r080915_jutakushukuhakujigyo.xlsx"
+    "source_path": "data/荒川区/民泊/元データ/20261014_r080915_jutakushukuhakujigyo.xlsx",
+    "source_date": "2026/09/07"
   },
   {
     "自治体コード": "131181_旅",
@@ -511,7 +526,8 @@
       "data/荒川区/旅館業/整形済み/20261014_荒川区_旅館業_旅館ホテル等_normalized.csv",
       "data/荒川区/旅館業/整形済み/20261014_荒川区_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/荒川区/旅館業/元データ/20261014_r080915_ryokangyo.xlsx"
+    "source_path": "data/荒川区/旅館業/元データ/20261014_r080915_ryokangyo.xlsx",
+    "source_date": "2026/09/07"
   },
   {
     "自治体コード": "131199_民",
@@ -539,7 +555,7 @@
       "data/板橋区/旅館業/整形済み/20261014_板橋区_旅館業_normalized.csv"
     ],
     "source_path": "data/板橋区/旅館業/元データ/20261014_20260930oprndate.xlsx",
-    "source_date": "2026/03/31"
+    "source_date": "2026/10/01"
   },
   {
     "自治体コード": "131202_民",
@@ -629,7 +645,8 @@
     "normalized_paths": [
       "data/江戸川区/民泊/整形済み/20261014_江戸川区_民泊_normalized.csv"
     ],
-    "source_path": "data/江戸川区/民泊/元データ/20261014_r0809_mimpaku_ichiran.xlsx"
+    "source_path": "data/江戸川区/民泊/元データ/20261014_r0809_mimpaku_ichiran.xlsx",
+    "source_date": "2026/10/09"
   },
   {
     "自治体コード": "131237_旅",
@@ -643,7 +660,8 @@
       "data/江戸川区/旅館業/整形済み/20261014_江戸川区_旅館業_旅館ホテル等_normalized.csv",
       "data/江戸川区/旅館業/整形済み/20261014_江戸川区_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/江戸川区/旅館業/元データ/20261014_r0809_ryokan_ichiran.xlsx"
+    "source_path": "data/江戸川区/旅館業/元データ/20261014_r0809_ryokan_ichiran.xlsx",
+    "source_date": "2026/10/06"
   },
   {
     "自治体コード": "27000_民",
@@ -698,7 +716,8 @@
     "normalized_paths": [
       "data/大阪市/民泊/整形済み/20261014_大阪市_民泊_normalized.csv"
     ],
-    "source_path": "data/大阪市/民泊/元データ/20261014_20260630_shinpou.csv"
+    "source_path": "data/大阪市/民泊/元データ/20261014_20260630_shinpou.csv",
+    "source_date": "2026/10/02"
   },
   {
     "自治体コード": "271004_旅",
@@ -712,7 +731,8 @@
       "data/大阪市/旅館業/整形済み/20261014_大阪市_旅館業_旅館ホテル等_normalized.csv",
       "data/大阪市/旅館業/整形済み/20261014_大阪市_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/大阪市/旅館業/元データ/20261014_20260630ryokan.csv"
+    "source_path": "data/大阪市/旅館業/元データ/20261014_20260630ryokan.csv",
+    "source_date": "2026/10/02"
   },
   {
     "自治体コード": "271004_民特",
@@ -725,14 +745,15 @@
     "normalized_paths": [
       "data/大阪市/民泊/整形済み/20261014_大阪市_民泊_特区_normalized.csv"
     ],
-    "source_path": "data/大阪市/民泊/元データ/20261014_20260630tokku.csv"
+    "source_path": "data/大阪市/民泊/元データ/20261014_20260630tokku.csv",
+    "source_date": "2026/10/02"
   },
   {
     "自治体コード": "271204_民",
     "自治体名": "堺市",
     "種別": "民泊",
     "status": "OK",
-    "detail": "37件 / 前回(36件)から+1件 / pdfplumberで38行検出",
+    "detail": "37件 / 前回から変化なし / pdfplumberで38行検出",
     "row_count": 37,
     "normalized_path": "data/堺市/民泊/整形済み/20261014_堺市_民泊_normalized.csv",
     "normalized_paths": [
@@ -746,7 +767,7 @@
     "自治体名": "堺市",
     "種別": "旅館業",
     "status": "OK",
-    "detail": "75件 / 前回(76件)から-1件 / pdfplumberで79行検出",
+    "detail": "75件 / 前回から変化なし / pdfplumberで79行検出",
     "row_count": 75,
     "normalized_path": "data/堺市/旅館業/整形済み/20261014_堺市_旅館業_旅館ホテル等_normalized.csv (旅館・ホテル等 61件) / data/堺市/旅館業/整形済み/20261014_堺市_旅館業_簡易宿所_normalized.csv (簡易宿所 14件)",
     "normalized_paths": [
@@ -767,7 +788,8 @@
     "normalized_paths": [
       "data/枚方市/民泊/整形済み/20261014_枚方市_民泊_normalized.csv"
     ],
-    "source_path": "data/枚方市/民泊/元データ/20261014_zyuhakuall.xlsx"
+    "source_path": "data/枚方市/民泊/元データ/20261014_zyuhakuall.xlsx",
+    "source_date": "2026/05/07"
   },
   {
     "自治体コード": "272101_旅",
@@ -780,7 +802,8 @@
     "normalized_paths": [
       "data/枚方市/旅館業/整形済み/20261014_枚方市_旅館業_normalized.csv"
     ],
-    "source_path": "data/枚方市/旅館業/元データ/20261014_ryokanall.xlsx"
+    "source_path": "data/枚方市/旅館業/元データ/20261014_ryokanall.xlsx",
+    "source_date": "2026/05/08"
   },
   {
     "自治体コード": "272144_民",
@@ -830,7 +853,8 @@
       "data/寝屋川市/旅館業/整形済み/20261014_寝屋川市_旅館業_旅館ホテル等_normalized.csv",
       "data/寝屋川市/旅館業/整形済み/20261014_寝屋川市_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/寝屋川市/旅館業/元データ/20261014_272159_ryokan_20260930.csv"
+    "source_path": "data/寝屋川市/旅館業/元データ/20261014_272159_ryokan_20260930.csv",
+    "source_date": "2026/10/09"
   },
   {
     "自治体コード": "13000_民",
@@ -858,7 +882,8 @@
       "data/東京都(多摩)/旅館業/整形済み/20261014_東京都(多摩)_旅館業_旅館ホテル等_normalized.csv",
       "data/東京都(多摩)/旅館業/整形済み/20261014_東京都(多摩)_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/東京都(多摩)/旅館業/元データ/20261014_kankyo-ryokan-1-7.csv"
+    "source_path": "data/東京都(多摩)/旅館業/元データ/20261014_kankyo-ryokan-1-7.csv",
+    "source_date": "2026/09/11"
   },
   {
     "自治体コード": "132012_民",
@@ -871,7 +896,8 @@
     "normalized_paths": [
       "data/八王子市/民泊/整形済み/20261014_八王子市_民泊_normalized.csv"
     ],
-    "source_path": "data/八王子市/民泊/元データ/20261014_jutakuichiran.pdf"
+    "source_path": "data/八王子市/民泊/元データ/20261014_jutakuichiran.pdf",
+    "source_date": "2026/06/04"
   },
   {
     "自治体コード": "132012_旅",
@@ -891,7 +917,8 @@
     "normalized_paths": [
       "data/町田市/民泊/整形済み/20261014_町田市_民泊_normalized.csv"
     ],
-    "source_path": "data/町田市/民泊/元データ/20261014_minpaku.pdf"
+    "source_path": "data/町田市/民泊/元データ/20261014_minpaku.pdf",
+    "source_date": "2026/03/31"
   },
   {
     "自治体コード": "132098_旅",
@@ -953,7 +980,8 @@
     "normalized_paths": [
       "data/横浜市/旅館業/整形済み/20261014_横浜市_旅館業_normalized.csv"
     ],
-    "source_path": "data/横浜市/旅館業/元データ/20261014_20260401ryokan.zip"
+    "source_path": "data/横浜市/旅館業/元データ/20261014_20260401ryokan.zip",
+    "source_date": "2026/09/14"
   },
   {
     "自治体コード": "141305_民",
@@ -966,7 +994,8 @@
     "normalized_paths": [
       "data/川崎市/民泊/整形済み/20261014_川崎市_民泊_normalized.csv"
     ],
-    "source_path": "data/川崎市/民泊/元データ/20261014_260826.csv"
+    "source_path": "data/川崎市/民泊/元データ/20261014_260826.csv",
+    "source_date": "2026/09/29"
   },
   {
     "自治体コード": "141305_旅",
@@ -980,7 +1009,8 @@
       "data/川崎市/旅館業/整形済み/20261014_川崎市_旅館業_旅館ホテル等_normalized.csv",
       "data/川崎市/旅館業/整形済み/20261014_川崎市_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/川崎市/旅館業/元データ/20261014_05ryokangyou202609.csv"
+    "source_path": "data/川崎市/旅館業/元データ/20261014_05ryokangyou202609.csv",
+    "source_date": "2026/10/14"
   },
   {
     "自治体コード": "141500_民",
@@ -1008,20 +1038,22 @@
       "data/相模原市/旅館業/整形済み/20261014_相模原市_旅館業_旅館ホテル等_normalized.csv",
       "data/相模原市/旅館業/整形済み/20261014_相模原市_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/相模原市/旅館業/元データ/20261014_13.zip"
+    "source_path": "data/相模原市/旅館業/元データ/20261014_13.zip",
+    "source_date": "2026/04/23"
   },
   {
     "自治体コード": "142018_民",
     "自治体名": "横須賀市",
     "種別": "民泊",
     "status": "OK",
-    "detail": "145件 / 前回(144件)から+1件 / ",
+    "detail": "145件 / 前回から変化なし / ",
     "row_count": 145,
     "normalized_path": "data/横須賀市/民泊/整形済み/20261014_横須賀市_民泊_normalized.csv",
     "normalized_paths": [
       "data/横須賀市/民泊/整形済み/20261014_横須賀市_民泊_normalized.csv"
     ],
-    "source_path": "data/横須賀市/民泊/元データ/20261014_minpaku_202609.xlsx"
+    "source_path": "data/横須賀市/民泊/元データ/20261014_minpaku_202609.xlsx",
+    "source_date": "2026/10/06"
   },
   {
     "自治体コード": "142018_旅",
@@ -1034,34 +1066,37 @@
     "normalized_paths": [
       "data/横須賀市/旅館業/整形済み/20261014_横須賀市_旅館業_normalized.csv"
     ],
-    "source_path": "data/横須賀市/旅館業/元データ/20261014_ryokanngyou_202609.xlsx"
+    "source_path": "data/横須賀市/旅館業/元データ/20261014_ryokanngyou_202609.xlsx",
+    "source_date": "2026/10/06"
   },
   {
     "自治体コード": "142051_民",
     "自治体名": "藤沢市",
     "種別": "民泊",
     "status": "OK",
-    "detail": "97件 / 前回(99件)から-2件 / pdfplumberで102行検出",
+    "detail": "97件 / 前回から変化なし / pdfplumberで102行検出",
     "row_count": 97,
     "normalized_path": "data/藤沢市/民泊/整形済み/20261014_藤沢市_民泊_normalized.csv",
     "normalized_paths": [
       "data/藤沢市/民泊/整形済み/20261014_藤沢市_民泊_normalized.csv"
     ],
-    "source_path": "data/藤沢市/民泊/元データ/20261014_minpakuichiran9.pdf"
+    "source_path": "data/藤沢市/民泊/元データ/20261014_minpakuichiran9.pdf",
+    "source_date": "2026/09/30"
   },
   {
     "自治体コード": "142051_旅",
     "自治体名": "藤沢市",
     "種別": "旅館業",
     "status": "OK",
-    "detail": "121件 / 前回(120件)から+1件 / pdfplumberで127行検出",
+    "detail": "121件 / 前回から変化なし / pdfplumberで127行検出",
     "row_count": 121,
     "normalized_path": "data/藤沢市/旅館業/整形済み/20261014_藤沢市_旅館業_旅館ホテル等_normalized.csv (旅館・ホテル等 38件) / data/藤沢市/旅館業/整形済み/20261014_藤沢市_旅館業_簡易宿所_normalized.csv (簡易宿所 83件)",
     "normalized_paths": [
       "data/藤沢市/旅館業/整形済み/20261014_藤沢市_旅館業_旅館ホテル等_normalized.csv",
       "data/藤沢市/旅館業/整形済み/20261014_藤沢市_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/藤沢市/旅館業/元データ/20261014_ryokanichiran9.pdf"
+    "source_path": "data/藤沢市/旅館業/元データ/20261014_ryokanichiran9.pdf",
+    "source_date": "2026/09/30"
   },
   {
     "自治体コード": "142077_民",
@@ -1074,7 +1109,8 @@
     "normalized_paths": [
       "data/茅ヶ崎市/民泊/整形済み/20261014_茅ヶ崎市_民泊_normalized.csv"
     ],
-    "source_path": "data/茅ヶ崎市/民泊/元データ/20261014_minpakuall2025.csv"
+    "source_path": "data/茅ヶ崎市/民泊/元データ/20261014_minpakuall2025.csv",
+    "source_date": "2026/09/08"
   },
   {
     "自治体コード": "142077_旅",
@@ -1088,7 +1124,8 @@
       "data/茅ヶ崎市/旅館業/整形済み/20261014_茅ヶ崎市_旅館業_旅館ホテル等_normalized.csv",
       "data/茅ヶ崎市/旅館業/整形済み/20261014_茅ヶ崎市_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/茅ヶ崎市/旅館業/元データ/20261014_ryokanall2025.csv"
+    "source_path": "data/茅ヶ崎市/旅館業/元データ/20261014_ryokanall2025.csv",
+    "source_date": "2026/08/06"
   },
   {
     "自治体コード": "11000_民",
@@ -1115,7 +1152,8 @@
     "normalized_paths": [
       "data/埼玉県/旅館業/整形済み/20261014_埼玉県_旅館業_normalized.csv"
     ],
-    "source_path": "data/埼玉県/旅館業/元データ/20261014_r7nenndo.zip"
+    "source_path": "data/埼玉県/旅館業/元データ/20261014_r7nenndo.zip",
+    "source_date": "2026/09/11"
   },
   {
     "自治体コード": "111007_旅",
@@ -1129,7 +1167,8 @@
       "data/さいたま市/旅館業/整形済み/20261014_さいたま市_旅館業_旅館ホテル等_normalized.csv",
       "data/さいたま市/旅館業/整形済み/20261014_さいたま市_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/さいたま市/旅館業/元データ/20261014_ryokanxls.pdf"
+    "source_path": "data/さいたま市/旅館業/元データ/20261014_ryokanxls.pdf",
+    "source_date": "2024/07/01"
   },
   {
     "自治体コード": "112011_旅",
@@ -1150,7 +1189,8 @@
       "data/越谷市/旅館業/整形済み/20261014_越谷市_旅館業_旅館ホテル等_normalized.csv",
       "data/越谷市/旅館業/整形済み/20261014_越谷市_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/越谷市/旅館業/元データ/20261014_ryokann.xls"
+    "source_path": "data/越谷市/旅館業/元データ/20261014_ryokann.xls",
+    "source_date": "2026/07/08"
   },
   {
     "自治体コード": "112038_民",
@@ -1178,7 +1218,8 @@
       "data/川口市/旅館業/整形済み/20261014_川口市_旅館業_旅館ホテル等_normalized.csv",
       "data/川口市/旅館業/整形済み/20261014_川口市_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/川口市/旅館業/元データ/20261014_ryokan2025.pdf"
+    "source_path": "data/川口市/旅館業/元データ/20261014_ryokan2025.pdf",
+    "source_date": "2026/10/06"
   },
   {
     "自治体コード": "12000_民",
@@ -1205,7 +1246,8 @@
     "normalized_paths": [
       "data/千葉県/旅館業/整形済み/20261014_千葉県_旅館業_normalized.csv"
     ],
-    "source_path": "data/千葉県/旅館業/元データ/20261014_82.xlsx"
+    "source_path": "data/千葉県/旅館業/元データ/20261014_82.xlsx",
+    "source_date": "2026/04/27"
   },
   {
     "自治体コード": "121002_旅",
@@ -1219,7 +1261,8 @@
       "data/千葉市/旅館業/整形済み/20261014_千葉市_旅館業_旅館ホテル等_normalized.csv",
       "data/千葉市/旅館業/整形済み/20261014_千葉市_旅館業_簡易宿所_normalized.csv"
     ],
-    "source_path": "data/千葉市/旅館業/元データ/20261014_r8-1ryokan.xlsx"
+    "source_path": "data/千葉市/旅館業/元データ/20261014_r8-1ryokan.xlsx",
+    "source_date": "2026/09/11"
   },
   {
     "自治体コード": "122041_旅",
@@ -1232,7 +1275,8 @@
     "normalized_paths": [
       "data/船橋市/旅館業/整形済み/20261014_船橋市_旅館業_normalized.csv"
     ],
-    "source_path": "data/船橋市/旅館業/元データ/20261014_ryokann2026071.csv"
+    "source_path": "data/船橋市/旅館業/元データ/20261014_ryokann2026071.csv",
+    "source_date": "2026/08/13"
   },
   {
     "自治体コード": "122173_旅",
@@ -1253,13 +1297,7 @@
     "自治体名": "茨城県",
     "種別": "旅館業",
     "status": "要確認",
-    "detail": "0件 / 前回から変化なし / Excel読み込み失敗: Excel file format cannot be determined, you must specify an engine manually.",
-    "row_count": 0,
-    "normalized_path": "data/茨城県/旅館業/整形済み/20261014_茨城県_旅館業_normalized.csv",
-    "normalized_paths": [
-      "data/茨城県/旅館業/整形済み/20261014_茨城県_旅館業_normalized.csv"
-    ],
-    "source_path": "data/茨城県/旅館業/元データ/20261014_260630_ryokangyou.xlsx"
+    "detail": "ダウンロード失敗"
   },
   {
     "自治体コード": "082015_旅",
