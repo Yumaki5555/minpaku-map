@@ -374,7 +374,15 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
                     recs.append(dict(zip(header, new)))
                     added += 1
                 else:
-                    keep = [not same(x, rec) for x in recs]
+                    hit = [same(x, rec) for x in recs]
+                    # 品川区のように年の付かない古い許可番号が重なっている場合は、許可日・施設名でさらに絞る
+                    if hit.count(True) > 1:
+                        for narrow in (lambda x: squash(rec.get("許可日")) and squash(x.get("許可日")) == squash(rec.get("許可日")),
+                                       lambda x: facility_key(x)[0] and facility_key(x)[0] == facility_key(rec)[0]):
+                            narrowed = [h and bool(narrow(x)) for h, x in zip(hit, recs)]
+                            if any(narrowed):
+                                hit = narrowed
+                    keep = [not h for h in hit]
                     removed += keep.count(False)
                     rows = [r for r, k in zip(rows, keep) if k]
                     recs = [x for x, k in zip(recs, keep) if k]
