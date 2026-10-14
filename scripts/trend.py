@@ -1,7 +1,7 @@
 """自治体・種別ごとの件数の移り変わりを、表(CSV)とグラフのページにする。
 
 - docs/data/件数の記録.csv: 自治体・種別ごとに、一覧の版(資料の日付)ごとの件数を1行ずつ並べた表(エクセルで開ける)
-- docs/trend.html        : 自治体・種別ごとの件数の推移グラフのページ
+- docs/trend.html        : 全体の合計と、自治体・種別ごとの件数の推移グラフのページ
 
 元になる記録は docs/data/history.json(地図を作るたびに、件数か資料の日付が変わっていれば1回分を書き足す)。
 build_site.py から呼ばれる。
@@ -39,6 +39,39 @@ def versions(history: list[dict], code: str) -> list[dict]:
         key = doc or snap["date"]
         out = [v for v in out if v["date"] < key]
         out.append({"date": key, "doc": doc, "count": count, "recorded": snap["date"]})
+    return out
+
+
+KINDS = [(0, "民泊"), (1, "特区民泊"), (2, "旅館業")]
+
+
+def kind_of(code: str) -> int:
+    """自治体コードの末尾(_民 / _民特 / _旅)から種別の番号(KINDS)を出す。"""
+    return 1 if code.endswith("民特") else 0 if code.endswith("民") else 2
+
+
+def totals(history: list[dict]) -> list[dict]:
+    """記録した日ごとの全体の合計と、種別ごとの内訳。
+
+    - 読み取りに失敗した回(件数0)は、その自治体の前回の件数を使う(合計が一時的に落ち込んで見えないように)。
+    - 増減は前回も記録があった自治体・種別だけで数え、新しく加えた自治体の分は「追加」として分ける。
+    """
+    out: list[dict] = []
+    last: dict[str, int] = {}
+    for snap in history:
+        cur = {c: n or last.get(c, 0) for c, n in snap["counts"].items()}
+        cur = {c: n for c, n in cur.items() if n}
+        kinds = {k: 0 for k, _ in KINDS}
+        kdiff = {k: 0 for k, _ in KINDS}
+        for c, n in cur.items():
+            kinds[kind_of(c)] += n
+            if c in last:
+                kdiff[kind_of(c)] += n - last[c]
+        first = not out
+        out.append({"date": snap["date"], "count": sum(cur.values()), "kinds": kinds,
+                    "diff": None if first else sum(kdiff.values()), "kdiff": None if first else kdiff,
+                    "added": 0 if first else sum(1 for c in cur if c not in last)})
+        last = cur
     return out
 
 
@@ -108,7 +141,8 @@ def chart_svg(vs: list[dict], today: str, label: str) -> str:
     data = []
     prev = None
     for (x, y), v in zip(pts, vs):
-        data.append([round(x, 1), round(y, 1), v["date"], v["count"], None if prev is None else v["count"] - prev])
+        data.append([round(x, 1), round(y, 1), v["date"], v["count"],
+                     [] if prev is None else [f'前の版から {v["count"] - prev:+,}']])
         prev = v["count"]
     desc = "、".join(f'{v["date"]} {v["count"]:,}件' for v in vs)
     return (
@@ -126,6 +160,69 @@ def chart_svg(vs: list[dict], today: str, label: str) -> str:
 
 def _pct(diff: int, base: int) -> str:
     return f"{diff / base * 100:+.1f}%" if base else ""
+
+
+def _signed(d: int) -> str:
+    cls = "up" if d > 0 else "down" if d < 0 else "zero"
+    return f'<span class="{cls}">{d:+,}</span>'
+
+
+def render_hero(history: list[dict], today: str) -> tuple[str, str]:
+    """ページ一番上の「全体の合計」(数字と推移のグラフ)と、表で見る用の行。
+    グラフは画面の幅が変わっても文字の大きさが変わらないよう、ページを開いたときに描く(ここではデータだけ渡す)。"""
+    e = html.escape
+    tl = totals(history)
+    now = tl[-1]
+    x0, x1 = _day(tl[0]["date"]), max(_day(today), _day(now["date"]))
+    if (x1 - x0).days < 7:
+        x0 = x1 - timedelta(days=7)
+    a, b, ticks = _y_axis([t["count"] for t in tl])
+    pts = []
+    for t in tl:
+        lines: list = []
+        if t["diff"] is not None:
+            lines.append(f'前回の記録から {t["diff"]:+,}' + ("（追加した自治体の分を除く）" if t["added"] else ""))
+        lines += [[k, f'{name} {t["kinds"][k]:,}件'] for k, name in KINDS if t["kinds"][k]]
+        if t["added"]:
+            lines.append(f'この日から自治体・種別を{t["added"]}件追加')
+        pts.append([(_day(t["date"]) - x0).days, t["count"], t["date"], lines])
+    data = {"a": a, "b": b, "ticks": ticks, "span": (x1 - x0).days, "start": x0.strftime("%Y/%m/%d"),
+            "end": x1.strftime("%Y/%m/%d"), "pts": pts,
+            "label": "全体の合計の推移：" + "、".join(f'{t["date"]} {t["count"]:,}件' for t in tl)}
+
+    if len(tl) >= 2:
+        prev = tl[-2]
+        since_start = sum(t["diff"] for t in tl[1:])
+        chg = (f'<li>前回 {e(prev["date"])} から<span class="n">{_signed(now["diff"])}</span>'
+               f'<span class="kd pct">{_pct(now["diff"], prev["count"])}</span></li>'
+               f'<li>記録開始 {e(tl[0]["date"])} から<span class="n">{_signed(since_start)}</span>'
+               f'<span class="kd pct">{_pct(since_start, tl[0]["count"])}</span></li>')
+    else:
+        chg = '<li class="since">まだ変化の記録なし</li>'
+    kinds = "".join(
+        f'<li><span class="dot c{k}"></span>{name}<span class="n">{now["kinds"][k]:,}件</span>'
+        f'<span class="kd">{_signed(now["kdiff"][k]) if now["kdiff"] else ""}</span></li>'
+        for k, name in KINDS if now["kinds"][k]
+    )
+    hero = f"""<section class="hero" id="hero" aria-labelledby="hero-h">
+<div class="hstat">
+  <h2 id="hero-h">全体の合計</h2>
+  <div><span class="big">{now["count"]:,}</span><span class="unit">件</span></div>
+  <div class="asof">{e(today)} 確認時点</div>
+  <ul class="hd" aria-label="合計の増減">{chg}</ul>
+  <ul aria-label="種別ごとの内訳（増減は前回の記録から）">{kinds}</ul>
+</div>
+<div class="hchart" data-d='{e(json.dumps(data, ensure_ascii=False))}'></div>
+<div class="tip" hidden></div>
+<p class="note hnote">地図に載せている全自治体の件数の合計です。横軸は<b>記録した日</b>（毎週の確認で、どこかの自治体の一覧が変わっていた日）です。自治体ごとに一覧の更新時期が違うため、新しい一覧が出た後の確認日にまとめて増減が表れます（数か月分の変化が一度に出ることもあります）。</p>
+</section>"""
+    rows = [
+        f'<tr><td>{e(t["date"])}</td><td class="num"><b>{t["count"]:,}</b></td>'
+        + "".join(f'<td class="num">{t["kinds"][k]:,}</td>' for k, _ in KINDS)
+        + f'<td class="num">{"" if t["diff"] is None else _signed(t["diff"])}</td></tr>'
+        for t in tl
+    ]
+    return hero, "\n".join(rows)
 
 
 def render_page(table: list[dict], history: list[dict], today: str, prefs: list[str], cats: list[str],
@@ -189,9 +286,11 @@ def render_page(table: list[dict], history: list[dict], today: str, prefs: list[
                         f'<td>{e(v["doc"])}</td><td class="num">{v["count"]:,}</td><td class="num">{d}</td>'
                         f'<td>{e(v["recorded"])}</td></tr>')
             prev = v["count"]
+    hero, total_rows = render_hero(history, today)
     return TEMPLATE.format(
         today=e(today), start=e(history[0]["date"]), items="\n".join(items), pref_opts=pref_opts,
         kind_btns=kind_btns, up=up, down=down, flat=flat, rows="\n".join(rows), csv=e(CSV_NAME), site_url=site_url,
+        hero=hero, total_rows=total_rows,
     )
 
 
@@ -203,7 +302,7 @@ TEMPLATE = """<!DOCTYPE html>
 <title>件数の推移｜民泊・旅館業マップ</title>
 <meta name="description" content="首都圏・大阪の自治体が公表している民泊・旅館業の件数を、一覧が更新されるたびに記録し、自治体ごとの増減をグラフにしています。">
 <meta property="og:type" content="website">
-<meta property="og:title" content="自治体ごとの民泊・旅館業の件数の推移">
+<meta property="og:title" content="民泊・旅館業の件数の推移（全体の合計と自治体ごと）">
 <meta property="og:description" content="自治体の一覧が更新されるたびに件数を記録し、増減をグラフにしています。毎週自動更新。">
 <meta property="og:url" content="{site_url}trend.html">
 <meta name="twitter:card" content="summary">
@@ -232,6 +331,24 @@ h1{{font-size:1.6rem;margin:4px 0 4px;letter-spacing:.02em}}
 .note{{font-size:.8rem;color:var(--sub);margin:6px 0}}
 .summary{{display:flex;flex-wrap:wrap;gap:6px 18px;margin:10px 0 4px;font-size:.9rem}}
 .summary b{{font-size:1.15rem;margin:0 2px}}
+h2.sec{{font-size:1.15rem;margin:26px 0 0}}
+.hero{{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px 8px;margin:10px 0 0;position:relative;
+  display:grid;grid-template-columns:270px minmax(0,1fr);gap:6px 24px;align-items:start}}
+@media (max-width:760px){{.hero{{grid-template-columns:minmax(0,1fr)}}}}
+.hero h2{{font-size:1rem;margin:0}}
+.hero .big{{font-size:3rem;font-weight:700;line-height:1.15}}
+.hero .unit{{font-size:1rem;color:var(--sub);margin-left:3px}}
+.hero .asof{{color:var(--sub);margin:0}}
+.hero ul{{list-style:none;margin:8px 0 0;padding:8px 0 0;border-top:1px solid var(--line);font-size:.85rem}}
+.hero ul.hd{{border-top:0;padding-top:0;margin-top:4px}}
+.hero .kd.pct{{font-size:.78rem}}
+.hero li{{display:flex;align-items:center;gap:2px;line-height:1.8}}
+.hero li .n{{margin-left:auto;font-variant-numeric:tabular-nums}}
+.hero li .kd{{min-width:4.2em;text-align:right;font-variant-numeric:tabular-nums}}
+.hero .hchart{{min-width:0;min-height:170px}}
+.hero svg.ch{{--s:var(--ink);margin-top:0}}
+.hero .hnote{{grid-column:1/-1;margin:2px 0 0}}
+.lk{{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}}
 .filters{{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0 6px;padding:10px 0;border-top:1px solid var(--line)}}
 .tagbtn{{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;
   padding:5px 12px;font-size:.88rem;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px}}
@@ -268,6 +385,7 @@ svg.ch .rest{{stroke-width:2;stroke-linecap:round;opacity:.3}}
 svg.ch .dots circle{{stroke:var(--card);stroke-width:2}}
 svg.ch .cross{{stroke:var(--sub);stroke-width:1}}
 svg.ch .hl{{fill:none;stroke-width:2}}
+svg.ch .tk{{stroke:var(--line);stroke-width:1}}
 .card[data-kind="0"] svg.ch{{--s:var(--c0)}}.card[data-kind="1"] svg.ch{{--s:var(--c1)}}
 .card[data-kind="2"] svg.ch{{--s:var(--c2)}}.card[data-kind="3"] svg.ch{{--s:var(--c3)}}
 svg.ch polyline,svg.ch .rest,svg.ch .hl{{stroke:var(--s)}}
@@ -292,14 +410,20 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 <div class="wrap">
 <header>
   <a class="back" href="./">← 民泊・旅館業マップに戻る</a>
-  <h1>📈 自治体ごとの件数の推移</h1>
+  <h1>📈 民泊・旅館業の件数の推移</h1>
   <p class="lead">地図に載せている民泊・旅館業の件数を、自治体の一覧が更新されるたびに記録しています（記録開始 {start}／最終確認 <b>{today}</b>・毎週月曜に自動更新）。</p>
+</header>
+
+{hero}
+
+<section>
+  <h2 class="sec">自治体ごとの推移</h2>
   <div class="summary" aria-label="直近の一覧での増減">
     <span>直近の一覧で 増えた <b class="up">{up}</b></span><span>減った <b class="down">{down}</b></span><span>変わらない・変化の記録なし <b>{flat}</b></span><span class="note" style="margin:0">（自治体・種別の数）</span>
   </div>
   <p class="note">グラフの横軸は<b>資料の日付</b>（自治体の一覧が「いつ時点」のものか）、右端は最終確認日です。縦軸はグラフごとに目盛りが違い、小さな増減も見えるよう0から始めていません（数字は目盛りでご確認ください）。点にマウスを重ねる（スマホは押す）と、その時点の件数が出ます。<br>
   自動で読み取っているため、同じ日付の一覧の読み取りを直したときは、記録も直した件数に置き換えています。すべての記録は <a href="data/{csv}" download>表（CSV・エクセルで開けます）</a> でダウンロードできます。</p>
-</header>
+</section>
 
 <div class="filters" role="group" aria-label="絞り込みと並び順">
   <select id="pref" aria-label="都府県"><option value="">すべての都府県</option>{pref_opts}</select>
@@ -319,6 +443,13 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 
 <details class="all">
 <summary>すべての記録を表で見る</summary>
+<p class="note"><b>全体の合計</b>（記録した日ごと）</p>
+<div class="tablewrap"><table>
+<thead><tr><th>記録した日</th><th style="text-align:right">合計</th><th style="text-align:right">民泊</th><th style="text-align:right">特区民泊</th><th style="text-align:right">旅館業</th><th style="text-align:right">前回の記録から</th></tr></thead>
+<tbody>
+{total_rows}
+</tbody></table></div>
+<p class="note"><b>自治体・種別ごと</b>（一覧の版ごと）</p>
 <div class="tablewrap"><table>
 <thead><tr><th>都府県</th><th>自治体</th><th>種別</th><th>資料の日付</th><th style="text-align:right">件数</th><th style="text-align:right">前の版から</th><th>記録した日</th></tr></thead>
 <tbody>
@@ -337,26 +468,31 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 (function(){{
   // グラフ: マウスを重ねる・押す・矢印キーで、いちばん近い時点の件数を吹き出しで出す
   const fmt = n => n.toLocaleString('ja-JP');
-  document.querySelectorAll('svg.ch').forEach(svg => {{
+  function bind(svg) {{
     const pts = JSON.parse(svg.dataset.p);
-    const card = svg.closest('.card'), tip = card.querySelector('.tip');
+    const card = svg.closest('.card, .hero'), tip = card.querySelector('.tip');
     const cross = svg.querySelector('.cross'), hl = svg.querySelector('.hl');
     const W = svg.viewBox.baseVal.width;
     let cur = -1;
     function show(i) {{
       cur = i;
-      const [x, y, date, n, d] = pts[i];
+      const [x, y, date, n, lines] = pts[i];
       cross.setAttribute('x1', x); cross.setAttribute('x2', x); cross.setAttribute('visibility', 'visible');
       hl.setAttribute('cx', x); hl.setAttribute('cy', y); hl.setAttribute('visibility', 'visible');
       tip.replaceChildren();
       const v = document.createElement('b'); v.textContent = fmt(n) + '件';
       const dt = document.createElement('span'); dt.className = 'd'; dt.textContent = ' ' + date + '時点';
       tip.append(v, dt);
-      if (d !== null) {{
+      lines.forEach(l => {{
         const c = document.createElement('div');
-        c.className = 'd'; c.textContent = '前の版から ' + (d > 0 ? '+' : '') + fmt(d);
+        c.className = 'd';
+        if (Array.isArray(l)) {{  // [種別の番号, 文]: 先頭に種別の色の短い線を付ける
+          const k = document.createElement('span');
+          k.className = 'lk c' + l[0];
+          c.append(k, l[1]);
+        }} else c.textContent = l;
         tip.append(c);
-      }}
+      }});
       tip.hidden = false;
       const r = svg.getBoundingClientRect(), cr = card.getBoundingClientRect(), s = r.width / W;
       const half = tip.offsetWidth / 2;
@@ -385,11 +521,63 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
       else if (ev.key === 'ArrowRight' && cur < pts.length - 1) {{ show(cur + 1); ev.preventDefault(); }}
       else if (ev.key === 'Escape') hide();
     }});
-  }});
+  }}
+  document.querySelectorAll('svg.ch').forEach(bind);
   // スマホで吹き出しを出したあと、グラフの外を押したら閉じる
   document.addEventListener('pointerdown', ev => {{
-    if (!ev.target.closest('svg.ch')) document.querySelectorAll('.tip').forEach(t => {{ if (!t.hidden) t.closest('.card').querySelector('svg.ch').dispatchEvent(new Event('blur')); }});
+    if (!ev.target.closest('svg.ch')) document.querySelectorAll('.tip').forEach(t => {{ if (!t.hidden) t.closest('.card, .hero').querySelector('svg.ch').dispatchEvent(new Event('blur')); }});
   }});
+
+  // 全体の合計のグラフ: 表示する幅ちょうどの大きさで描く(幅が変わったら描き直す)
+  const hbox = document.querySelector('.hero .hchart');
+  if (hbox) {{
+    const D = JSON.parse(hbox.dataset.d);
+    const r1 = v => Math.round(v * 10) / 10;
+    let lastW = 0;
+    const draw = () => {{
+      const w = Math.round(hbox.clientWidth);
+      if (!w || w === lastW) return;
+      lastW = w;
+      const h = w < 480 ? 170 : 200, pr = 10, pt = 10, pb = 24;
+      const pl = Math.max(...D.ticks.map(t => 12 + 6.6 * fmt(t).length));
+      const fx = d => pl + (D.span ? d / D.span : 1) * (w - pl - pr);
+      const fy = n => pt + (D.b - n) / (D.b - D.a) * (h - pt - pb);
+      const P = D.pts.map(p => [r1(fx(p[0])), r1(fy(p[1])), p[2], p[1], p[3]]);
+      let s = '<g class="grid">' + D.ticks.map(t => '<line x1="' + pl + '" x2="' + (w - pr) + '" y1="' + r1(fy(t)) + '" y2="' + r1(fy(t)) + '"/>'
+        + '<text x="' + (pl - 5) + '" y="' + r1(fy(t) + 4) + '" text-anchor="end">' + fmt(t) + '</text>').join('') + '</g>';
+      // 月の区切り(両端の日付や隣の月の文字と重ならないものだけ)
+      const [sy, sm, sd] = D.start.split('/').map(Number);
+      const t0 = Date.UTC(sy, sm - 1, sd);
+      let minX = pl + 75;
+      for (let m = Date.UTC(sy, sm, 1); (m - t0) / 864e5 < D.span; ) {{
+        const md = new Date(m), x = r1(fx((m - t0) / 864e5));
+        if (x >= minX && x <= w - pr - 80) {{
+          const lab = md.getUTCMonth() === 0 ? md.getUTCFullYear() + '年1月' : (md.getUTCMonth() + 1) + '月';
+          s += '<line class="tk" x1="' + x + '" x2="' + x + '" y1="' + (h - pb) + '" y2="' + (h - pb + 4) + '"/>'
+            + '<text x="' + x + '" y="' + (h - 6) + '" text-anchor="middle">' + lab + '</text>';
+          minX = x + 55;
+        }}
+        m = Date.UTC(md.getUTCFullYear(), md.getUTCMonth() + 1, 1);
+      }}
+      s += '<line class="cross" x1="0" x2="0" y1="' + pt + '" y2="' + (h - pb) + '" visibility="hidden"/>';
+      const [lx, ly] = P[P.length - 1];
+      if (lx < w - pr - 1) s += '<line class="rest" x1="' + lx + '" x2="' + (w - pr) + '" y1="' + ly + '" y2="' + ly + '"/>';
+      s += '<polyline points="' + P.map(p => p[0] + ',' + p[1]).join(' ') + '"/>'
+        + '<g class="dots">' + P.map(p => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="4"/>').join('') + '</g>'
+        + '<circle class="hl" r="6" cx="0" cy="0" visibility="hidden"/>'
+        + '<text x="' + pl + '" y="' + (h - 6) + '" text-anchor="start">' + D.start + '</text>'
+        + '<text x="' + (w - pr) + '" y="' + (h - 6) + '" text-anchor="end">' + D.end + '</text>';
+      hbox.innerHTML = '<svg class="ch" viewBox="0 0 ' + w + ' ' + h + '" tabindex="0" role="img">' + s + '</svg>';
+      const svg = hbox.firstChild;
+      svg.setAttribute('aria-label', D.label);
+      svg.dataset.p = JSON.stringify(P);
+      hbox.parentNode.querySelector('.tip').hidden = true;
+      bind(svg);
+    }};
+    draw();
+    if (window.ResizeObserver) new ResizeObserver(draw).observe(hbox);
+    window.addEventListener('resize', draw);
+  }}
 
   // 絞り込みと並び順
   const grid = document.getElementById('grid');
