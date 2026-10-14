@@ -57,28 +57,45 @@ def full_snapshots(history: list[dict]) -> list[dict]:
     return [s for s in history if not s.get("partial")]
 
 
-def totals(history: list[dict]) -> list[dict]:
-    """記録した日ごとの全体の合計と、種別ごとの内訳。
+def axis_range(all_versions: list[list[dict]]) -> tuple[datetime, datetime]:
+    """全グラフ共通の横軸(資料の日付)の範囲。
+    終わりは一番新しい資料の日付。始まりは、それより1年以内で一番古い資料の日付の月初め
+    (1年以上前の古い資料は、グラフの左端に置く)。"""
+    dates = [_day(v["date"]) for vs in all_versions for v in vs]
+    end = max(dates)
+    start = min(d for d in dates if d >= end - timedelta(days=365))
+    return start.replace(day=1), end
 
-    - 読み取りに失敗した回(件数0)は、その自治体の前回の件数を使う(合計が一時的に落ち込んで見えないように)。
-    - 増減は前回も記録があった自治体・種別だけで数え、新しく加えた自治体の分は「追加」として分ける。
+
+def totals(per_code: dict[str, list[dict]], start: datetime) -> list[dict]:
+    """資料の日付で見た全体の合計と、種別ごとの内訳。
+
+    合計が動くのは、どこかの自治体の資料の日付が新しくなり、件数が変わった日だけ。
+    前の版が分からない自治体は、分かっている一番古い件数のままとして足す。
+    返す形: [{"date": 資料の日付, "count": 合計, "kinds": {種別: 件数}, "changes": [(code, 増減), ...]}, ...]
+    (先頭はグラフの始まりの日。そこより前の増減は先頭の件数に含めてある)
     """
-    out: list[dict] = []
-    last: dict[str, int] = {}
-    for snap in full_snapshots(history):
-        cur = {c: n or last.get(c, 0) for c, n in snap["counts"].items()}
-        cur = {c: n for c, n in cur.items() if n}
-        kinds = {k: 0 for k, _ in KINDS}
-        kdiff = {k: 0 for k, _ in KINDS}
-        for c, n in cur.items():
-            kinds[kind_of(c)] += n
-            if c in last:
-                kdiff[kind_of(c)] += n - last[c]
-        first = not out
-        out.append({"date": snap["date"], "count": sum(cur.values()), "kinds": kinds,
-                    "diff": None if first else sum(kdiff.values()), "kdiff": None if first else kdiff,
-                    "added": 0 if first else sum(1 for c in cur if c not in last)})
-        last = cur
+    events: list[tuple[str, str, int]] = []
+    now = {k: 0 for k, _ in KINDS}
+    for code, vs in per_code.items():
+        now[kind_of(code)] += vs[-1]["count"]
+        for p, v in zip(vs, vs[1:]):
+            if v["count"] != p["count"]:
+                events.append((v["date"], code, v["count"] - p["count"]))
+    s = start.strftime("%Y/%m/%d")
+
+    def at(day: str) -> dict[int, int]:  # その日の時点の件数 = 今の件数から、その日より後の増減を引いたもの
+        kinds = dict(now)
+        for d, code, delta in events:
+            if d > day:
+                kinds[kind_of(code)] -= delta
+        return kinds
+
+    out = []
+    for day in [s] + sorted({d for d, _, _ in events if d > s}):
+        kinds = at(day)
+        changes = [(c, delta) for d, c, delta in events if d == day] if day != s else []
+        out.append({"date": day, "count": sum(kinds.values()), "kinds": kinds, "changes": changes})
     return out
 
 
@@ -122,15 +139,31 @@ def _y_axis(values: list[int]) -> tuple[int, int, list[int]]:
     return a, b, list(range(a, b + 1, step))
 
 
-def chart_svg(vs: list[dict], today: str, label: str) -> str:
+def _months(x0: datetime, x1: datetime) -> list[datetime]:
+    """x0 より後、x1 より前の各月の1日。"""
+    out = []
+    m = (x0.replace(day=1) + timedelta(days=32)).replace(day=1)
+    while m < x1:
+        out.append(m)
+        m = (m + timedelta(days=32)).replace(day=1)
+    return out
+
+
+def chart_svg(vs: list[dict], x0: datetime, x1: datetime, label: str) -> str:
+    """1つの自治体・種別のグラフ。横軸(資料の日付)は全グラフ共通の x0〜x1。
+    線は資料の日付が新しくなったときだけ動く階段の形にし、一番新しい資料の日付で終える。
+    x0 より前の資料は、一番新しいものだけを左端に◀で置く。"""
     e = html.escape
-    x1 = max(_day(today), _day(vs[-1]["date"]))
-    x0 = min(_day(vs[0]["date"]), x1 - timedelta(days=30))  # 短すぎる期間は30日分に広げる
     days = (x1 - x0).days
-    a, b, ticks = _y_axis([v["count"] for v in vs])
-    if len(vs) == 1:  # 版が1つだけなら、目盛りはその件数だけ
-        ticks = [vs[0]["count"]]
-    fx = lambda d: PL + (_day(d) - x0).days / days * (W - PL - PR)  # noqa: E731
+    diffs = [None] + [v["count"] - p["count"] for p, v in zip(vs, vs[1:])]
+    shown = [(v, d) for v, d in zip(vs, diffs) if _day(v["date"]) >= x0]
+    old = [(v, d) for v, d in zip(vs, diffs) if _day(v["date"]) < x0]
+    if old:
+        shown = [old[-1]] + shown
+    a, b, ticks = _y_axis([v["count"] for v, _ in shown])
+    if len(shown) == 1:  # 点が1つだけなら、目盛りはその件数だけ
+        ticks = [shown[0][0]["count"]]
+    fx = lambda day: PL + max(0, (day - x0).days) / days * (W - PL - PR)  # noqa: E731
     fy = lambda n: PT + (b - n) / (b - a) * (H - PT - PB)  # noqa: E731
 
     grid = "".join(
@@ -138,29 +171,31 @@ def chart_svg(vs: list[dict], today: str, label: str) -> str:
         f'<text x="{PL - 5}" y="{fy(t) + 4:.1f}" text-anchor="end">{t:,}</text>'
         for t in ticks
     )
-    pts = [(fx(v["date"]), fy(v["count"])) for v in vs]
-    line = " ".join(f"{x:.1f},{y:.1f}" for x, y in pts)
-    lx, ly = pts[-1]
-    # 最後の版から今日まで(その一覧のまま)を薄くのばす
-    rest = f'<line class="rest" x1="{lx:.1f}" x2="{W - PR}" y1="{ly:.1f}" y2="{ly:.1f}"/>' if lx < W - PR - 1 else ""
-    dots = "".join(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4"/>' for x, y in pts)
-    start, end = x0.strftime("%Y/%m/%d"), x1.strftime("%Y/%m/%d")
+    months = "".join(f'<line class="tk" x1="{fx(m):.1f}" x2="{fx(m):.1f}" y1="{H - PB}" y2="{H - PB + 3}"/>'
+                     for m in _months(x0, x1))
+    pts = [(fx(_day(v["date"])), fy(v["count"])) for v, _ in shown]
+    path = f"M{pts[0][0]:.1f},{pts[0][1]:.1f}" + "".join(f" H{x:.1f} V{y:.1f}" for x, y in pts[1:])
+    marks = "".join(
+        f'<path class="old" d="M{x - 1:.1f},{y:.1f} l7,-4.5 v9 z"/>' if old and i == 0
+        else f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4"/>'
+        for i, (x, y) in enumerate(pts)
+    )
     data = []
-    prev = None
-    for (x, y), v in zip(pts, vs):
-        data.append([round(x, 1), round(y, 1), v["date"], v["count"],
-                     [] if prev is None else [f'前の版から {v["count"] - prev:+,}']])
-        prev = v["count"]
+    for i, ((x, y), (v, d)) in enumerate(zip(pts, shown)):
+        lines = ["グラフの期間より前の資料"] if old and i == 0 else []
+        if d is not None:
+            lines.append(f"前の版から {d:+,}")
+        data.append([round(x, 1), round(y, 1), v["date"], v["count"], lines])
     desc = "、".join(f'{v["date"]} {v["count"]:,}件' for v in vs)
     return (
         f'<svg class="ch" viewBox="0 0 {W} {H}" tabindex="0" role="img" aria-label="{e(label)}の件数の推移：{e(desc)}"'
         f' data-p=\'{e(json.dumps(data, ensure_ascii=False))}\'>'
-        f'<g class="grid">{grid}</g>'
+        f'<g class="grid">{grid}{months}</g>'
         f'<line class="cross" x1="0" x2="0" y1="{PT}" y2="{H - PB}" visibility="hidden"/>'
-        f'{rest}<polyline points="{line}"/><g class="dots">{dots}</g>'
+        f'<path class="line" d="{path}"/><g class="dots">{marks}</g>'
         f'<circle class="hl" r="6" cx="0" cy="0" visibility="hidden"/>'
-        f'<text x="{PL}" y="{H - 5}" text-anchor="start">{start}</text>'
-        f'<text x="{W - PR}" y="{H - 5}" text-anchor="end">{end}</text>'
+        f'<text x="{PL}" y="{H - 5}" text-anchor="start">{x0:%Y/%m/%d}</text>'
+        f'<text x="{W - PR}" y="{H - 5}" text-anchor="end">{x1:%Y/%m/%d}</text>'
         f"</svg>"
     )
 
@@ -171,77 +206,81 @@ def _pct(diff: int, base: int) -> str:
 
 def _signed(d: int) -> str:
     cls = "up" if d > 0 else "down" if d < 0 else "zero"
-    return f'<span class="{cls}">{d:+,}</span>'
+    return f'<span class="{cls}">{d:+,}</span>' if d else '<span class="zero">±0</span>'
 
 
-def render_hero(history: list[dict], today: str) -> tuple[str, str]:
-    """ページ一番上の「全体の合計」(数字と推移のグラフ)と、表で見る用の行。
+def render_hero(per_code: dict[str, list[dict]], names: dict[str, str], x0: datetime, x1: datetime,
+                today: str) -> tuple[str, str]:
+    """ページ一番上の「全体の合計」(数字と推移のグラフ)と、表で見る用の行。横軸は自治体のグラフと同じ資料の日付。
     グラフは画面の幅が変わっても文字の大きさが変わらないよう、ページを開いたときに描く(ここではデータだけ渡す)。"""
     e = html.escape
-    tl = totals(history)
-    now = tl[-1]
-    x0, x1 = _day(tl[0]["date"]), max(_day(today), _day(now["date"]))
-    if (x1 - x0).days < 7:
-        x0 = x1 - timedelta(days=7)
+    tl = totals(per_code, x0)
+    now, first = tl[-1], tl[0]
     a, b, ticks = _y_axis([t["count"] for t in tl])
     pts = []
+    prev = None
     for t in tl:
         lines: list = []
-        if t["diff"] is not None:
-            lines.append(f'前回の記録から {t["diff"]:+,}' + ("（追加した自治体の分を除く）" if t["added"] else ""))
-        lines += [[k, f'{name} {t["kinds"][k]:,}件'] for k, name in KINDS if t["kinds"][k]]
-        if t["added"]:
-            lines.append(f'この日から自治体・種別を{t["added"]}件追加')
+        if prev is None:
+            lines.append("グラフの始まりの時点（それより前の増減を含む）")
+        else:
+            lines.append(f'前の点から {t["count"] - prev:+,}')
+            top = sorted(t["changes"], key=lambda x: -abs(x[1]))
+            lines += [[kind_of(c), f"{names.get(c, c)} {d:+,}"] for c, d in top[:5]]
+            if len(top) > 5:
+                lines.append(f"ほか{len(top) - 5}件の自治体・種別")
         pts.append([(_day(t["date"]) - x0).days, t["count"], t["date"], lines])
-    data = {"a": a, "b": b, "ticks": ticks, "span": (x1 - x0).days, "start": x0.strftime("%Y/%m/%d"),
-            "end": x1.strftime("%Y/%m/%d"), "pts": pts,
+        prev = t["count"]
+    data = {"a": a, "b": b, "ticks": ticks, "span": (x1 - x0).days, "start": f"{x0:%Y/%m/%d}",
+            "end": f"{x1:%Y/%m/%d}", "pts": pts,
             "label": "全体の合計の推移：" + "、".join(f'{t["date"]} {t["count"]:,}件' for t in tl)}
 
-    if len(tl) >= 2:
-        prev = tl[-2]
-        since_start = sum(t["diff"] for t in tl[1:])
-        chg = (f'<li>前回 {e(prev["date"])} から<span class="n">{_signed(now["diff"])}</span>'
-               f'<span class="kd pct">{_pct(now["diff"], prev["count"])}</span></li>'
-               f'<li>記録開始 {e(tl[0]["date"])} から<span class="n">{_signed(since_start)}</span>'
-               f'<span class="kd pct">{_pct(since_start, tl[0]["count"])}</span></li>')
-    else:
-        chg = '<li class="since">まだ変化の記録なし</li>'
+    m1 = (x1 - timedelta(days=30)).strftime("%Y/%m/%d")
+    base1 = next((t for t in reversed(tl) if t["date"] <= m1), first)
+    chg = (f'<li title="{e(m1)}より後の資料で">直近30日<span class="n">{_signed(now["count"] - base1["count"])}</span>'
+           f'<span class="kd pct">{_pct(now["count"] - base1["count"], base1["count"])}</span></li>'
+           f'<li>{x0:%Y/%m/%d}から<span class="n">{_signed(now["count"] - first["count"])}</span>'
+           f'<span class="kd pct">{_pct(now["count"] - first["count"], first["count"])}</span></li>')
     kinds = "".join(
         f'<li><span class="dot c{k}"></span>{name}<span class="n">{now["kinds"][k]:,}件</span>'
-        f'<span class="kd">{_signed(now["kdiff"][k]) if now["kdiff"] else ""}</span></li>'
+        f'<span class="kd">{_signed(now["kinds"][k] - first["kinds"][k])}</span></li>'
         for k, name in KINDS if now["kinds"][k]
     )
     hero = f"""<section class="hero" id="hero" aria-labelledby="hero-h">
 <div class="hstat">
   <h2 id="hero-h">全体の合計</h2>
   <div><span class="big">{now["count"]:,}</span><span class="unit">件</span></div>
-  <div class="asof">{e(today)} 確認時点</div>
-  <ul class="hd" aria-label="合計の増減">{chg}</ul>
-  <ul aria-label="種別ごとの内訳（増減は前回の記録から）">{kinds}</ul>
+  <div class="asof">各自治体の最新の資料の合計（{e(today)} 確認）</div>
+  <ul class="hd" aria-label="合計の増減（資料の日付で）">{chg}</ul>
+  <ul aria-label="種別ごとの内訳（増減はグラフの期間）">{kinds}</ul>
 </div>
 <div class="hchart" data-d='{e(json.dumps(data, ensure_ascii=False))}'></div>
 <div class="tip" hidden></div>
-<p class="note hnote">地図に載せている全自治体の件数の合計です。横軸は<b>記録した日</b>（毎週の確認で、どこかの自治体の一覧が変わっていた日）です。自治体ごとに一覧の更新時期が違うため、新しい一覧が出た後の確認日にまとめて増減が表れます（数か月分の変化が一度に出ることもあります）。</p>
+<p class="note hnote">地図に載せている全自治体の件数の合計です。横軸は下の自治体ごとのグラフと同じ<b>資料の日付</b>で、どこかの自治体の資料の日付が新しくなり件数が変わったときだけ線が動きます（点にマウスを重ねると、その日に件数が変わった自治体が出ます）。前の版が分からない自治体は、分かっている一番古い件数のままとして足しています。種別ごとの内訳の増減は、グラフの期間のものです。</p>
 </section>"""
-    rows = [
-        f'<tr><td>{e(t["date"])}</td><td class="num"><b>{t["count"]:,}</b></td>'
-        + "".join(f'<td class="num">{t["kinds"][k]:,}</td>' for k, _ in KINDS)
-        + f'<td class="num">{"" if t["diff"] is None else _signed(t["diff"])}</td></tr>'
-        for t in tl
-    ]
+    rows = []
+    prev = None
+    for t in tl:
+        rows.append(f'<tr><td>{e(t["date"])}</td><td class="num"><b>{t["count"]:,}</b></td>'
+                    + "".join(f'<td class="num">{t["kinds"][k]:,}</td>' for k, _ in KINDS)
+                    + f'<td class="num">{"" if prev is None else _signed(t["count"] - prev)}</td></tr>')
+        prev = t["count"]
     return hero, "\n".join(rows)
 
 
 def render_page(table: list[dict], history: list[dict], today: str, prefs: list[str], cats: list[str],
                 site_url: str) -> str:
     e = html.escape
+    all_vs = {t["code"]: versions(history, t["code"]) for t in table}
+    x0, x1 = axis_range([vs for vs in all_vs.values() if vs])
     items = []
     up = down = flat = 0
     last_pref = None
     order = 0
     kinds_used: list[int] = []
+    names: dict[str, str] = {}
     for t in table:
-        vs = versions(history, t["code"])
+        vs = all_vs[t["code"]]
         if not vs:
             continue
         kind = cats.index(t["kind"]) if t["kind"] in cats else 2
@@ -256,8 +295,7 @@ def render_page(table: list[dict], history: list[dict], today: str, prefs: list[
         if len(vs) >= 2 and now:
             d = vs[-1]["count"] - vs[-2]["count"]
             up, down, flat = up + (d > 0), down + (d < 0), flat + (d == 0)
-            cls = "up" if d > 0 else "down" if d < 0 else "zero"
-            chg = (f'<span class="{cls}">{d:+,}</span> <span class="pct">{_pct(d, vs[-2]["count"])}</span>'
+            chg = (f'{_signed(d)} <span class="pct">{_pct(d, vs[-2]["count"]) if d else ""}</span>'
                    f'<span class="since">前回 {e(vs[-2]["date"])} は {vs[-2]["count"]:,}件</span>')
             diff_attr = str(d)
         else:
@@ -269,12 +307,13 @@ def render_page(table: list[dict], history: list[dict], today: str, prefs: list[
         link = t["page"] or t["doc"]
         src = f'<a class="src" href="{e(link)}" target="_blank" rel="noopener">出典</a>' if link else ""
         name = f'{t["muni"]} {kind_label}'
+        names[t["code"]] = name
         items.append(
             f'<article class="card" id="{e(t["code"])}" data-pref="{t["pref"]}" data-kind="{kind}" data-diff="{diff_attr}"'
             f' data-order="{order}">'
             f'<h3><span class="dot c{kind}"></span>{e(t["muni"])}<span class="kind">{e(kind_label)}</span>{src}</h3>'
             f'<div class="val">{val}</div><div class="chg">{chg}</div>'
-            f'{chart_svg(vs, today, name)}<div class="tip" hidden></div></article>'
+            f'{chart_svg(vs, x0, x1, name)}<div class="tip" hidden></div></article>'
         )
 
     pref_opts = "".join(f'<option value="{i}">{e(p)}</option>' for i, p in enumerate(prefs)
@@ -287,14 +326,17 @@ def render_page(table: list[dict], history: list[dict], today: str, prefs: list[
     rows = []
     for t in table:
         prev = None
-        for v in versions(history, t["code"]):
-            d = "" if prev is None else f'<span class="{"up" if v["count"] > prev else "down" if v["count"] < prev else "zero"}">{v["count"] - prev:+,}</span>'
+        for v in all_vs[t["code"]]:
+            d = "" if prev is None else _signed(v["count"] - prev)
             rows.append(f'<tr><td>{e(prefs[t["pref"]])}</td><td>{e(t["muni"])}</td><td>{e(t["kind"])}</td>'
                         f'<td>{e(v["doc"])}</td><td class="num">{v["count"]:,}</td><td class="num">{d}</td>'
                         f'<td>{e(v["recorded"])}</td></tr>')
             prev = v["count"]
-    hero, total_rows = render_hero(history, today)
+    # 全体の合計は、地図の合計とそろうよう、今の件数がある(データなしでない)自治体・種別だけで出す
+    per_code = {t["code"]: all_vs[t["code"]] for t in table if t["count"] and all_vs[t["code"]]}
+    hero, total_rows = render_hero(per_code, names, x0, x1, today)
     return TEMPLATE.format(
+        x0=f"{x0:%Y/%m/%d}", x1=f"{x1:%Y/%m/%d}",
         today=e(today), start=e(full_snapshots(history)[0]["date"]), items="\n".join(items), pref_opts=pref_opts,
         kind_btns=kind_btns, up=up, down=down, flat=flat, rows="\n".join(rows), csv=e(CSV_NAME), site_url=site_url,
         hero=hero, total_rows=total_rows,
@@ -387,16 +429,16 @@ svg.ch{{display:block;width:100%;height:auto;margin-top:4px;overflow:visible;out
 svg.ch:focus-visible{{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}}
 svg.ch .grid line{{stroke:var(--line);stroke-width:1}}
 svg.ch text{{fill:var(--sub);font-size:11px;font-variant-numeric:tabular-nums}}
-svg.ch polyline{{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}}
-svg.ch .rest{{stroke-width:2;stroke-linecap:round;opacity:.3}}
+svg.ch .line{{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}}
+svg.ch .old{{stroke:var(--card);stroke-width:1.5;stroke-linejoin:round}}
 svg.ch .dots circle{{stroke:var(--card);stroke-width:2}}
 svg.ch .cross{{stroke:var(--sub);stroke-width:1}}
 svg.ch .hl{{fill:none;stroke-width:2}}
 svg.ch .tk{{stroke:var(--line);stroke-width:1}}
 .card[data-kind="0"] svg.ch{{--s:var(--c0)}}.card[data-kind="1"] svg.ch{{--s:var(--c1)}}
 .card[data-kind="2"] svg.ch{{--s:var(--c2)}}.card[data-kind="3"] svg.ch{{--s:var(--c3)}}
-svg.ch polyline,svg.ch .rest,svg.ch .hl{{stroke:var(--s)}}
-svg.ch .dots circle{{fill:var(--s)}}
+svg.ch .line,svg.ch .hl{{stroke:var(--s)}}
+svg.ch .dots circle,svg.ch .old{{fill:var(--s)}}
 .tip{{position:absolute;z-index:5;pointer-events:none;background:var(--card);color:var(--ink);border:1px solid var(--line);
   border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.18);padding:5px 9px;font-size:.78rem;line-height:1.4;white-space:nowrap;
   transform:translate(-50%,calc(-100% - 10px))}}
@@ -428,7 +470,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
   <div class="summary" aria-label="直近の一覧での増減">
     <span>直近の一覧で 増えた <b class="up">{up}</b></span><span>減った <b class="down">{down}</b></span><span>変わらない・変化の記録なし <b>{flat}</b></span><span class="note" style="margin:0">（自治体・種別の数）</span>
   </div>
-  <p class="note">グラフの横軸は<b>資料の日付</b>（自治体の一覧が「いつ時点」のものか）、右端は最終確認日です。縦軸はグラフごとに目盛りが違い、小さな増減も見えるよう0から始めていません（数字は目盛りでご確認ください）。点にマウスを重ねる（スマホは押す）と、その時点の件数が出ます。<br>
+  <p class="note">グラフの横軸は<b>全グラフ共通の資料の日付</b>（自治体の一覧が「いつ時点」のものか。{x0}〜{x1}）です。線は、その自治体の資料の日付が新しくなったときだけ動き、一番新しい資料の日付で終わります。{x0}より前の古い資料は、左端に◀で置いています。縦軸はグラフごとに目盛りが違い、小さな増減も見えるよう0から始めていません（数字は目盛りでご確認ください）。点にマウスを重ねる（スマホは押す）と、その時点の件数が出ます。<br>
   自動で読み取っているため、同じ日付の一覧の読み取りを直したときは、記録も直した件数に置き換えています。すべての記録は <a href="data/{csv}" download>表（CSV・エクセルで開けます）</a> でダウンロードできます。</p>
 </section>
 
@@ -450,9 +492,9 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 
 <details class="all">
 <summary>すべての記録を表で見る</summary>
-<p class="note"><b>全体の合計</b>（記録した日ごと）</p>
+<p class="note"><b>全体の合計</b>（資料の日付で、件数が変わった日ごと）</p>
 <div class="tablewrap"><table>
-<thead><tr><th>記録した日</th><th style="text-align:right">合計</th><th style="text-align:right">民泊</th><th style="text-align:right">特区民泊</th><th style="text-align:right">旅館業</th><th style="text-align:right">前回の記録から</th></tr></thead>
+<thead><tr><th>資料の日付</th><th style="text-align:right">合計</th><th style="text-align:right">民泊</th><th style="text-align:right">特区民泊</th><th style="text-align:right">旅館業</th><th style="text-align:right">前の行から</th></tr></thead>
 <tbody>
 {total_rows}
 </tbody></table></div>
@@ -567,10 +609,10 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
         m = Date.UTC(md.getUTCFullYear(), md.getUTCMonth() + 1, 1);
       }}
       s += '<line class="cross" x1="0" x2="0" y1="' + pt + '" y2="' + (h - pb) + '" visibility="hidden"/>';
-      const [lx, ly] = P[P.length - 1];
-      if (lx < w - pr - 1) s += '<line class="rest" x1="' + lx + '" x2="' + (w - pr) + '" y1="' + ly + '" y2="' + ly + '"/>';
-      s += '<polyline points="' + P.map(p => p[0] + ',' + p[1]).join(' ') + '"/>'
-        + '<g class="dots">' + P.map(p => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="4"/>').join('') + '</g>'
+      // 合計は資料の日付が新しくなったときだけ変わるので階段の形にし、一番新しい資料の日付までのばす
+      const steps = P.slice(1).map(p => ' H' + p[0] + ' V' + p[1]).join('');
+      s += '<path class="line" d="M' + P[0][0] + ',' + P[0][1] + steps + ' H' + (w - pr) + '"/>'
+        + '<g class="dots">' + P.map(p => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.5"/>').join('') + '</g>'
         + '<circle class="hl" r="6" cx="0" cy="0" visibility="hidden"/>'
         + '<text x="' + pl + '" y="' + (h - 6) + '" text-anchor="start">' + D.start + '</text>'
         + '<text x="' + (w - pr) + '" y="' + (h - 6) + '" text-anchor="end">' + D.end + '</text>';
