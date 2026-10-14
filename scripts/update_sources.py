@@ -295,8 +295,23 @@ def facility_key(rec: dict) -> tuple:
     return (n("名称"), n("所在地"), n("方書"))
 
 
+def pick_col(rec: dict, name: str) -> str:
+    """全体一覧の列 name に当たる値を、追加情報の1行から取り出す。
+    枚方市のように「施設所在地」と「所在地」で列名が違っても、施設の名称・所在地・方書の列どうしは対応させる。
+    """
+    if name in rec:
+        return rec[name]
+    for word in ("名称", "所在地", "方書"):
+        if key_col([name], word):
+            col = key_col(rec.keys(), word)
+            return rec[col] if col else ""
+    return ""
+
+
 def squash(v) -> str:
     """全角/半角・空白・改行の違いをそろえる(PDFから読むと途中に改行が入るため)。"""
+    if isinstance(v, float) and v != v:
+        return ""  # エクセル・CSVを表として読んだときの空欄(NaN)
     return re.sub(r"\s+", "", unicodedata.normalize("NFKC", str(v or "")))
 
 
@@ -366,10 +381,13 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
                 rec = dict(zip(dh, cells))
                 if rec.get("業種") and "旅館" not in rec["業種"]:
                     continue  # 理容所・美容所などは対象外
+                addr_col = key_col(rec.keys(), "所在地")
+                if addr_col and not squash(rec[addr_col]) and not squash(rec.get("許可番号")):
+                    continue  # 港区の「旅館業施設新規一覧(令和8年8月31日現在) / Ver202608」のような表の終わりの注記
                 if section == "新規":
                     if any(same(x, rec) for x in recs):
                         continue
-                    new = [rec.get(h, "") for h in header]
+                    new = [pick_col(rec, h) for h in header]
                     rows.append(new)
                     recs.append(dict(zip(header, new)))
                     added += 1
