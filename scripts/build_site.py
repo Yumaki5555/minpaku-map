@@ -2,7 +2,9 @@
 
 - docs/data/points.json : 地図に載せる全施設(位置・施設名・住所・種別・日付)
 - docs/data/history.json: 自治体ごとの件数と資料の日付の移り変わり(前回の一覧からの増減の表示に使う)
+- docs/data/件数の記録.csv: 上の記録を、自治体・種別と資料の日付ごとに1行ずつ並べた表(エクセル用)
 - docs/index.html       : 地図と件数表のページ
+- docs/trend.html       : 自治体ごとの件数の推移グラフのページ(trend.py)
 
 使い方: python scripts/build_site.py
 """
@@ -19,6 +21,7 @@ from datetime import datetime, timedelta, timezone
 sys.path.insert(0, os.path.dirname(__file__))
 from addresses import PREF_BY_CODE, collect_all, load_registry  # noqa: E402
 from geocode import load_cache  # noqa: E402
+import trend  # noqa: E402
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOCS = os.path.join(BASE_DIR, "docs")
@@ -171,6 +174,10 @@ def main() -> None:
     write_json(HISTORY_PATH, history)
     for t in table:
         t["diff"], t["prev_date"] = previous_version(history, t["code"])
+    with open_retry(os.path.join(DATA, trend.CSV_NAME), "w", encoding="utf-8-sig", newline="") as f:
+        f.write(trend.records_csv(table, history, PREFS))
+    with open_retry(os.path.join(DOCS, "trend.html"), "w", encoding="utf-8") as f:
+        f.write(trend.render_page(table, history, today, PREFS, CATS, SITE_URL))
 
     total = sum(t["count"] for t in table)
     by_cat = {c: sum(len(p[5]) for p in pins if CATS[p[2]] == c) for c in CATS}
@@ -186,23 +193,17 @@ def main() -> None:
 
 
 def previous_version(history: list[dict], code: str) -> tuple[int | None, str]:
-    """その自治体の前回の一覧(件数か資料の日付が今と違う、一番新しい記録)と比べた増減と、前回の資料の日付。
+    """その自治体の前回の一覧(件数か資料の日付が今と違う版)と比べた増減と、前回の資料の日付。
 
     自治体ごとに一覧を更新する時期が違うので、地図の更新日ではなく自治体の一覧の版で比べる。
-    資料の日付の記録がない古い回は件数だけで比べ、日付が分からなければ記録した日を使う。
-    件数0(データなし・読み取り失敗)の回は比べる相手にしない。
+    版の分け方は推移のグラフ(trend.versions)と同じにして、表とグラフの数字をそろえる。
     """
-    now = history[-1]
-    count, date = now["counts"].get(code, 0), now.get("dates", {}).get(code)
-    if not count:
+    if not history[-1]["counts"].get(code, 0):
         return None, ""
-    for snap in reversed(history[:-1]):
-        c, d = snap["counts"].get(code, 0), snap.get("dates", {}).get(code)
-        if not c:
-            continue
-        if c != count or (d and date and d != date):
-            return count - c, d or snap["date"]
-    return None, ""
+    vs = trend.versions(history, code)
+    if len(vs) < 2:
+        return None, ""
+    return vs[-1]["count"] - vs[-2]["count"], vs[-2]["date"]
 
 
 def render_src_date(src_date: str, basis: str) -> str:
@@ -280,6 +281,8 @@ def render(table, total, by_cat, today, not_found, ranks, by_source) -> str:
         if t["diff"]:
             diff = (f'<span class="{"up" if t["diff"] > 0 else "down"}">{t["diff"]:+,}</span>'
                     f'<span class="since">（前回{e(t["prev_date"])}より）</span>')
+        if t["count"]:
+            diff += f'<a class="tl" href="trend.html#{e(t["code"])}" title="{e(t["muni"])}の件数の推移をグラフで見る">推移</a>'
         note = f'<div class="memo">{e(t["memo"])}</div>' if t["memo"] else ""
         src_date = render_src_date(t["src_date"], t["date_basis"])
         rows.append(
@@ -320,7 +323,7 @@ TEMPLATE = """<!DOCTYPE html>
 @media (prefers-color-scheme: dark){{
   :root:not([data-theme="light"]){{
     --bg:#16161a;--card:#202026;--ink:#ecebe8;--sub:#a8a59f;--line:#34343c;--accent:#7aa2ff;--chip:#2c2c33;
-    --c0:#e66767;--c1:#9085e9;--c2:#2bb5a6;--c3:#c98500;--up:#f87171;--down:#7aa2ff;
+    --c0:#e66767;--c1:#9085e9;--c2:#25a898;--c3:#c98500;--up:#f87171;--down:#7aa2ff;
   }}
 }}
 *{{box-sizing:border-box}}
@@ -401,6 +404,8 @@ th{{background:var(--chip);font-weight:600;position:sticky;top:0}}
 td.num{{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}}
 .up{{color:var(--up);font-weight:700}}.down{{color:var(--down);font-weight:700}}
 .since{{display:block;font-size:.78rem;color:var(--sub);font-weight:400}}
+a.tl{{display:block;font-size:.75rem}}
+.trendlink{{display:inline-block;margin:0 0 8px;font-weight:700}}
 .none{{color:var(--sub)}}
 .memo{{font-size:.78rem;color:var(--sub)}}
 tr.hide{{display:none}}
@@ -437,7 +442,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 <div class="wrap">
 <header>
   <h1>🏠 民泊・旅館業マップ</h1>
-  <p class="lead">首都圏・大阪の民泊・旅館業 <b>{total}件</b> を地図にしました。毎週月曜に自動更新（最終更新 {today}）。</p>
+  <p class="lead">首都圏・大阪の民泊・旅館業 <b>{total}件</b> を地図にしました。毎週月曜に自動更新（最終更新 {today}）。<a href="trend.html">📈 自治体ごとの件数の推移</a></p>
   <div class="caution">
     <p class="ct">このマップについて</p>
     <ul>
@@ -478,6 +483,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 </div>
 <div>
 <h2>自治体ごとの件数</h2>
+<a class="trendlink" href="trend.html">📈 自治体ごとの件数の推移をグラフで見る</a>
 <p class="note">増減は、自治体ごとに前回の一覧と比べた件数の差です（自治体によって一覧の更新時期が違うため、比べた前回の資料の日付をかっこ内に書いています）。「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。<br>「資料の日付」は、各自治体の資料（PDF・エクセルなど）に書かれた「〇年〇月〇日現在」などの日付です。資料に日付が書かれていないものは、ファイル自体に記録された保存日（「ファイルの日付」と表示）を載せています。</p>
 <div class="tablewrap"><table>
 <thead><tr><th>自治体</th><th>種別</th><th style="text-align:right">件数</th><th style="text-align:right">増減</th><th>資料の日付</th><th>出典</th></tr></thead>
