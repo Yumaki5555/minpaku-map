@@ -1,7 +1,7 @@
 """地図ページ(docs/)を作る。
 
 - docs/data/points.json : 地図に載せる全施設(位置・施設名・住所・種別・日付)
-- docs/data/history.json: 自治体ごとの件数の移り変わり(前回からの増減の表示に使う)
+- docs/data/history.json: 自治体ごとの件数と資料の日付の移り変わり(前回の一覧からの増減の表示に使う)
 - docs/index.html       : 地図と件数表のページ
 
 使い方: python scripts/build_site.py
@@ -159,20 +159,18 @@ def main() -> None:
             "mymap": r.get("Googleマイマップ", ""), "memo": r.get("メモ", "") if not st.get("with_addr") else "",
         })
 
+    # 件数と資料の日付を記録しておき、自治体ごとに「前回の一覧」からの増減を出す
     history = load_json(HISTORY_PATH, [])
     current = {t["code"]: t["count"] for t in table}
-    if not history or history[-1]["counts"] != current:
+    dates = {t["code"]: t["src_date"] for t in table if t["src_date"]}
+    if not history or history[-1]["counts"] != current or history[-1].get("dates") != dates:
         if history and history[-1]["date"] == today:
-            history[-1]["counts"] = current
+            history[-1].update(counts=current, dates=dates)
         else:
-            history.append({"date": today, "counts": current})
+            history.append({"date": today, "counts": current, "dates": dates})
     write_json(HISTORY_PATH, history)
-    prev = history[-2] if len(history) >= 2 else None
     for t in table:
-        if prev and t["code"] in prev["counts"]:
-            t["diff"] = t["count"] - prev["counts"][t["code"]]
-        else:
-            t["diff"] = None
+        t["diff"], t["prev_date"] = previous_version(history, t["code"])
 
     total = sum(t["count"] for t in table)
     by_cat = {c: sum(len(p[5]) for p in pins if CATS[p[2]] == c) for c in CATS}
@@ -180,11 +178,31 @@ def main() -> None:
         ("民泊", "特区民泊を含む", 0, ranking(collected["points"], reg_by_code, {"民泊", "特区民泊"})),
         ("旅館・ホテル", "簡易宿所を含む", 2, ranking(collected["points"], reg_by_code, {"旅館・ホテル", "簡易宿所"})),
     ]
-    page = render(table, total, by_cat, today, prev["date"] if prev else "", not_found, ranks, by_source)
+    page = render(table, total, by_cat, today, not_found, ranks, by_source)
     with open_retry(os.path.join(DOCS, "index.html"), "w", encoding="utf-8") as f:
         f.write(page)
     open(os.path.join(DOCS, ".nojekyll"), "a").close()
     print(f"地図ページを作りました: ピン {len(pins)}個 / 施設 {sum(by_cat.values())}件 / 位置不明 {not_found}件")
+
+
+def previous_version(history: list[dict], code: str) -> tuple[int | None, str]:
+    """その自治体の前回の一覧(件数か資料の日付が今と違う、一番新しい記録)と比べた増減と、前回の資料の日付。
+
+    自治体ごとに一覧を更新する時期が違うので、地図の更新日ではなく自治体の一覧の版で比べる。
+    資料の日付の記録がない古い回は件数だけで比べ、日付が分からなければ記録した日を使う。
+    件数0(データなし・読み取り失敗)の回は比べる相手にしない。
+    """
+    now = history[-1]
+    count, date = now["counts"].get(code, 0), now.get("dates", {}).get(code)
+    if not count:
+        return None, ""
+    for snap in reversed(history[:-1]):
+        c, d = snap["counts"].get(code, 0), snap.get("dates", {}).get(code)
+        if not c:
+            continue
+        if c != count or (d and date and d != date):
+            return count - c, d or snap["date"]
+    return None, ""
 
 
 def render_src_date(src_date: str, basis: str) -> str:
@@ -243,7 +261,7 @@ def render_method(by_source: dict, not_found: int, today: str) -> str:
 </details>"""
 
 
-def render(table, total, by_cat, today, prev_date, not_found, ranks, by_source) -> str:
+def render(table, total, by_cat, today, not_found, ranks, by_source) -> str:
     e = html.escape
     rows = []
     last_pref = None
@@ -260,7 +278,8 @@ def render(table, total, by_cat, today, prev_date, not_found, ranks, by_source) 
             num = f'{t["count"]:,}'
         diff = ""
         if t["diff"]:
-            diff = f'<span class="{"up" if t["diff"] > 0 else "down"}">{t["diff"]:+,}</span>'
+            diff = (f'<span class="{"up" if t["diff"] > 0 else "down"}">{t["diff"]:+,}</span>'
+                    f'<span class="since">（前回{e(t["prev_date"])}より）</span>')
         note = f'<div class="memo">{e(t["memo"])}</div>' if t["memo"] else ""
         src_date = render_src_date(t["src_date"], t["date_basis"])
         rows.append(
@@ -271,11 +290,10 @@ def render(table, total, by_cat, today, prev_date, not_found, ranks, by_source) 
         f'<button class="tagbtn" data-cat="{i}" aria-pressed="true"><span class="dot c{i}"></span>{e(c)}<span class="n">{by_cat[c]:,}</span></button>'
         for i, c in enumerate(CATS)
     )
-    diff_note = f"増減は前回（{e(prev_date)}）との比較です。" if prev_date else ""
     nf_note = f"住所から位置を特定できなかった {not_found:,} 件は地図に表示されていません。" if not_found else ""
     return TEMPLATE.format(
         total=f"{total:,}", today=e(today), cat_btns=cat_btns, rows="\n".join(rows),
-        diff_note=diff_note, nf_note=nf_note, method=render_method(by_source, not_found, today), site_url=SITE_URL, area=AREA, ranks=render_ranks(ranks),
+        nf_note=nf_note, method=render_method(by_source, not_found, today), site_url=SITE_URL, area=AREA, ranks=render_ranks(ranks),
     )
 
 
@@ -378,9 +396,11 @@ select{{padding:6px 10px;border:1px solid var(--line);border-radius:8px;backgrou
 table{{border-collapse:collapse;width:100%;font-size:.88rem;min-width:620px}}
 th,td{{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;white-space:nowrap}}
 td:last-child{{white-space:normal;width:100%}}
+td:last-child a{{white-space:nowrap}}
 th{{background:var(--chip);font-weight:600;position:sticky;top:0}}
 td.num{{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}}
 .up{{color:var(--up);font-weight:700}}.down{{color:var(--down);font-weight:700}}
+.since{{display:block;font-size:.78rem;color:var(--sub);font-weight:400}}
 .none{{color:var(--sub)}}
 .memo{{font-size:.78rem;color:var(--sub)}}
 tr.hide{{display:none}}
@@ -458,7 +478,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 </div>
 <div>
 <h2>自治体ごとの件数</h2>
-<p class="note">{diff_note}「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。<br>「資料の日付」は、各自治体の資料（PDF・エクセルなど）に書かれた「〇年〇月〇日現在」などの日付です。資料に日付が書かれていないものは、ファイル自体に記録された保存日（「ファイルの日付」と表示）を載せています。</p>
+<p class="note">増減は、自治体ごとに前回の一覧と比べた件数の差です（自治体によって一覧の更新時期が違うため、比べた前回の資料の日付をかっこ内に書いています）。「データなし」は、自治体が一覧を公開していない、またはファイルを自動で読み取れなかったものです。<br>「資料の日付」は、各自治体の資料（PDF・エクセルなど）に書かれた「〇年〇月〇日現在」などの日付です。資料に日付が書かれていないものは、ファイル自体に記録された保存日（「ファイルの日付」と表示）を載せています。</p>
 <div class="tablewrap"><table>
 <thead><tr><th>自治体</th><th>種別</th><th style="text-align:right">件数</th><th style="text-align:right">増減</th><th>資料の日付</th><th>出典</th></tr></thead>
 <tbody id="tbody">
