@@ -278,8 +278,11 @@ def render(table, total, by_cat, today, not_found, ranks, by_source) -> str:
         else:
             num = f'{t["count"]:,}'
         diff = ""
-        if t["diff"]:
-            diff = (f'<span class="{"up" if t["diff"] > 0 else "down"}">{t["diff"]:+,}</span>'
+        if t["diff"] is not None:
+            # 前回の一覧と同じ件数のときも「±0」と前回の日付を出す(空欄だと前回が分からないのか区別できない)
+            cls = "up" if t["diff"] > 0 else "down" if t["diff"] < 0 else "zero"
+            sign = f'{t["diff"]:+,}' if t["diff"] else "±0"
+            diff = (f'<span class="{cls}">{sign}</span>'
                     f'<span class="since">（前回{e(t["prev_date"])}より）</span>')
         if t["count"]:
             diff += f'<a class="tl" href="trend.html#{e(t["code"])}" title="{e(t["muni"])}の件数の推移をグラフで見る">推移</a>'
@@ -402,7 +405,7 @@ td:last-child{{white-space:normal;width:100%}}
 td:last-child a{{white-space:nowrap}}
 th{{background:var(--chip);font-weight:600;position:sticky;top:0}}
 td.num{{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}}
-.up{{color:var(--up);font-weight:700}}.down{{color:var(--down);font-weight:700}}
+.up{{color:var(--up);font-weight:700}}.down{{color:var(--down);font-weight:700}}.zero{{color:var(--sub);font-weight:700}}
 .since{{display:block;font-size:.78rem;color:var(--sub);font-weight:400}}
 a.tl{{display:block;font-size:.75rem}}
 .trendlink{{display:inline-block;margin:0 0 8px;font-weight:700}}

@@ -4,6 +4,8 @@
 - docs/trend.html        : 全体の合計と、自治体・種別ごとの件数の推移グラフのページ
 
 元になる記録は docs/data/history.json(地図を作るたびに、件数か資料の日付が変わっていれば1回分を書き足す)。
+先頭の "partial": true の回は、記録を始める前の版(手元に残っていた資料やウェブ魚拓の資料を数え直したもの)で、
+一部の自治体の分しか無いため、自治体ごとの版には使うが、全体の合計には使わない。
 build_site.py から呼ばれる。
 """
 from __future__ import annotations
@@ -50,6 +52,11 @@ def kind_of(code: str) -> int:
     return 1 if code.endswith("民特") else 0 if code.endswith("民") else 2
 
 
+def full_snapshots(history: list[dict]) -> list[dict]:
+    """全自治体の件数がそろっている回(記録を始める前の版を数え直した "partial" の回を除く)。"""
+    return [s for s in history if not s.get("partial")]
+
+
 def totals(history: list[dict]) -> list[dict]:
     """記録した日ごとの全体の合計と、種別ごとの内訳。
 
@@ -58,7 +65,7 @@ def totals(history: list[dict]) -> list[dict]:
     """
     out: list[dict] = []
     last: dict[str, int] = {}
-    for snap in history:
+    for snap in full_snapshots(history):
         cur = {c: n or last.get(c, 0) for c, n in snap["counts"].items()}
         cur = {c: n for c, n in cur.items() if n}
         kinds = {k: 0 for k, _ in KINDS}
@@ -288,7 +295,7 @@ def render_page(table: list[dict], history: list[dict], today: str, prefs: list[
             prev = v["count"]
     hero, total_rows = render_hero(history, today)
     return TEMPLATE.format(
-        today=e(today), start=e(history[0]["date"]), items="\n".join(items), pref_opts=pref_opts,
+        today=e(today), start=e(full_snapshots(history)[0]["date"]), items="\n".join(items), pref_opts=pref_opts,
         kind_btns=kind_btns, up=up, down=down, flat=flat, rows="\n".join(rows), csv=e(CSV_NAME), site_url=site_url,
         hero=hero, total_rows=total_rows,
     )
