@@ -1,12 +1,12 @@
 {
   "row_count": 37,
-  "date": "20261014",
+  "date": "20261019",
   "header": [
     "No",
     "施設所在地"
   ],
   "source_url": "https://www.city.sakai.lg.jp/kenko/kankyoeisei/taisaku/ryokankeihatu.files/R8.9.30jyuuhaku.pdf",
   "normalized_files": [
-    "data/堺市/民泊/整形済み/20261014_堺市_民泊_normalized.csv"
+    "data/堺市/民泊/整形済み/20261019_堺市_民泊_normalized.csv"
   ]
 }

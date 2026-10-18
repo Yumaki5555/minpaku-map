@@ -1,6 +1,6 @@
 {
   "row_count": 1566,
-  "date": "20261014",
+  "date": "20261019",
   "header": [
     "",
     "所在地",
@@ -12,6 +12,6 @@
   ],
   "source_url": "https://www.city.taito.lg.jp/kenchiku/jutaku/eisei/shisetsuichiran.files/20260930.pdf",
   "normalized_files": [
-    "data/台東区/民泊/整形済み/20261014_台東区_民泊_normalized.csv"
+    "data/台東区/民泊/整形済み/20261019_台東区_民泊_normalized.csv"
   ]
 }

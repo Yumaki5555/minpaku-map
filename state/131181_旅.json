@@ -1,6 +1,6 @@
 {
   "row_count": 98,
-  "date": "20261014",
+  "date": "20261019",
   "header": [
     "種別",
     "施設名称",
@@ -14,9 +14,9 @@
     "許可番号",
     "許可年月日"
   ],
-  "source_url": "https://www.city.arakawa.tokyo.jp/documents/21504/r080915_ryokangyo.xlsx",
+  "source_url": "https://www.city.arakawa.tokyo.jp/documents/21504/r081015_ryokangyo.xlsx",
   "normalized_files": [
-    "data/荒川区/旅館業/整形済み/20261014_荒川区_旅館業_旅館ホテル等_normalized.csv",
-    "data/荒川区/旅館業/整形済み/20261014_荒川区_旅館業_簡易宿所_normalized.csv"
+    "data/荒川区/旅館業/整形済み/20261019_荒川区_旅館業_旅館ホテル等_normalized.csv",
+    "data/荒川区/旅館業/整形済み/20261019_荒川区_旅館業_簡易宿所_normalized.csv"
   ]
 }
