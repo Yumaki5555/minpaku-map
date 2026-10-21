@@ -1,9 +1,9 @@
-# 毎週月曜の朝6時（日本時間）に、各自治体の民泊・旅館業の一覧を集め直し、地図ページを作り直して公開する
-name: weekly-update
+# 毎週月曜と木曜の朝6時（日本時間）に、各自治体の民泊・旅館業の一覧を集め直し、地図ページを作り直して公開する
+name: 定期更新（月・木）
 
 on:
   schedule:
-    - cron: "0 21 * * 0"   # 世界標準時の日曜21時 = 日本時間の月曜朝6時
+    - cron: "0 21 * * 0,3"   # 世界標準時の日曜・水曜21時 = 日本時間の月曜・木曜朝6時
   workflow_dispatch:        # 手動でも実行できるようにする
 
 permissions:
@@ -40,7 +40,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A registry.csv state geocode_cache.json docs 最新の実行結果.txt
-          git diff --cached --quiet || git commit -m "毎週の自動更新 $(TZ=Asia/Tokyo date +%Y-%m-%d)"
+          git diff --cached --quiet || git commit -m "定期の自動更新 $(TZ=Asia/Tokyo date +%Y-%m-%d)"
           # 実行中に手作業の変更が保存されていても失敗しないよう、最新を取り込んでから保存する
           # (取り込みでぶつかった地図データなどは、今回の自動更新の結果を優先する)
           git pull --rebase -X theirs

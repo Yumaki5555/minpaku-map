@@ -361,7 +361,7 @@ TEMPLATE = """<!DOCTYPE html>
 <meta name="description" content="首都圏・大阪の自治体が公表している民泊・旅館業の件数を、一覧が更新されるたびに記録し、自治体ごとの増減をグラフにしています。">
 <meta property="og:type" content="website">
 <meta property="og:title" content="民泊・旅館業の件数の推移（全体の合計と自治体ごと）">
-<meta property="og:description" content="自治体の一覧が更新されるたびに件数を記録し、増減をグラフにしています。毎週自動更新。">
+<meta property="og:description" content="自治体の一覧が更新されるたびに件数を記録し、増減をグラフにしています。週2回自動更新。">
 <meta property="og:url" content="{site_url}trend.html">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>">
@@ -470,7 +470,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 <header>
   <a class="back" href="./">← 民泊・旅館業マップに戻る</a>
   <h1>📈 民泊・旅館業の件数の推移</h1>
-  <p class="lead">地図に載せている民泊・旅館業の件数を、自治体の一覧が更新されるたびに記録しています（記録開始 {start}／最終確認 <b>{today}</b>・毎週月曜に自動更新）。</p>
+  <p class="lead">地図に載せている民泊・旅館業の件数を、自治体の一覧が更新されるたびに記録しています（記録開始 {start}／最終確認 <b>{today}</b>・毎週月曜・木曜に自動更新）。</p>
 </header>
 
 {hero}

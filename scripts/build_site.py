@@ -257,7 +257,7 @@ def render_method(by_source: dict, not_found: int, today: str) -> str:
 <ul>
 <li>2026年10月1日に全住所を両方で調べて比べたところ、国土地理院が「番地まで分かった」と答えた住所でも約900件が200m以上（最大で約13km）ずれていました。山あいや海沿いなどの地番の地域で、町の中心付近を返すことがあるためです。そこで、条件を満たすYahoo!の位置を優先しています。</li>
 <li>一方でYahoo!は、「墨田区墨田3丁目」で問い合わせると「墨田区緑3丁目」を返すなど、別の町や別の番地を答えることがあります。そのため、番地の数字と町名の両方が一致したときだけ使っています。</li>
-<li>新しく加わった住所も、毎週の更新で同じ方法で調べています。この判断は、今後の確認結果によって見直すことがあります。</li>
+<li>新しく加わった住所も、定期の更新で同じ方法で調べています。この判断は、今後の確認結果によって見直すことがあります。</li>
 </ul>
 </details>"""
 
@@ -309,10 +309,10 @@ TEMPLATE = """<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>民泊・旅館業マップ｜首都圏・大阪</title>
-<meta name="description" content="{area}の自治体が公表している民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。毎週自動更新。">
+<meta name="description" content="{area}の自治体が公表している民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。週2回自動更新。">
 <meta property="og:type" content="website">
 <meta property="og:title" content="民泊・旅館業マップ｜{total}件を地図で">
-<meta property="og:description" content="{area}の自治体が公表している民泊・特区民泊・旅館業の施設を地図にまとめました。毎週自動更新。">
+<meta property="og:description" content="{area}の自治体が公表している民泊・特区民泊・旅館業の施設を地図にまとめました。週2回自動更新。">
 <meta property="og:url" content="{site_url}">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
@@ -445,7 +445,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 <div class="wrap">
 <header>
   <h1>🏠 民泊・旅館業マップ</h1>
-  <p class="lead">首都圏・大阪の民泊・旅館業 <b>{total}件</b> を地図にしました。毎週月曜に自動更新（最終更新 {today}）。<a href="trend.html">📈 自治体ごとの件数の推移</a></p>
+  <p class="lead">首都圏・大阪の民泊・旅館業 <b>{total}件</b> を地図にしました。毎週月曜・木曜に自動更新（最終更新 {today}）。<a href="trend.html">📈 自治体ごとの件数の推移</a></p>
   <div class="caution">
     <p class="ct">このマップについて</p>
     <ul>
