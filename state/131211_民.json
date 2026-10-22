@@ -1,6 +1,6 @@
 {
   "row_count": 293,
-  "date": "20261019",
+  "date": "20261022",
   "header": [
     "",
     "届 出 番 号",
@@ -8,6 +8,6 @@
   ],
   "source_url": "https://www.city.adachi.tokyo.jp/documents/43457/jyutakusyukuhakujigyou.pdf",
   "normalized_files": [
-    "data/足立区/民泊/整形済み/20261019_足立区_民泊_normalized.csv"
+    "data/足立区/民泊/整形済み/20261022_足立区_民泊_normalized.csv"
   ]
 }

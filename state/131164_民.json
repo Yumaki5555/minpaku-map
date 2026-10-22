@@ -1,6 +1,6 @@
 {
   "row_count": 1811,
-  "date": "20261019",
+  "date": "20261022",
   "header": [
     "No.",
     "届出住宅所在地",
@@ -13,6 +13,6 @@
   ],
   "source_url": "https://www.city.toshima.lg.jp/documents/21284/todokedezumi-r80915.pdf",
   "normalized_files": [
-    "data/豊島区/民泊/整形済み/20261019_豊島区_民泊_normalized.csv"
+    "data/豊島区/民泊/整形済み/20261022_豊島区_民泊_normalized.csv"
   ]
 }

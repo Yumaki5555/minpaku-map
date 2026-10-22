@@ -1,6 +1,6 @@
 {
   "row_count": 728,
-  "date": "20261019",
+  "date": "20261022",
   "header": [
     "No",
     "施設名称",
@@ -16,7 +16,7 @@
   ],
   "source_url": "https://www.city.shinjuku.lg.jp/content/000452996.pdf",
   "normalized_files": [
-    "data/新宿区/旅館業/整形済み/20261019_新宿区_旅館業_旅館ホテル等_normalized.csv",
-    "data/新宿区/旅館業/整形済み/20261019_新宿区_旅館業_簡易宿所_normalized.csv"
+    "data/新宿区/旅館業/整形済み/20261022_新宿区_旅館業_旅館ホテル等_normalized.csv",
+    "data/新宿区/旅館業/整形済み/20261022_新宿区_旅館業_簡易宿所_normalized.csv"
   ]
 }

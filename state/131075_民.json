@@ -1,6 +1,6 @@
 {
   "row_count": 2221,
-  "date": "20261019",
+  "date": "20261022",
   "header": [
     "",
     "届出住宅所在地",
@@ -12,6 +12,6 @@
   ],
   "source_url": "https://www.city.sumida.lg.jp/kenko_fukushi/eisei/kankyo_eisei/taa0200020220216.files/jj081014.pdf",
   "normalized_files": [
-    "data/墨田区/民泊/整形済み/20261019_墨田区_民泊_normalized.csv"
+    "data/墨田区/民泊/整形済み/20261022_墨田区_民泊_normalized.csv"
   ]
 }
