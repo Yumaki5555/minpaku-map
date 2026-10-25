@@ -46,10 +46,15 @@ def versions(history: list[dict], code: str) -> list[dict]:
 
 
 KINDS = [(0, "民泊"), (1, "特区民泊"), (2, "旅館業")]
+# 資料に載っている施設が、自治体コードの末尾とは別の種別だけだったもの(八尾市の「民泊」の一覧が特区民泊だけ、など)。
+# 地図の種類分けと件数をそろえるため、build_site.py が中身を見て入れる
+KIND_OVERRIDE: dict[str, int] = {}
 
 
 def kind_of(code: str) -> int:
     """自治体コードの末尾(_民 / _民特 / _旅)から種別の番号(KINDS)を出す。"""
+    if code in KIND_OVERRIDE:
+        return KIND_OVERRIDE[code]
     return 1 if code.endswith("民特") else 0 if code.endswith("民") else 2
 
 
@@ -367,37 +372,35 @@ TEMPLATE = """<!DOCTYPE html>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>">
 <style>
 :root{{
-  --bg:#f6f5f2;--card:#fff;--ink:#1c1b19;--sub:#5f5c56;--line:#e3e0d9;--accent:#1d4ed8;--chip:#efede8;
-  --c0:#e34948;--c1:#4a3aa7;--c2:#0f9488;--c3:#eda100;--up:#dc2626;--down:#2563eb;
-}}
-@media (prefers-color-scheme: dark){{
-  :root:not([data-theme="light"]){{
-    --bg:#16161a;--card:#202026;--ink:#ecebe8;--sub:#a8a59f;--line:#34343c;--accent:#7aa2ff;--chip:#2c2c33;
-    --c0:#e66767;--c1:#9085e9;--c2:#25a898;--c3:#c98500;--up:#f87171;--down:#7aa2ff;
-  }}
+  color-scheme:light;
+  --bg:#fff;--card:#fff;--ink:#1f2a24;--sub:#47534c;--line:#dde5df;--accent:#166530;--chip:#f6f9f7;
+  --g:#1e7f3c;--g2:#166530;--gsoft:#eaf6ee;
+  --c0:#e34948;--c1:#6250d6;--c2:#0f9488;--c3:#eda100;--up:#c62828;--down:#1d4ed8;
 }}
 *{{box-sizing:border-box}}
-body{{margin:0;background:var(--bg);color:var(--ink);
-  font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic UI","Meiryo",sans-serif;line-height:1.6}}
-a{{color:var(--accent)}}
-.wrap{{max-width:1100px;margin:0 auto;padding:0 16px}}
-header{{padding:20px 0 4px}}
-.back{{font-size:.88rem}}
-h1{{font-size:1.6rem;margin:4px 0 4px;letter-spacing:.02em}}
-.lead{{color:var(--sub);margin:0 0 8px;font-size:.95rem}}
+body{{margin:0;background:var(--bg);color:var(--ink);font-size:17px;
+  font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Meiryo",sans-serif;line-height:1.75}}
+a{{color:var(--accent);text-underline-offset:3px}}
+.wrap{{max-width:1180px;margin:0 auto;padding:0 16px}}
+header{{padding:16px 0 4px}}
+.back{{display:inline-flex;align-items:center;gap:6px;min-height:46px;padding:6px 16px;border:2px solid var(--g);border-radius:12px;
+  font-size:16px;font-weight:700;text-decoration:none;color:var(--g2);background:#fff}}
+.back:hover{{background:var(--gsoft)}}
+h1{{font-size:clamp(26px,4vw,34px);margin:14px 0 6px;letter-spacing:.02em;line-height:1.35}}
+.lead{{color:var(--sub);margin:0 0 8px;font-size:17px}}
 .lead b{{color:var(--ink)}}
-.note{{font-size:.8rem;color:var(--sub);margin:6px 0}}
-.summary{{display:flex;flex-wrap:wrap;gap:6px 18px;margin:10px 0 4px;font-size:.9rem}}
-.summary b{{font-size:1.15rem;margin:0 2px}}
-h2.sec{{font-size:1.15rem;margin:26px 0 0}}
+.note{{font-size:15.5px;color:var(--sub);margin:8px 0}}
+.summary{{display:flex;flex-wrap:wrap;gap:6px 18px;margin:10px 0 4px;font-size:17px}}
+.summary b{{font-size:1.3rem;margin:0 2px}}
+h2.sec{{font-size:clamp(22px,3vw,28px);margin:36px 0 0}}
 .hero{{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px 8px;margin:10px 0 0;position:relative;
   display:grid;grid-template-columns:270px minmax(0,1fr);gap:6px 24px;align-items:start}}
 @media (max-width:760px){{.hero{{grid-template-columns:minmax(0,1fr)}}}}
-.hero h2{{font-size:1rem;margin:0}}
+.hero h2{{font-size:20px;margin:0}}
 .hero .big{{font-size:3rem;font-weight:700;line-height:1.15}}
 .hero .unit{{font-size:1rem;color:var(--sub);margin-left:3px}}
 .hero .asof{{color:var(--sub);margin:0}}
-.hero ul{{list-style:none;margin:8px 0 0;padding:8px 0 0;border-top:1px solid var(--line);font-size:.85rem}}
+.hero ul{{list-style:none;margin:8px 0 0;padding:8px 0 0;border-top:1px solid var(--line);font-size:16px}}
 .hero ul.hd{{border-top:0;padding-top:0;margin-top:4px}}
 .hero .kd.pct{{font-size:.78rem}}
 .hero li{{display:flex;align-items:center;gap:2px;line-height:1.8}}
@@ -408,13 +411,20 @@ h2.sec{{font-size:1.15rem;margin:26px 0 0}}
 .hero .hnote{{grid-column:1/-1;margin:2px 0 0}}
 .lk{{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}}
 .filters{{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0 6px;padding:10px 0;border-top:1px solid var(--line)}}
-.tagbtn{{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;
-  padding:5px 12px;font-size:.88rem;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px}}
-.tagbtn[aria-pressed="false"]{{opacity:.45}}
-.tagbtn[aria-pressed="false"] .dot{{background:transparent;border:2px solid var(--sub)}}
-select{{padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:.9rem;font-family:inherit}}
-label.chk{{font-size:.88rem;display:inline-flex;align-items:center;gap:4px;cursor:pointer}}
-.shown{{font-size:.8rem;color:var(--sub);margin-left:auto}}
+/* 種類の切り替え(トップページと同じ、大きなチェックの形) */
+.tagbtn{{border:2px solid #c5d1c9;background:#fff;color:var(--ink);border-radius:12px;min-height:50px;
+  padding:6px 14px 6px 10px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px}}
+.tagbtn::before{{content:"";width:24px;height:24px;border-radius:7px;border:2.5px solid #c5d1c9;background:#fff;flex:none}}
+.tagbtn[aria-pressed="true"]{{border-color:var(--g);background:var(--gsoft)}}
+.tagbtn[aria-pressed="true"]::before{{background:var(--g) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/18px no-repeat;border-color:var(--g)}}
+.tagbtn[aria-pressed="false"] .dot{{opacity:.45}}
+select{{min-height:48px;padding:8px 12px;border:2px solid #c5d1c9;border-radius:10px;background:#fff;color:var(--ink);font-size:17px;font-family:inherit;max-width:100%}}
+label.chk{{font-size:16px;font-weight:700;display:inline-flex;align-items:center;gap:8px;cursor:pointer;min-height:48px}}
+label.chk input{{width:24px;height:24px;accent-color:var(--g)}}
+.shown{{font-size:16px;color:var(--sub);margin-left:auto}}
+.totop{{position:fixed;right:16px;bottom:16px;z-index:50;display:inline-flex;align-items:center;gap:6px;min-height:52px;padding:8px 18px;
+  border:2px solid var(--g);border-radius:999px;background:var(--g);color:#fff;font:inherit;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.2)}}
+.totop[hidden]{{display:none}}
 .dot{{display:inline-block;width:11px;height:11px;border-radius:50%;flex:none;vertical-align:-1px;margin-right:5px}}
 .c0{{background:var(--c0)}}.c1{{background:var(--c1)}}.c2{{background:var(--c2)}}.c3{{background:var(--c3)}}
 .grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}}
@@ -423,21 +433,21 @@ label.chk{{font-size:.88rem;display:inline-flex;align-items:center;gap:4px;curso
 .card{{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px 6px;position:relative;scroll-margin-top:16px}}
 .card:target{{outline:2px solid var(--accent);outline-offset:1px}}
 .card[hidden],.pref[hidden]{{display:none}}
-.card h3{{font-size:.98rem;margin:0;display:flex;align-items:center}}
-.card .kind{{font-weight:400;color:var(--sub);font-size:.8rem;margin-left:6px}}
-.card .src{{margin-left:auto;font-size:.75rem;font-weight:400}}
-.val{{font-size:.85rem;color:var(--sub);line-height:1.3;margin-top:4px}}
-.val b{{font-size:1.4rem;color:var(--ink);margin-right:2px}}
-.asof{{font-size:.75rem;margin-left:8px}}
-.chg{{font-size:.85rem;min-height:2.7em;line-height:1.35;margin-top:2px}}
+.card h3{{font-size:18px;margin:0;display:flex;align-items:center}}
+.card .kind{{font-weight:400;color:var(--sub);font-size:15px;margin-left:6px}}
+.card .src{{margin-left:auto;font-size:15px;font-weight:700}}
+.val{{font-size:15px;color:var(--sub);line-height:1.3;margin-top:4px}}
+.val b{{font-size:1.7rem;color:var(--ink);margin-right:2px}}
+.asof{{font-size:14.5px;margin-left:8px}}
+.chg{{font-size:16px;min-height:2.7em;line-height:1.45;margin-top:2px}}
 .up{{color:var(--up);font-weight:700}}.down{{color:var(--down);font-weight:700}}.zero{{color:var(--sub);font-weight:700}}
-.pct{{color:var(--sub);font-size:.78rem}}
-.since{{display:block;font-size:.75rem;color:var(--sub)}}
-.none{{color:var(--sub);font-size:.85rem}}
+.pct{{color:var(--sub);font-size:14.5px}}
+.since{{display:block;font-size:14.5px;color:var(--sub)}}
+.none{{color:var(--sub);font-size:15px}}
 svg.ch{{display:block;width:100%;height:auto;margin-top:4px;overflow:visible;outline:none;touch-action:pan-y}}
 svg.ch:focus-visible{{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}}
 svg.ch .grid line{{stroke:var(--line);stroke-width:1}}
-svg.ch text{{fill:var(--sub);font-size:11px;font-variant-numeric:tabular-nums}}
+svg.ch text{{fill:var(--sub);font-size:12px;font-variant-numeric:tabular-nums}}
 svg.ch .line{{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}}
 svg.ch .line.dash{{stroke-dasharray:2 4;opacity:.7}}
 svg.ch .old{{stroke:var(--card);stroke-width:1.5;stroke-linejoin:round}}
@@ -450,25 +460,25 @@ svg.ch .tk{{stroke:var(--line);stroke-width:1}}
 svg.ch .line,svg.ch .hl{{stroke:var(--s)}}
 svg.ch .dots circle,svg.ch .old{{fill:var(--s)}}
 .tip{{position:absolute;z-index:5;pointer-events:none;background:var(--card);color:var(--ink);border:1px solid var(--line);
-  border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.18);padding:5px 9px;font-size:.78rem;line-height:1.4;white-space:nowrap;
+  border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,.18);padding:6px 10px;font-size:15px;line-height:1.45;white-space:nowrap;
   transform:translate(-50%,calc(-100% - 10px))}}
 .tip b{{font-size:.95rem}}
 .tip .d{{color:var(--sub)}}
 .tip[hidden]{{display:none}}
-details.all{{margin:24px 0 0;font-size:.85rem}}
-details.all summary{{cursor:pointer;color:var(--accent);font-weight:600;padding:4px 0}}
+details.all{{margin:28px 0 0;font-size:16px}}
+details.all summary{{cursor:pointer;color:var(--accent);font-weight:800;padding:10px 0;min-height:44px}}
 .tablewrap{{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-top:6px;max-height:70vh}}
-table{{border-collapse:collapse;width:100%;font-size:.85rem;min-width:560px}}
+table{{border-collapse:collapse;width:100%;font-size:15.5px;min-width:560px}}
 th,td{{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}}
 th{{background:var(--chip);font-weight:600;position:sticky;top:0}}
 td.num{{text-align:right;font-variant-numeric:tabular-nums}}
-footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px solid var(--line);margin-top:28px}}
+footer{{font-size:15.5px;color:var(--sub);padding:24px 0 90px;border-top:1px solid var(--line);margin-top:40px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <a class="back" href="./">← 民泊・旅館業マップに戻る</a>
+  <a class="back" href="./">← 民泊・旅館業マップ（地図・グラフ）に戻る</a>
   <h1>📈 民泊・旅館業の件数の推移</h1>
   <p class="lead">地図に載せている民泊・旅館業の件数を、自治体の一覧が更新されるたびに記録しています（記録開始 {start}／最終確認 <b>{today}</b>・毎週月曜・木曜に自動更新）。</p>
 </header>
@@ -517,6 +527,7 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
 <p class="note">資料の日付が空欄のものは、資料から日付を読み取れなかったため、グラフでは記録した日の位置に置いています。</p>
 </details>
 
+<button type="button" class="totop" id="totop" hidden>↑ 上へ戻る</button>
 <footer>
   <p>各自治体が公表している一覧（PDF・Excel・CSV）から自動で数えた件数です。自治体によって公表範囲が違い、すべての施設が載っているわけではありません。正確な情報は各自治体の公表資料をご確認ください。</p>
   <p><a href="./">民泊・旅館業マップ</a></p>
@@ -671,6 +682,11 @@ footer{{font-size:.8rem;color:var(--sub);padding:20px 0 40px;border-top:1px soli
   }}));
   [pref, chg, sort].forEach(el => el.addEventListener('change', apply));
   apply();
+
+  // 長いページなので、下へ読み進めたら「上へ戻る」ボタンを出す
+  const totop = document.getElementById('totop');
+  window.addEventListener('scroll', () => {{ totop.hidden = window.scrollY < 700; }}, {{passive: true}});
+  totop.addEventListener('click', () => window.scrollTo({{top: 0, behavior: 'smooth'}}));
 }})();
 </script>
 </body>

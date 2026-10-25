@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>民泊・旅館業マップ｜首都圏・大阪</title>
+<meta name="description" content="{{AREA}}の自治体が公表している民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。週2回自動更新。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="民泊・旅館業マップ｜{{TOTAL}}件を地図で">
+<meta property="og:description" content="{{AREA}}の自治体が公表している民泊・特区民泊・旅館業の施設を地図にまとめました。週2回自動更新。">
+<meta property="og:url" content="{{SITE_URL}}">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css">
+<link rel="stylesheet" href="style.css?v={{CSS_V}}">
+</head>
+<body>
+<!-- ページ全体で使う小さな絵(アイコン)。<use href="#i-…"> で呼び出す -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-cat0" viewBox="0 0 32 32"><path d="M16 3.5 2.5 15H7v13.5h18V15h4.5z" fill="currentColor"/><rect x="13" y="19" width="6" height="9.5" rx="1" fill="#fff"/><rect x="8.5" y="16" width="4" height="4" rx=".8" fill="#fff"/><rect x="19.5" y="16" width="4" height="4" rx=".8" fill="#fff"/></symbol>
+  <symbol id="i-cat1" viewBox="0 0 32 32"><rect x="4" y="7" width="17" height="21.5" rx="2" fill="currentColor"/><g fill="#fff"><rect x="7.5" y="11" width="3.5" height="3.5" rx=".6"/><rect x="14" y="11" width="3.5" height="3.5" rx=".6"/><rect x="7.5" y="17" width="3.5" height="3.5" rx=".6"/><rect x="14" y="17" width="3.5" height="3.5" rx=".6"/><rect x="10.5" y="23" width="4" height="5.5"/></g><path d="m24.5 2.5 2 4.1 4.5.6-3.3 3.1.8 4.4-4-2.1-4 2.1.8-4.4-3.3-3.1 4.5-.6z" fill="currentColor" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/></symbol>
+  <symbol id="i-cat2" viewBox="0 0 32 32"><path d="M1.5 13.5c5.5 0 9.5-3 14.5-8.5 5 5.5 9 8.5 14.5 8.5v2h-29z" fill="currentColor"/><rect x="5" y="15.5" width="22" height="13" fill="currentColor"/><path d="M11 17.5h10v5.5l-1.7 1.2-1.6-1.2-1.7 1.2-1.7-1.2-1.6 1.2-1.7-1.2z" fill="#fff"/><rect x="14" y="24.5" width="4" height="4" fill="#fff"/></symbol>
+  <symbol id="i-cat3" viewBox="0 0 32 32"><rect x="4" y="3.5" width="3.2" height="25.5" rx="1" fill="currentColor"/><rect x="24.8" y="3.5" width="3.2" height="25.5" rx="1" fill="currentColor"/><rect x="6" y="11.5" width="20" height="4" rx="1" fill="currentColor"/><rect x="6" y="22.5" width="20" height="4" rx="1" fill="currentColor"/><rect x="8.5" y="7.5" width="6.5" height="4" rx="2" fill="currentColor" opacity=".55"/><rect x="8.5" y="18.5" width="6.5" height="4" rx="2" fill="currentColor" opacity=".55"/></symbol>
+  <symbol id="i-map" viewBox="0 0 48 48"><path d="M5 12 17 7l14 5 12-5v29l-12 5-14-5-12 5z" fill="#d9f0df"/><path d="M17 7v29M31 12v29" stroke="#9fd3ae" stroke-width="2"/><path d="M5 12 17 7l14 5 12-5v29l-12 5-14-5-12 5z" fill="none" stroke="#1e7f3c" stroke-width="2.5" stroke-linejoin="round"/><path d="M30 3.5c-4.4 0-8 3.4-8 7.8C22 17.1 30 25.5 30 25.5s8-8.4 8-14.2c0-4.4-3.6-7.8-8-7.8z" fill="#e34948"/><circle cx="30" cy="11.5" r="3.2" fill="#fff"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="9" fill="#eaf6ee"/><rect x="10" y="11" width="16" height="6.5" rx="2" fill="#e34948"/><rect x="27.5" y="11" width="9" height="6.5" rx="2" fill="#0f9488"/><rect x="10" y="21" width="11" height="6.5" rx="2" fill="#e34948"/><rect x="22.5" y="21" width="7" height="6.5" rx="2" fill="#0f9488"/><rect x="10" y="31" width="6" height="6.5" rx="2" fill="#6250d6"/><rect x="17.5" y="31" width="9" height="6.5" rx="2" fill="#eda100"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="9" fill="#eaf6ee"/><path d="M9 34l9-9 7 5 13-14" fill="none" stroke="#1e7f3c" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 15h7.5v7.5" fill="none" stroke="#1e7f3c" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="25" r="3.2" fill="#e34948"/><circle cx="25" cy="30" r="3.2" fill="#6250d6"/></symbol>
+  <symbol id="i-beginner" viewBox="0 0 48 48"><path d="M24 44.5 7 31.5V4.5l17 13z" fill="#f6c700"/><path d="M24 44.5l17-13v-27l-17 13z" fill="#22a04b"/><path d="M24 44.5 7 31.5v-27l17 13 17-13v27z" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-list" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="9" fill="#eaf6ee"/><g fill="#1e7f3c"><rect x="10" y="12" width="5" height="5" rx="1.2"/><rect x="10" y="21.5" width="5" height="5" rx="1.2"/><rect x="10" y="31" width="5" height="5" rx="1.2"/></g><g fill="#9fd3ae"><rect x="18" y="12.5" width="20" height="4" rx="2"/><rect x="18" y="22" width="16" height="4" rx="2"/><rect x="18" y="31.5" width="18" height="4" rx="2"/></g></symbol>
+  <symbol id="i-rank" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="9" fill="#eaf6ee"/><rect x="18" y="16" width="12" height="22" rx="2" fill="#f6c700"/><rect x="6.5" y="23" width="11" height="15" rx="2" fill="#c9d3cc"/><rect x="30.5" y="27" width="11" height="11" rx="2" fill="#e8b48a"/><path d="m24 6 1.8 3.6 4 .6-2.9 2.8.7 4-3.6-1.9-3.6 1.9.7-4-2.9-2.8 4-.6z" fill="#e8a400"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M4 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="8.5" cy="9.5" r="2" fill="currentColor"/><path d="m4 18 5.5-5.5 4 4 2.5-2.5L20.5 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V6M6 11.5 12 5.5l6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 2.5c-3.9 0-7 3-7 6.9 0 5.2 7 12.1 7 12.1s7-6.9 7-12.1c0-3.9-3.1-6.9-7-6.9z" fill="currentColor"/><circle cx="12" cy="9.5" r="2.7" fill="#fff"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 10.5v6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="7.2" r="1.5" fill="currentColor"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="m4.5 16 5-5.5 4 3.5 6-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 2.8h8l4.5 4.5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-16.5a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"/><path d="M13.5 3v5h5M8.5 12.5h7M8.5 16.5h7" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></symbol>
+  <symbol id="v-dots" viewBox="0 0 56 36"><rect width="56" height="36" rx="6" fill="#f1f5f2"/><g stroke="#fff" stroke-width="1"><circle cx="9" cy="10" r="3.5" fill="#e34948"/><circle cx="18" cy="22" r="3.5" fill="#0f9488"/><circle cx="25" cy="9" r="3.5" fill="#e34948"/><circle cx="31" cy="27" r="3.5" fill="#eda100"/><circle cx="36" cy="15" r="3.5" fill="#6250d6"/><circle cx="45" cy="25" r="3.5" fill="#e34948"/><circle cx="48" cy="9" r="3.5" fill="#0f9488"/><circle cx="12" cy="29" r="3.5" fill="#e34948"/></g></symbol>
+  <symbol id="v-cluster" viewBox="0 0 56 36"><rect width="56" height="36" rx="6" fill="#f1f5f2"/><circle cx="19" cy="18" r="12" fill="#e34948"/><path d="M19 6a12 12 0 0 1 11.4 15.7L19 18z" fill="#0f9488"/><circle cx="19" cy="18" r="7.5" fill="#fff"/><text x="19" y="21.5" text-anchor="middle" font-size="10" font-weight="700" fill="#1f2a24">25</text><circle cx="43" cy="20" r="9" fill="#eda100"/><circle cx="43" cy="20" r="5.5" fill="#fff"/><text x="43" y="23.3" text-anchor="middle" font-size="8.5" font-weight="700" fill="#1f2a24">8</text></symbol>
+</svg>
+
+<a class="skip" href="#map-sec">地図へ移動</a>
+
+<!-- いま選んでいる条件(下へ読み進めても見えるよう、画面の上に出しておく) -->
+<div class="condbar" id="condbar" hidden>
+  <div class="wrap condin">
+    <span class="condlabel">表示中の条件</span>
+    <span class="condtext" id="condtext" aria-live="polite"></span>
+    <button type="button" class="btn btn-sub btn-sm js-reset"><svg class="ic"><use href="#i-reset"/></svg>条件を解除</button>
+    <nav class="condnav" aria-label="ページ内の移動">
+      <a href="#map-sec" data-go>地図</a><a href="#compare-sec" data-go>数で比較</a><a href="#trend-sec" data-go>増減</a><a href="#table-sec" data-go>一覧表</a><a href="#guide-sec" data-go>初めての方へ</a>
+    </nav>
+  </div>
+</div>
+
+<header class="top">
+  <div class="wrap topin">
+    <a class="logo" href="./"><svg class="ic"><use href="#i-pin"/></svg>民泊・旅館業マップ</a>
+    <a class="toplink" href="trend.html"><svg class="ic"><use href="#i-chart"/></svg>件数の推移（全自治体のグラフ）</a>
+  </div>
+</header>
+
+<section class="hero" aria-labelledby="hero-h">
+  <div class="wrap herogrid">
+    <div class="herotext">
+      <h1 id="hero-h"><span class="nw">民泊・旅館業</span><span class="nw">マップ</span></h1>
+      <p class="herolead">首都圏と大阪の<b>民泊・旅館・ホテル</b>が、どこに、どれくらいあるかを<br class="pc">地図と数で見ることができます。</p>
+      <div class="herostat">
+        <div><span class="bignum">{{TOTAL}}</span><span class="unit">件</span></div>
+        <div class="statsub">{{AREA}}の {{N_CITIES}}市区町村（{{N_MUNIS}}の自治体が公表した一覧から）</div>
+        <div class="statsub">最終更新 <b>{{TODAY}}</b>（毎週 月曜・木曜に自動で更新）</div>
+      </div>
+    </div>
+    <div class="heroart">
+      <svg viewBox="0 0 600 380" role="img" aria-labelledby="art-t">
+        <title id="art-t">地図の上に、民泊の家、マンション、旅館、ホテル、ゲストハウスが並び、それぞれの上に色分けされた地図のピンが立っているイラスト</title>
+        <circle cx="530" cy="62" r="34" fill="#ffeaa8"/>
+        <path d="M70 78c0-14 12-24 26-22 6-12 24-16 34-6 14-3 26 8 24 22H70z" fill="#eef4fa"/>
+        <path d="M300 52c0-11 10-19 21-17 5-10 19-13 27-5 11-2 21 6 19 17h-67z" fill="#eef4fa"/>
+        <rect x="18" y="214" width="564" height="150" rx="30" fill="#e9f5ec"/>
+        <path d="M60 364c40-30 70-40 120-46" fill="none" stroke="#d3ebda" stroke-width="10" stroke-linecap="round"/>
+        <rect x="18" y="300" width="564" height="24" fill="#fff"/>
+        <path d="M30 312h540" stroke="#dbe5de" stroke-width="2.5" stroke-dasharray="14 12"/>
+        <path d="M420 324c20 14 50 26 110 30" fill="none" stroke="#cfe6f6" stroke-width="12" stroke-linecap="round"/>
+        <!-- 木 -->
+        <rect x="168" y="270" width="6" height="30" rx="2" fill="#a77b52"/><circle cx="171" cy="262" r="16" fill="#8fd09f"/>
+        <rect x="273" y="276" width="5" height="24" rx="2" fill="#a77b52"/><circle cx="275.5" cy="268" r="13" fill="#7cc48c"/>
+        <rect x="505" y="282" width="5" height="18" rx="2" fill="#a77b52"/><circle cx="507.5" cy="276" r="10" fill="#8fd09f"/>
+        <!-- 民泊の家 -->
+        <rect x="56" y="234" width="88" height="66" fill="#fff1ee"/>
+        <path d="M46 240 100 194l54 46z" fill="#ec7a77"/>
+        <rect x="90" y="262" width="20" height="38" rx="3" fill="#c9504e"/>
+        <rect x="65" y="250" width="17" height="15" rx="2" fill="#cfe6f6"/><rect x="118" y="250" width="17" height="15" rx="2" fill="#cfe6f6"/>
+        <rect x="146" y="276" width="18" height="24" rx="4" fill="#f2b84b"/><path d="M151 276v-5h8v5" fill="none" stroke="#c98a1b" stroke-width="2.5"/>
+        <!-- 特区民泊のマンション -->
+        <rect x="190" y="178" width="76" height="122" rx="6" fill="#eeeafc"/>
+        <rect x="190" y="178" width="76" height="14" rx="6" fill="#8b80e6"/>
+        <g fill="#fff"><rect x="201" y="202" width="13" height="13" rx="2"/><rect x="222" y="202" width="13" height="13" rx="2"/><rect x="243" y="202" width="13" height="13" rx="2"/><rect x="201" y="225" width="13" height="13" rx="2"/><rect x="222" y="225" width="13" height="13" rx="2"/><rect x="243" y="225" width="13" height="13" rx="2"/><rect x="201" y="248" width="13" height="13" rx="2"/><rect x="243" y="248" width="13" height="13" rx="2"/></g>
+        <rect x="218" y="270" width="20" height="30" rx="2" fill="#6250d6"/>
+        <!-- 旅館 -->
+        <rect x="300" y="248" width="112" height="52" fill="#fbf6ea"/>
+        <path d="M286 252c10-1 18-6 26-16h88c8 10 16 15 26 16z" fill="#3e5b57"/>
+        <path d="M318 236c7-1 12-5 17-13h42c5 8 10 12 17 13z" fill="#4f716c"/>
+        <rect x="338" y="262" width="36" height="38" fill="#e2d3b4"/>
+        <path d="M338 262h36v19h-36z" fill="#0f9488"/><path d="M350 263v17M362 263v17" stroke="#fbf6ea" stroke-width="2"/>
+        <rect x="314" y="262" width="11" height="17" rx="5" fill="#f6a35c"/><rect x="387" y="262" width="11" height="17" rx="5" fill="#f6a35c"/>
+        <!-- ホテル -->
+        <rect x="430" y="150" width="66" height="150" rx="6" fill="#ddf1ee"/>
+        <rect x="441" y="159" width="44" height="16" rx="3" fill="#0f9488"/>
+        <text x="463" y="171.5" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="sans-serif" letter-spacing="1">HOTEL</text>
+        <g fill="#fff"><rect x="441" y="186" width="17" height="12" rx="2"/><rect x="468" y="186" width="17" height="12" rx="2"/><rect x="441" y="207" width="17" height="12" rx="2"/><rect x="468" y="207" width="17" height="12" rx="2"/><rect x="441" y="228" width="17" height="12" rx="2"/><rect x="468" y="228" width="17" height="12" rx="2"/><rect x="441" y="249" width="17" height="12" rx="2"/><rect x="468" y="249" width="17" height="12" rx="2"/></g>
+        <rect x="452" y="272" width="22" height="28" rx="2" fill="#0f9488" opacity=".75"/>
+        <!-- 簡易宿所(ゲストハウス) -->
+        <rect x="520" y="240" width="56" height="60" fill="#fff5d8"/>
+        <path d="M512 244 548 214l36 30z" fill="#efb02a"/>
+        <rect x="530" y="252" width="36" height="26" rx="2" fill="#fff" stroke="#e7bf5c" stroke-width="2"/>
+        <path d="M534 265h28M534 274h28" stroke="#efb02a" stroke-width="2.5"/><path d="M534 256v20M562 256v20" stroke="#efb02a" stroke-width="2"/>
+        <rect x="541" y="282" width="14" height="18" rx="2" fill="#c98500"/>
+        <!-- 地図のピン(種類ごとの色) -->
+        <g transform="translate(83 140)"><ellipse cx="17" cy="49" rx="9" ry="3" fill="#000" opacity=".08"/><path d="M17 0C7.6 0 0 7.4 0 16.6 0 29 17 46 17 46s17-17 17-29.4C34 7.4 26.4 0 17 0z" fill="#e34948"/><circle cx="17" cy="16.6" r="7" fill="#fff"/></g>
+        <g transform="translate(211 122)"><path d="M17 0C7.6 0 0 7.4 0 16.6 0 29 17 46 17 46s17-17 17-29.4C34 7.4 26.4 0 17 0z" fill="#6250d6"/><circle cx="17" cy="16.6" r="7" fill="#fff"/></g>
+        <g transform="translate(339 170)"><path d="M17 0C7.6 0 0 7.4 0 16.6 0 29 17 46 17 46s17-17 17-29.4C34 7.4 26.4 0 17 0z" fill="#0f9488"/><circle cx="17" cy="16.6" r="7" fill="#fff"/></g>
+        <g transform="translate(446 96)"><path d="M17 0C7.6 0 0 7.4 0 16.6 0 29 17 46 17 46s17-17 17-29.4C34 7.4 26.4 0 17 0z" fill="#0f9488"/><circle cx="17" cy="16.6" r="7" fill="#fff"/></g>
+        <g transform="translate(531 160)"><path d="M17 0C7.6 0 0 7.4 0 16.6 0 29 17 46 17 46s17-17 17-29.4C34 7.4 26.4 0 17 0z" fill="#eda100"/><circle cx="17" cy="16.6" r="7" fill="#fff"/></g>
+        <!-- 旅行かばんを持った人 -->
+        <g transform="translate(24 252)"><circle cx="12" cy="6" r="6" fill="#f2c9a6"/><path d="M4 18c0-4 3.5-6 8-6s8 2 8 6v12H4z" fill="#22a04b"/><rect x="5" y="30" width="5" height="16" rx="2" fill="#3e5b57"/><rect x="14" y="30" width="5" height="16" rx="2" fill="#3e5b57"/><rect x="21" y="30" width="11" height="14" rx="3" fill="#6fa8dc"/><path d="M26 30v-6" stroke="#4c7fb0" stroke-width="2"/></g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <nav class="entries" aria-label="このサイトでできること">
+      <a class="entry" href="#map-sec" data-go>
+        <span class="eicon"><svg><use href="#i-map"/></svg></span>
+        <span class="etext"><span class="et">地図で探す</span><span class="ed">住所や市区町村から、施設の場所を見る</span></span>
+      </a>
+      <a class="entry" href="#compare-sec" data-go>
+        <span class="eicon"><svg><use href="#i-bars"/></svg></span>
+        <span class="etext"><span class="et">数で比較する</span><span class="ed">市区町村ごとの件数をグラフとランキングで</span></span>
+      </a>
+      <a class="entry" href="#trend-sec" data-go>
+        <span class="eicon"><svg><use href="#i-trend"/></svg></span>
+        <span class="etext"><span class="et">増減を見る</span><span class="ed">前の資料と比べて、増えた・減ったを見る</span></span>
+      </a>
+      <a class="entry" href="#guide-sec" data-go>
+        <span class="eicon"><svg><use href="#i-beginner"/></svg></span>
+        <span class="etext"><span class="et">初めての方へ</span><span class="ed">使い方と、言葉・データの見方</span></span>
+      </a>
+    </nav>
+
+    <aside class="notice" aria-label="ご注意">
+      <svg class="ic"><use href="#i-info"/></svg>
+      <ul>
+        <li>施設の位置は住所から推定しています。実際の場所と異なる場合があります。</li>
+        <li>「掲載なし」は、施設が存在しないという証明ではありません。「掲載あり」は、いま営業中であることを保証するものではありません。</li>
+        <li>各自治体が公表している一覧を自動で読み取っています。くわしくは <a href="#guide-sec" data-go>初めての方へ</a> をご覧ください。</li>
+      </ul>
+    </aside>
+  </div>
+</section>
+
+<main>
+<!-- ① 地図で探す -->
+<section class="sec" id="map-sec" aria-labelledby="map-h">
+  <div class="wrap">
+    <header class="sechead">
+      <svg class="secicon" aria-hidden="true"><use href="#i-map"/></svg>
+      <div><h2 id="map-h">地図で探す</h2><p>地域や種類をえらぶと、地図に表示される施設がしぼりこまれます。点を押すと、施設の名前や住所が出ます。</p></div>
+    </header>
+
+    <div class="panel" role="group" aria-label="地図の表示条件">
+      <div class="prow">
+        <div class="plabel">地域</div>
+        <div class="chips" id="regions" role="group" aria-label="地域を切り替える"></div>
+      </div>
+      <div class="prow">
+        <div class="plabel"><label for="citysel">市区町村</label></div>
+        <select id="citysel" class="sel"></select>
+      </div>
+      <div class="prow">
+        <div class="plabel">施設の種類</div>
+        <div class="catchecks" data-catfilter="4" role="group" aria-label="施設の種類でしぼりこむ"></div>
+      </div>
+      <div class="prow">
+        <div class="plabel">表示のしかた</div>
+        <div class="viewswitch" role="radiogroup" aria-label="地図の表示のしかた">
+          <button type="button" role="radio" class="vopt" data-view="dots" aria-checked="true">
+            <svg class="vimg" aria-hidden="true"><use href="#v-dots"/></svg>
+            <span><b>点で見る</b><small>1か所を点1つで表示</small></span>
+          </button>
+          <button type="button" role="radio" class="vopt" data-view="cluster" aria-checked="false">
+            <svg class="vimg" aria-hidden="true"><use href="#v-cluster"/></svg>
+            <span><b>まとめて見る</b><small>近くの施設を数字の円に</small></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <form id="search" class="search" role="search" autocomplete="off">
+      <label class="slabel" for="q"><svg class="ic"><use href="#i-search"/></svg>住所・市区町村名で探す</label>
+      <div class="sbox">
+        <input type="search" id="q" list="citylist" placeholder="例：新宿区、箱根町、西新宿2丁目">
+        <button type="submit" class="btn">この場所を表示</button>
+        <button type="button" class="btn btn-sub js-reset"><svg class="ic"><use href="#i-reset"/></svg>検索・しぼりこみを解除</button>
+      </div>
+      <p id="qmsg" class="qmsg" aria-live="polite"></p>
+      <datalist id="citylist"></datalist>
+    </form>
+
+    <div class="mapgrid">
+      <div class="mapwrap">
+        <div id="map" role="region" aria-label="施設の地図"><p class="maploading">地図を読み込んでいます…</p></div>
+      </div>
+      <aside class="infocard" id="infocard" aria-live="polite" aria-label="選んだ施設の情報">
+        <button type="button" class="infox" aria-label="情報を閉じる" hidden><svg class="ic"><use href="#i-close"/></svg></button>
+        <div class="infobody" id="infobody"></div>
+      </aside>
+    </div>
+
+    <div class="legend" aria-label="地図の見方">
+      <div class="lgroup" id="legend-cats"></div>
+      <div class="lgroup">
+        <span class="lk"><span class="ldot"></span>番地まで分かった位置</span>
+        <span class="lk"><span class="ldot approx"></span>薄い点線の点：町の中心付近（位置は目安）</span>
+        <span class="lk"><span class="ldot big"></span>大きい点：同じ場所に複数の施設</span>
+      </div>
+    </div>
+    <p class="mapcount" id="mapcount" aria-live="polite"></p>
+    <div class="actions">
+      <button type="button" class="btn" data-png="map"><svg class="ic"><use href="#i-image"/></svg>この地図を画像で保存（X投稿用）</button>
+    </div>
+    <div class="accnote">
+      <p><svg class="ic"><use href="#i-info"/></svg>施設の位置は住所から推定しています。実際の場所と異なる場合があります。</p>
+      <p><svg class="ic"><use href="#i-info"/></svg>「掲載なし」は施設が存在しないという証明ではなく、「掲載あり」は現在営業中であることを保証するものではありません。</p>
+    </div>
+    {{METHOD}}
+  </div>
+</section>
+
+<!-- ② 数で比較する -->
+<section class="sec" id="compare-sec" aria-labelledby="compare-h">
+  <div class="wrap">
+    <header class="sechead">
+      <svg class="secicon" aria-hidden="true"><use href="#i-bars"/></svg>
+      <div><h2 id="compare-h">数で比較する</h2><p>市区町村ごとの施設の数を、種類ごとに色分けした横棒グラフで比べます。市区町村の名前を押すと、地図・増減・一覧表がその市区町村に切り替わります。</p></div>
+    </header>
+
+    <div class="panel" role="group" aria-label="グラフの条件">
+      <div class="prow">
+        <div class="plabel">地域</div>
+        <div class="chips" data-regions role="group" aria-label="地域を切り替える"></div>
+      </div>
+      <div class="prow">
+        <div class="plabel">施設の種類</div>
+        <div class="catchecks" data-catfilter="4" role="group" aria-label="施設の種類でしぼりこむ"></div>
+      </div>
+      <div class="prow">
+        <div class="plabel"><label for="barsort">並び順</label></div>
+        <select id="barsort" class="sel">
+          <option value="sum">えらんだ種類の合計が多い順</option>
+          <option value="sumasc">えらんだ種類の合計が少ない順</option>
+          <option value="0">民泊が多い順</option>
+          <option value="1">特区民泊が多い順</option>
+          <option value="2">旅館・ホテルが多い順</option>
+          <option value="3">簡易宿所が多い順</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardhead">
+        <h3 id="bars-title">市区町村ごとの施設の数</h3>
+        <div class="legend inline" id="bars-legend"></div>
+      </div>
+      <p class="sub" id="bars-sub"></p>
+      <div class="bars" id="bars" role="list"></div>
+      <div class="actions">
+        <button type="button" class="btn btn-sub" id="bars-more"></button>
+        <button type="button" class="btn" data-png="bars"><svg class="ic"><use href="#i-image"/></svg>このグラフを画像で保存</button>
+      </div>
+      <p class="note">数は、自治体が公表している一覧の施設を、住所から市区町村に分けて数えたものです（県がまとめて公表している一覧も、住所の市区町村に分けています）。0件は「その一覧に掲載なし」という意味で、施設がないとは限りません。「データ未取得」は、その市区町村の一覧が公開されていない、または読み取れていないものです。</p>
+    </div>
+
+    <h3 class="subhead"><svg class="ic"><use href="#i-rank"/></svg>市区町村ランキング</h3>
+    <p class="sub">民泊と旅館業、それぞれの数が多い市区町村の順位です。名前を押すと、その市区町村の地図に移動します。</p>
+    <div class="rankgrid" id="ranks"></div>
+  </div>
+</section>
+
+<!-- ③ 増減を見る -->
+<section class="sec" id="trend-sec" aria-labelledby="trend-h">
+  <div class="wrap">
+    <header class="sechead">
+      <svg class="secicon" aria-hidden="true"><use href="#i-trend"/></svg>
+      <div><h2 id="trend-h">増減を見る</h2><p>自治体の一覧が新しくなるたびに件数を記録しています。前の資料と比べて増えたか減ったかを、資料の日付といっしょに見ることができます。</p></div>
+    </header>
+
+    <div class="panel" role="group" aria-label="増減の条件">
+      <div class="prow">
+        <div class="plabel">地域</div>
+        <div class="chips" data-regions role="group" aria-label="地域を切り替える"></div>
+      </div>
+      <div class="prow">
+        <div class="plabel">施設の種類</div>
+        <div class="catchecks" data-catfilter="3" role="group" aria-label="施設の種類で表示・非表示を切り替える"></div>
+      </div>
+    </div>
+
+    <p class="scope" id="trend-scope"></p>
+    <div class="trendgrid" id="trendcharts"></div>
+    <div class="actions">
+      <button type="button" class="btn" data-png="trend"><svg class="ic"><use href="#i-image"/></svg>この推移グラフを画像で保存</button>
+      <a class="btn btn-sub" href="trend.html"><svg class="ic"><use href="#i-chart"/></svg>すべての自治体の推移グラフ（別のページ）</a>
+    </div>
+    <p class="note">グラフの横軸は、自治体の一覧が「いつ時点」のものかを示す<b>資料の日付</b>です（{{AXIS}}）。自治体ごとに一覧を更新する時期が違うため、増減は自治体ごとの「前回の資料」との差です。いくつかの自治体を足した合計の増減は、同じ期間どうしの比較ではありません。縦軸は小さな増減も見えるよう0から始めていません。</p>
+
+    <div class="card">
+      <div class="cardhead"><h3>資料ごとの前回との差</h3></div>
+      <p class="sub">それぞれの資料の、前回の資料の日付と件数、今回の資料の日付と件数を並べています。</p>
+      <div class="tablewrap"><table class="chgtable">
+        <thead><tr><th>自治体・種類</th><th>前回の資料</th><th>今回の資料</th><th class="num">前回との差</th></tr></thead>
+        <tbody id="chgbody"></tbody>
+      </table></div>
+      <div class="actions"><button type="button" class="btn btn-sub" id="chg-more"></button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 自治体ごとの一覧表 -->
+<section class="sec" id="table-sec" aria-labelledby="table-h">
+  <div class="wrap">
+    <header class="sechead">
+      <svg class="secicon" aria-hidden="true"><use href="#i-list"/></svg>
+      <div><h2 id="table-h">自治体ごとの一覧表</h2><p>自治体が公表している一覧（資料）ごとの件数・前回との差・資料の日付・出典です。都府県の名前を押すと開いたり閉じたりします。</p></div>
+    </header>
+
+    <div class="panel" role="group" aria-label="一覧表の条件">
+      <div class="prow">
+        <div class="plabel"><label for="tq">自治体名</label></div>
+        <input type="search" id="tq" class="tinput" placeholder="例：新宿区、横浜市">
+      </div>
+      <div class="prow">
+        <div class="plabel">施設の種類</div>
+        <div class="catchecks" data-catfilter="3" role="group" aria-label="施設の種類でしぼりこむ"></div>
+      </div>
+      <div class="prow">
+        <div class="plabel"><label for="tsort">並び順</label></div>
+        <select id="tsort" class="sel">
+          <option value="area">地域の順（標準）</option>
+          <option value="count">件数が多い順</option>
+          <option value="up">増えた数が多い順</option>
+          <option value="down">減った数が多い順</option>
+          <option value="date">資料の日付が新しい順</option>
+        </select>
+      </div>
+      <div class="prow">
+        <div class="plabel"></div>
+        <div class="btnrow">
+          <button type="button" class="btn btn-sub btn-sm" id="t-open">すべて開く</button>
+          <button type="button" class="btn btn-sub btn-sm" id="t-close">すべて閉じる</button>
+          <button type="button" class="btn btn-sub btn-sm js-reset"><svg class="ic"><use href="#i-reset"/></svg>条件を解除</button>
+        </div>
+      </div>
+    </div>
+    <p class="scope" id="table-scope"></p>
+    <p class="note">「件数」は資料に載っている施設の数です。住所から位置を特定できなかった施設は地図に出ないため、地図に表示している数が件数より少ないときは「地図に表示 ○件」と書いています。「データ未取得」は、一覧が公開されていない、またはファイルを自動で読み取れなかったものです（0件という意味ではありません）。「資料の日付」は、資料（PDF・エクセルなど）に書かれた「〇年〇月〇日現在」などの日付で、書かれていないものはファイルに記録された保存日（「ファイルの日付」と表示）です。</p>
+    <div class="tablewrap tmain"><table class="mtab" id="mtab">
+      <thead><tr><th>自治体</th><th>種類</th><th class="num">件数</th><th class="num">前回との差</th><th>資料の日付</th><th>出典・推移</th></tr></thead>
+    </table></div>
+    <p class="note">すべての記録は <a href="data/{{CSV}}" download>件数の記録（CSV・エクセルで開けます）</a> でダウンロードできます。</p>
+  </div>
+</section>
+
+<!-- ④ 初めての方へ -->
+<section class="sec guide" id="guide-sec" aria-labelledby="guide-h">
+  <div class="wrap">
+    <header class="sechead">
+      <svg class="secicon" aria-hidden="true"><use href="#i-beginner"/></svg>
+      <div><h2 id="guide-h">初めての方へ</h2><p>このマップの目的と使い方、言葉の意味、データを見るときの注意です。</p></div>
+    </header>
+
+    <div class="card purpose">
+      <p>このマップは、身近な地域にある民泊・旅館などの宿泊施設の<b>数を「見える化」</b>することを目的に、各自治体が公表している一覧（PDF・エクセル・CSV）を自動で集めて地図にしたものです。</p>
+    </div>
+
+    <h3 class="subhead">使い方</h3>
+    <ol class="steps">
+      <li><span class="stepn">1</span><svg class="stepi" aria-hidden="true"><use href="#i-map"/></svg><b>地域をえらぶ</b><span>「地域」のボタンで都府県を切り替えるか、住所・市区町村名を入れて「この場所を表示」を押します。</span></li>
+      <li><span class="stepn">2</span><svg class="stepi" aria-hidden="true"><use href="#i-cat0" style="color:var(--c0)"/></svg><b>種類をえらぶ</b><span>民泊・特区民泊・旅館・ホテル・簡易宿所のチェックで、見たい種類だけにしぼれます。</span></li>
+      <li><span class="stepn">3</span><svg class="stepi" aria-hidden="true"><use href="#i-pin" style="color:var(--c2)"/></svg><b>点を押す</b><span>地図の点を押すと、施設の名前・住所・種類・出典が出ます。</span></li>
+      <li><span class="stepn">4</span><svg class="stepi" aria-hidden="true"><use href="#i-bars"/></svg><b>数を比べる・増減を見る</b><span>グラフやランキングで市区町村を比べたり、前の資料からの増減を見たりできます。</span></li>
+      <li><span class="stepn">5</span><svg class="stepi" aria-hidden="true"><use href="#i-image" style="color:var(--g)"/></svg><b>画像で保存</b><span>地図・グラフ・ランキングは、X（旧Twitter）に投稿しやすい横長の画像（1920×1080）で保存できます。</span></li>
+    </ol>
+
+    <h3 class="subhead">施設の種類</h3>
+    <div class="kindgrid">
+      <div class="kindcard k0"><svg class="kicon" aria-hidden="true"><use href="#i-cat0"/></svg><div><h4>民泊（住宅宿泊事業）</h4><p>ふつうの住宅（一戸建てやマンションの部屋など）に、料金を受け取って人を泊める仕組みです。自治体への「届出」が必要で、営業できるのは1年に180日までです。</p></div></div>
+      <div class="kindcard k1"><svg class="kicon" aria-hidden="true"><use href="#i-cat1"/></svg><div><h4>特区民泊</h4><p>国が指定した「国家戦略特区」の一部の地域で、自治体の「認定」を受けた民泊です。このマップでは大田区と大阪府内の一部の市が対象です。2泊3日以上の滞在が条件です。</p></div></div>
+      <div class="kindcard k2"><svg class="kicon" aria-hidden="true"><use href="#i-cat2"/></svg><div><h4>旅館・ホテル</h4><p>旅館業法の「許可」を受けた旅館やホテルです。</p></div></div>
+      <div class="kindcard k3"><svg class="kicon" aria-hidden="true"><use href="#i-cat3"/></svg><div><h4>簡易宿所</h4><p>旅館業法の許可を受けた宿のうち、ゲストハウスやカプセルホテルのように、客室を複数の人で使う形の宿です。</p></div></div>
+    </div>
+    <p class="note">「旅館業」は、旅館・ホテルと簡易宿所をあわせた呼び方です。同じような施設でも、<b>自治体によって「旅館・ホテル」「簡易宿所」などの区分が違う</b>ことがあります。</p>
+
+    <h3 class="subhead">データを見るときの注意</h3>
+    <ul class="cautions">
+      <li><b>すべての施設が載っているわけではありません。</b>公表している範囲は自治体ごとに違います。</li>
+      <li><b>「掲載なし」は、施設が存在しないという証明ではありません。</b>一覧に載っていない施設や、一覧を公開していない自治体もあります。</li>
+      <li><b>「掲載あり」は、いま営業中であることを保証するものではありません。</b>廃業していても一覧に残っている場合があります。</li>
+      <li><b>施設の位置は住所から推定しています。</b>実際の場所と異なる場合があります。薄い点線の点は、番地まで分からず町の中心付近に置いたものです。</li>
+      <li><b>自動で読み取っているため、内容や位置に誤りがあることがあります。</b>正確な情報は、各自治体の公表資料（一覧表の「出典」）でご確認ください。</li>
+    </ul>
+    <p><a href="#method" class="jlink" data-open-method>地図上の位置の決め方と精度について（くわしい説明）</a></p>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>各自治体が公表している一覧（PDF・Excel・CSV）をもとに自動で作成しています。地図上の位置は住所から自動で推定したもので、ずれている場合があります。正確な情報は各自治体の公表資料をご確認ください。</p>
+    <p>個人の氏名・電話番号は掲載していません。地図：<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>／位置の推定：国土地理院 住所検索、<a href="https://developer.yahoo.co.jp/sitemap/" target="_blank" rel="noopener">Web Services by Yahoo! JAPAN</a></p>
+    <p><a href="trend.html">件数の推移（全自治体のグラフ）</a>／<a href="data/{{CSV}}" download>件数の記録（CSV）</a></p>
+  </div>
+</footer>
+
+<button type="button" class="totop" id="totop" hidden><svg class="ic"><use href="#i-up"/></svg>上へ戻る</button>
+
+<dialog class="pngdlg" id="pngdlg" aria-labelledby="pngdlg-h">
+  <div class="dlghead"><h2 id="pngdlg-h">画像で保存</h2><button type="button" class="btn btn-sub btn-sm" data-close>閉じる</button></div>
+  <p class="sub" id="pngmsg">画像を作っています…</p>
+  <img id="pngimg" alt="" hidden>
+  <div class="actions"><a class="btn" id="pngdl" download hidden><svg class="ic"><use href="#i-image"/></svg>画像をダウンロード（1920×1080）</a></div>
+  <p class="note">スマートフォンでは、画像を長押しして保存することもできます。</p>
+</dialog>
+
+<noscript><p class="wrap">このページの地図やグラフを見るには、JavaScriptを有効にしてください。</p></noscript>
+<script type="application/json" id="site-data">{{DATA}}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<script src="app.js?v={{JS_V}}"></script>
+</body>
+</html>
