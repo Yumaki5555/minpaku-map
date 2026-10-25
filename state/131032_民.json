@@ -1,6 +1,6 @@
 {
   "row_count": 970,
-  "date": "20261022",
+  "date": "20261026",
   "header": [
     "No",
     "届出年月日",
@@ -15,6 +15,6 @@
   ],
   "source_url": "https://www.city.minato.tokyo.jp/documents/84144/2026100702.pdf",
   "normalized_files": [
-    "data/港区/民泊/整形済み/20261022_港区_民泊_normalized.csv"
+    "data/港区/民泊/整形済み/20261026_港区_民泊_normalized.csv"
   ]
 }

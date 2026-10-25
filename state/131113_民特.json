@@ -1,11 +1,11 @@
 {
-  "row_count": 511,
-  "date": "20261022",
+  "row_count": 517,
+  "date": "20261026",
   "header": [
     "HP番号 施設名称 施設所在地"
   ],
-  "source_url": "https://www.city.ota.tokyo.jp/seikatsu/hoken/minpaku/minpaku.files/0916nintei.pdf",
+  "source_url": "https://www.city.ota.tokyo.jp/seikatsu/hoken/minpaku/minpaku.files/1019nintei.pdf",
   "normalized_files": [
-    "data/大田区/民泊/整形済み/20261022_大田区_民泊_特区_normalized.csv"
+    "data/大田区/民泊/整形済み/20261026_大田区_民泊_特区_normalized.csv"
   ]
 }

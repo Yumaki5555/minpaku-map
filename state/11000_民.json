@@ -1,6 +1,6 @@
 {
   "row_count": 469,
-  "date": "20261022",
+  "date": "20261026",
   "header": [
     "番号",
     "届出年月日",
@@ -9,6 +9,6 @@
   ],
   "source_url": "https://www.pref.saitama.lg.jp/documents/131642/1030minpaku.pdf",
   "normalized_files": [
-    "data/埼玉県/民泊/整形済み/20261022_埼玉県_民泊_normalized.csv"
+    "data/埼玉県/民泊/整形済み/20261026_埼玉県_民泊_normalized.csv"
   ]
 }

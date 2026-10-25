@@ -1,6 +1,6 @@
 {
   "row_count": 126,
-  "date": "20261022",
+  "date": "20261026",
   "header": [
     "",
     "届出住宅所在地",
@@ -11,6 +11,6 @@
   ],
   "source_url": "https://www.city.chuo.lg.jp/documents/3395/20261001minpaku.pdf",
   "normalized_files": [
-    "data/中央区/民泊/整形済み/20261022_中央区_民泊_normalized.csv"
+    "data/中央区/民泊/整形済み/20261026_中央区_民泊_normalized.csv"
   ]
 }

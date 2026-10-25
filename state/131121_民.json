@@ -1,6 +1,6 @@
 {
   "row_count": 570,
-  "date": "20261022",
+  "date": "20261026",
   "header": [
     "No",
     "（受付・届出情報）届出年月日",
@@ -10,6 +10,6 @@
   ],
   "source_url": "https://www.city.setagaya.lg.jp/documents/3248/0930.xlsx",
   "normalized_files": [
-    "data/世田谷区/民泊/整形済み/20261022_世田谷区_民泊_normalized.csv"
+    "data/世田谷区/民泊/整形済み/20261026_世田谷区_民泊_normalized.csv"
   ]
 }

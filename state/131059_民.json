@@ -1,6 +1,6 @@
 {
   "row_count": 346,
-  "date": "20261022",
+  "date": "20261026",
   "header": [
     "届出番号",
     "届出年月日",
@@ -13,6 +13,6 @@
   ],
   "source_url": "https://www.city.bunkyo.lg.jp/documents/3037/itiran20260930nengappi.pdf",
   "normalized_files": [
-    "data/文京区/民泊/整形済み/20261022_文京区_民泊_normalized.csv"
+    "data/文京区/民泊/整形済み/20261026_文京区_民泊_normalized.csv"
   ]
 }
