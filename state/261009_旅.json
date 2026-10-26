@@ -1,0 +1,16 @@
+{
+  "row_count": 3874,
+  "date": "20261026",
+  "header": [
+    "施設名称",
+    "施設所在地",
+    "営業者氏名",
+    "旅館業の種別",
+    "許可日"
+  ],
+  "source_url": "https://www.city.kyoto.lg.jp/hokenfukushi/cmsfiles/contents/0000193/193116/20260831itiran_jpn.pdf",
+  "normalized_files": [
+    "data/京都市/旅館業/整形済み/20261026_京都市_旅館業_旅館ホテル等_normalized.csv",
+    "data/京都市/旅館業/整形済み/20261026_京都市_旅館業_簡易宿所_normalized.csv"
+  ]
+}

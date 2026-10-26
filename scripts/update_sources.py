@@ -118,6 +118,10 @@ def link_date(text: str) -> tuple[int, int] | None:
     m = re.search(r"令和(\d+)年(\d+)月", t)
     if m:
         return 2018 + int(m.group(1)), int(m.group(2))
+    # 静岡市の「R8.4旅館業新規許可施設」「旅館業許可全施設（R8.3.31現在）」のような令和の略記
+    m = re.search(r"(?<![A-Za-z0-9])R(\d{1,2})[.．](0?[1-9]|1[0-2])(?!\d)", t)
+    if m:
+        return 2018 + int(m.group(1)), int(m.group(2))
     # 「000420123」のような通し番号を日付と取り違えないよう、前に数字が付いたものは除く
     m = re.search(r"(?<!\d)(20\d{2})[年/_-]?(0?[1-9]|1[0-2])(?!\d{3})", t)
     if m:
@@ -152,7 +156,8 @@ def page_anchors(page: str) -> list[tuple[str, str]]:
     bodik(CKAN)のデータセットページの場合は、データの名前をリンクの文字として扱う。
     """
     # bodikや相模原市などのCKAN(オープンデータの仕組み)のデータセットページは、APIでファイル一覧を取る
-    m = re.match(r"(https?://[^/]+)/dataset/([^/?#]+)/?$", page)
+    # (静岡県のオープンデータの「/dataset/8902.html」のような普通のページは除く)
+    m = re.match(r"(https?://[^/]+)/dataset/([^/?#.]+)/?$", page)
     try:
         if m:
             resp = requests.get(f"{m.group(1)}/api/3/action/package_show", params={"id": m.group(2)}, timeout=30)
@@ -163,8 +168,14 @@ def page_anchors(page: str) -> list[tuple[str, str]]:
         # 大阪市のように <base href> でリンクの基準の場所を指定しているページに対応する
         base_tag = soup.find("base", href=True)
         origin = urljoin(page, base_tag["href"]) if base_tag else page
-        return [(urljoin(origin, a["href"]), re.sub(r"\s+", " ", a.get_text(" ", strip=True)))
-                for a in soup.find_all("a", href=True)]
+        out = []
+        for a in soup.find_all("a", href=True):
+            url, text = urljoin(origin, a["href"]), re.sub(r"\s+", " ", a.get_text(" ", strip=True))
+            # 静岡県のオープンデータのように、リンクの文字が「ダウンロード」だけのものは、ファイルの名前もリンクの文字とする
+            if text in ("ダウンロード", "URLをコピー"):
+                text += " " + unquote(os.path.basename(urlparse(url).path))
+            out.append((url, text))
+        return out
     except Exception as e:  # noqa: BLE001
         print(f"  [警告] 自治体のページを開けませんでした: {page} ({e})")
         return []
@@ -394,6 +405,8 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
         key = facility_key(rec)
         return bool(key[0] or key[1]) and facility_key(x) == key
 
+    # 仙台市の毎月の新規一覧のように、理容所・美容所などのシートも同じファイルに入っているものは、「シート指定」のシートだけ読む
+    wanted = [s.strip() for s in row.get("シート指定", "").split(",") if s.strip() not in ("", "*")]
     links = page_links(row.get("元HP", ""), pattern)
     # 墨田区のように同じ内容がExcelとPDFの両方で載っている場合は、読み取りが確実なExcel/CSVだけを使う
     if any(link_format(u, t) != "pdf" for u, t in links):
@@ -412,6 +425,8 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
         used_files.append((path, link_format(url, text)))
         hint = "廃止" if re.search(r"廃止|haishi", text + url) else "新規"
         for sheet, table in read_tables(path, row.get("ZIP内ファイル", "").strip()):
+            if sheet and wanted and sheet not in wanted:
+                continue
             section = "廃止" if "廃止" in sheet else "新規" if "新規" in sheet else hint
             dh = None
             for r in table:
@@ -688,13 +703,16 @@ def process_row(row: dict) -> dict:
     if len(filled) != len(result.rows):
         result.rows, result.row_count = filled, len(filled)
 
-    # 旅館業以外の施設も入っている資料(中野区など)は、指定された列の値で絞り込む
+    # 旅館業以外の施設も入っている資料(中野区など)は、指定された列の値で絞り込む。
+    # 「列!=値」は、その値の行を除く(京都市の旅館業の一覧に載っている「施設外玄関帳場」(受付だけの場所)など)
     cond = row.get("絞り込み", "").strip()
     if cond and "=" in cond and result.header:
         col, val = cond.split("=", 1)
+        exclude = col.endswith("!")
+        col = col.rstrip("!")
         if col in result.header:
             i = result.header.index(col)
-            result.rows = [r for r in result.rows if i < len(r) and str(r[i]).strip() == val]
+            result.rows = [r for r in result.rows if (i < len(r) and str(r[i]).strip() == val) != exclude]
             result.row_count = len(result.rows)
             result.note += f"({cond} で絞り込み)"
 

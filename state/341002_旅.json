@@ -1,0 +1,15 @@
+{
+  "row_count": 499,
+  "date": "20261026",
+  "header": [
+    "施 設 名",
+    "施設所在地",
+    "開設者",
+    "区分"
+  ],
+  "source_url": "https://www.city.hiroshima.lg.jp/_res/projects/default_project/_page_/001/013/507/r809.pdf",
+  "normalized_files": [
+    "data/広島市/旅館業/整形済み/20261026_広島市_旅館業_旅館ホテル等_normalized.csv",
+    "data/広島市/旅館業/整形済み/20261026_広島市_旅館業_簡易宿所_normalized.csv"
+  ]
+}

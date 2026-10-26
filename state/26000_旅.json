@@ -1,0 +1,17 @@
+{
+  "row_count": 1071,
+  "date": "20261026",
+  "header": [
+    "施設名称",
+    "施設所在地",
+    "申請者名(法人の場合)",
+    "種別",
+    "許可年月日",
+    "許可番号"
+  ],
+  "source_url": "https://www.pref.kyoto.jp/seikatsu/documents/ryokanr70331.pdf",
+  "normalized_files": [
+    "data/京都府/旅館業/整形済み/20261026_京都府_旅館業_旅館ホテル等_normalized.csv",
+    "data/京都府/旅館業/整形済み/20261026_京都府_旅館業_簡易宿所_normalized.csv"
+  ]
+}

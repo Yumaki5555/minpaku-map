@@ -46,7 +46,7 @@ HEADER_LIKE_TOKENS = {
     "施設名称", "施設名", "名称", "所在地", "住所", "営業種別", "業種別", "種別", "区分",
     "施設種別", "対応する外国語", "no", "no.", "届出番号", "届出年月日", "許可番号", "許可日",
     "登録番号", "連絡先", "商号又は名称", "住宅宿泊事業者", "営業者", "建物名・部屋番号",
-    "建物名", "部屋番号", "電話番号", "tel", "tel1", "備考", "住宅の住所",
+    "建物名", "部屋番号", "電話番号", "tel", "tel1", "備考", "住宅の住所", "届出住宅の所在地",
 }
 
 
@@ -54,7 +54,8 @@ def _is_header_like_row(row: list) -> bool:
     cells = [str(c).strip() for c in row if c not in (None, "")]
     if not cells:
         return False
-    return all(c.lower() in HEADER_LIKE_TOKENS for c in cells)
+    # 広島市の民泊のように、区ごとの表の見出しが「届出住宅の所在地（東区）」と区の名前付きで繰り返されるものも見出しとみなす
+    return all(re.sub(r"[（(][^（()）]*[）)]$", "", c).strip().lower() in HEADER_LIKE_TOKENS for c in cells)
 
 
 @dataclass

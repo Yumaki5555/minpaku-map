@@ -1,0 +1,28 @@
+{
+  "row_count": 249,
+  "date": "20261026",
+  "header": [
+    "業態",
+    "施設_名称",
+    "施設_所在地",
+    "施設_方書",
+    "施設_所在地_緯度",
+    "施設_所在地_経度",
+    "施設_電話番号",
+    "申請者_氏名",
+    "申請者_所在地",
+    "申請者_方書",
+    "申請者所在地（法人）　緯度",
+    "申請者所在地（法人）　経度",
+    "許可年月日",
+    "許可番号",
+    "営業の種別",
+    "NO",
+    "区"
+  ],
+  "source_url": "https://static.hamamatsu.odpf.net/opendata/v01/ryokangyoudaityou/ryokangyoudaityou.csv",
+  "normalized_files": [
+    "data/浜松市/旅館業/整形済み/20261026_浜松市_旅館業_旅館ホテル等_normalized.csv",
+    "data/浜松市/旅館業/整形済み/20261026_浜松市_旅館業_簡易宿所_normalized.csv"
+  ]
+}

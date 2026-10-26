@@ -1,0 +1,12 @@
+{
+  "row_count": 466,
+  "date": "20261026",
+  "header": [
+    "No",
+    "住宅の所在地"
+  ],
+  "source_url": "https://www.city.naha.okinawa.jp/_res/projects/default_project/_page_/001/006/640/r080914mipnaku.xlsx",
+  "normalized_files": [
+    "data/那覇市/民泊/整形済み/20261026_那覇市_民泊_normalized.csv"
+  ]
+}

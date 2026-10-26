@@ -1,0 +1,12 @@
+{
+  "row_count": 331,
+  "date": "20261026",
+  "header": [
+    "届出年月日",
+    "届出住宅の所在地(中区)"
+  ],
+  "source_url": "https://www.city.hiroshima.lg.jp/_res/projects/default_project/_page_/001/013/508/080893.pdf",
+  "normalized_files": [
+    "data/広島市/民泊/整形済み/20261026_広島市_民泊_normalized.csv"
+  ]
+}
