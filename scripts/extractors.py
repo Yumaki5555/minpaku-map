@@ -34,6 +34,9 @@ def _fix_pdf_text(value):
     return text
 
 ADDRESS_HINTS = ["住所", "所在地", "所在", "location", "address"]
+# 函館市のように住所が「町名・番・号」の列に分かれている資料の見出し。
+# 「日高町名色」のような住所と取り違えないよう、マスの中身がちょうどこの言葉のときだけ見出しとみなす
+ADDRESS_CELLS = {"町名"}
 NAME_HINTS = ["施設名", "名称", "屋号", "建物名", "施設の名称", "住宅宿泊事業者", "営業者", "name"]
 
 # 複数の表を1枚のPDFに載せている資料では、表が切り替わるたびに
@@ -69,15 +72,18 @@ def _pick_header_row(raw_rows: list[list]) -> int:
     見つからなければ 0 行目(先頭行)をヘッダーとみなす。
     """
     limit = min(10, len(raw_rows))
+
+    def has_address(cells: list[str]) -> bool:
+        return any(h in "".join(cells) for h in ADDRESS_HINTS) or any(c in ADDRESS_CELLS for c in cells)
+
     for i in range(limit):
         cells = [str(c).strip() for c in raw_rows[i] if c is not None]
         joined = "".join(cells)
-        if any(h in joined for h in ADDRESS_HINTS) and any(h in joined for h in NAME_HINTS):
+        if has_address(cells) and any(h in joined for h in NAME_HINTS):
             return i
     for i in range(limit):
         cells = [str(c).strip() for c in raw_rows[i] if c is not None]
-        joined = "".join(cells)
-        if any(h in joined for h in ADDRESS_HINTS):
+        if has_address(cells):
             return i
     return 0
 
@@ -302,6 +308,21 @@ def extract_docx(path: str) -> ExtractResult:
     return result
 
 
+def extract_html(path: str) -> ExtractResult:
+    """姫路市の民泊のように、一覧がファイルではなくページの中の表として載っているもの。ページで一番大きな表を読む。"""
+    from bs4 import BeautifulSoup
+
+    with open(path, "rb") as f:
+        soup = BeautifulSoup(f.read(), "html.parser")
+    tables = [[[c.get_text(" ", strip=True) for c in tr.find_all(["th", "td"])] for tr in t.find_all("tr")]
+              for t in soup.find_all("table")]
+    if not tables:
+        return ExtractResult(row_count=0, note="ページ内に表が見つかりませんでした")
+    result = _clean_table(max(tables, key=len))
+    result.note = "ページの表を読み取り"
+    return result
+
+
 KANI_SHUKUSHO_HINTS = ["種別", "区分", "営業形態"]
 
 
@@ -322,7 +343,7 @@ def split_kani_shukusho(header: list[str], rows: list[list]) -> tuple[list[list]
     found_kani = False
     for r in rows:
         cell = str(r[col_idx]) if col_idx < len(r) and r[col_idx] is not None else ""
-        if "簡易宿所" in cell:
+        if "簡易宿" in cell:  # 北海道の網走保健所のように「簡易宿泊営業」と書かれているものも簡易宿所
             kani_rows.append(r)
             found_kani = True
         else:
@@ -375,4 +396,6 @@ def extract(path: str, fmt: str, kind_hint: str | None = None, sheet_hint: str |
         return extract_pdf(path)
     if fmt == "docx":
         return extract_docx(path)
+    if fmt == "html":
+        return extract_html(path)
     return ExtractResult(row_count=0, note=f"未対応の形式: {fmt}")

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>民泊・旅館業マップ｜首都圏・大阪</title>
+<title>民泊・旅館業マップ｜首都圏・北海道・愛知・大阪・兵庫・福岡</title>
 <meta name="description" content="{{AREA}}の自治体が公表している民泊（住宅宿泊事業）・特区民泊・旅館業の施設を地図にまとめました。週2回自動更新。">
 <meta property="og:type" content="website">
 <meta property="og:title" content="民泊・旅館業マップ｜{{TOTAL}}件を地図で">
@@ -68,7 +68,7 @@
   <div class="wrap herogrid">
     <div class="herotext">
       <h1 id="hero-h"><span class="nw">民泊・旅館業</span><span class="nw">マップ</span></h1>
-      <p class="herolead">首都圏と大阪の<b>民泊・旅館・ホテル</b>が、どこに、どれくらいあるかを<br class="pc">地図と数で見ることができます。</p>
+      <p class="herolead">首都圏・北海道・愛知・大阪・兵庫・福岡の<b>民泊・旅館・ホテル</b>が、どこに、どれくらいあるかを<br class="pc">地図と数で見ることができます。</p>
       <div class="herostat">
         <div><span class="bignum">{{TOTAL}}</span><span class="unit">件</span></div>
         <div class="statsub">{{AREA}}の {{N_CITIES}}市区町村（{{N_MUNIS}}の自治体が公表した一覧から）</div>
@@ -155,6 +155,7 @@
     <aside class="notice" aria-label="ご注意">
       <svg class="ic"><use href="#i-info"/></svg>
       <ul>
+        <li><b>お知らせ（2026年10月26日）：北海道・愛知県・兵庫県・福岡県を加えました。</b>一覧を公開していない市があるなどの注意点は <a href="#news" data-go>こちら</a> をご覧ください。</li>
         <li>施設の位置は住所から推定しています。実際の場所と異なる場合があります。</li>
         <li>「掲載なし」は、施設が存在しないという証明ではありません。「掲載あり」は、いま営業中であることを保証するものではありません。</li>
         <li>各自治体が公表している一覧を自動で読み取っています。くわしくは <a href="#guide-sec" data-go>初めての方へ</a> をご覧ください。</li>
@@ -335,7 +336,7 @@
   <div class="wrap">
     <header class="sechead">
       <svg class="secicon" aria-hidden="true"><use href="#i-list"/></svg>
-      <div><h2 id="table-h">自治体ごとの一覧表</h2><p>自治体が公表している一覧（資料）ごとの件数・前回との差・資料の日付・出典です。都府県の名前を押すと開いたり閉じたりします。</p></div>
+      <div><h2 id="table-h">自治体ごとの一覧表</h2><p>自治体が公表している一覧（資料）ごとの件数・前回との差・資料の日付・出典です。都道府県の名前を押すと開いたり閉じたりします。</p></div>
     </header>
 
     <div class="panel" role="group" aria-label="一覧表の条件">
@@ -389,7 +390,7 @@
 
     <h3 class="subhead">使い方</h3>
     <ol class="steps">
-      <li><span class="stepn">1</span><svg class="stepi" aria-hidden="true"><use href="#i-map"/></svg><b>地域をえらぶ</b><span>「地域」のボタンで都府県を切り替えるか、住所・市区町村名を入れて「この場所を表示」を押します。</span></li>
+      <li><span class="stepn">1</span><svg class="stepi" aria-hidden="true"><use href="#i-map"/></svg><b>地域をえらぶ</b><span>「地域」のボタンで都道府県を切り替えるか、住所・市区町村名を入れて「この場所を表示」を押します。</span></li>
       <li><span class="stepn">2</span><svg class="stepi" aria-hidden="true"><use href="#i-cat0" style="color:var(--c0)"/></svg><b>種類をえらぶ</b><span>民泊・特区民泊・旅館・ホテル・簡易宿所のチェックで、見たい種類だけにしぼれます。</span></li>
       <li><span class="stepn">3</span><svg class="stepi" aria-hidden="true"><use href="#i-pin" style="color:var(--c2)"/></svg><b>点を押す</b><span>地図の点を押すと、施設の名前・住所・種類・出典が出ます。</span></li>
       <li><span class="stepn">4</span><svg class="stepi" aria-hidden="true"><use href="#i-bars"/></svg><b>数を比べる・増減を見る</b><span>グラフやランキングで市区町村を比べたり、前の資料からの増減を見たりできます。</span></li>
@@ -414,6 +415,15 @@
       <li><b>自動で読み取っているため、内容や位置に誤りがあることがあります。</b>正確な情報は、各自治体の公表資料（一覧表の「出典」）でご確認ください。</li>
     </ul>
     <p><a href="#method" class="jlink" data-open-method>地図上の位置の決め方と精度について（くわしい説明）</a></p>
+
+    <h3 class="subhead" id="news">お知らせ：北海道・愛知県・兵庫県・福岡県を加えました（2026年10月26日）</h3>
+    <ul class="cautions">
+      <li><b>一覧を公開していない市があります。</b>豊橋市（民泊・旅館業）、岡崎市（旅館業）、一宮市（民泊）、姫路市（旅館業）、明石市（民泊・旅館業）、久留米市（旅館業）、北九州市（特区民泊）は、一覧が見つからないため「データ未取得」としています（2026年10月に確認）。</li>
+      <li><b>愛知県・神戸市・福岡県の旅館業は、廃業した施設が残っていることがあります。</b>毎年3月末時点の一覧に、その後の毎月の「新しく許可した施設」を足しています。廃業した施設の一覧は公表されていないため、年度の途中で廃業した施設を除けません。</li>
+      <li><b>名古屋市・福岡市・一宮市の旅館業は、すべて「旅館・ホテル」として数えています。</b>一覧に旅館・ホテルと簡易宿所の区別が書かれていないためです。</li>
+      <li><b>福岡市・北九州市・久留米市の民泊は、福岡県の一覧に含まれています。</b>福岡県では、県が県内全域の民泊の届出を受け付けているためです。</li>
+      <li><b>新しく加えた地域の施設の位置は、今後数回の更新でより細かくなります。</b>いまは国土地理院の住所検索で決めた位置です。Yahoo!の住所検索での確認を、毎週月曜・木曜の自動更新で順に進めています。それまでは、位置が少しずれている点があります。</li>
+    </ul>
   </div>
 </section>
 </main>

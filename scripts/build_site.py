@@ -33,8 +33,8 @@ SITE_SRC = os.path.join(BASE_DIR, "scripts", "site")  # ページのひな形・
 SITE_URL = "https://yumaki5555.github.io/minpaku-map/"
 
 CATS = ["民泊", "特区民泊", "旅館・ホテル", "簡易宿所"]
-PREFS = ["東京都", "神奈川県", "埼玉県", "千葉県", "茨城県", "大阪府"]
-AREA = "東京・神奈川・埼玉・千葉・茨城・大阪"
+PREFS = ["東京都", "神奈川県", "埼玉県", "千葉県", "茨城県", "北海道", "愛知県", "大阪府", "兵庫県", "福岡県"]
+AREA = "東京・神奈川・埼玉・千葉・茨城・北海道・愛知・大阪・兵庫・福岡"
 
 
 def pref_index(code: str) -> int:
@@ -74,14 +74,19 @@ def city_of(addr: str, pref: str, known: list[str]) -> str:
     for name in known:  # 登録済みの自治体名(23区・政令市など)で始まるならそれ
         if rest.startswith(name):
             return name
-    m = re.match(r"^.{1,4}?島(.{1,4}?[町村])", rest)  # 東京都の島しょ(「三宅島三宅村」など)
+    # 東京都の島しょ(「三宅島三宅村」など)。「昭島市玉川町」を「市玉川町」としないよう、島のすぐ後ろが「市」のものは除く
+    m = re.match(r"^[^市]{1,4}?島([^市].{0,3}?[町村])", rest) if pref == "東京都" else None
     if m:
         return m.group(1)
-    m = re.match(r"^.+?郡(.{1,5}?[町村])", rest)
+    # 郡の名前は2文字以上(「蒲郡市竹島町」の「蒲郡」は市の名前の一部)。「赤穂郡上郡町」のように町の名前に郡が入ることもある。
+    # 「群」は北海道の資料の「虻田群洞爺湖町」のような書き誤り
+    m = re.match(r"^.{2,}[郡群]([^郡].{0,4}?[町村])", rest)
     if m:
         return m.group(1)
     m = re.match(r"^(.{1,6}?市)", rest)
-    if m:
+    if m and rest[m.end():m.end() + 1] in ("町", "村") and len(m.group(1)) <= 2:
+        return rest[:m.end() + 1]  # 北海道の「余市町」
+    if m and rest[m.end():m.end() + 1] != "街":  # 北海道の「当麻町市街」の「市」は市の名前ではない
         return m.group(1)
     m = re.match(r"^(.{1,4}?[町村区])", rest)
     return m.group(1) if m else ""
@@ -110,7 +115,7 @@ def main() -> None:
 
     known = known_names(reg_by_code)
     cities: list[str] = []
-    city_idx: dict[str, int] = {}
+    city_idx: dict[tuple[str, str], int] = {}  # (都道府県, 市区町村) → 番号
     # 市区町村(住所から分けたもの)ごとの数。県がまとめて公表している一覧も、住所の市区町村に分けて数える
     city_pref: list[int] = []
     city_n: list[list[int]] = []          # 資料に載っている施設の数(種類ごと)
@@ -128,14 +133,14 @@ def main() -> None:
         pref = PREF_BY_CODE[p["code"][:2]]
         city = city_of(p["addr"], pref, known) or muni
         cat = CATS.index(p["cat"])
-        if city not in city_idx:
-            city_idx[city] = len(cities)
+        if (pref, city) not in city_idx:
+            city_idx[(pref, city)] = len(cities)
             cities.append(city)
             city_pref.append(PREFS.index(pref))
             city_n.append([0] * len(CATS))
             city_m.append([0] * len(CATS))
             city_src.append({})
-        ci = city_idx[city]
+        ci = city_idx[(pref, city)]
         city_n[ci][cat] += 1
         city_src[ci][p["code"]] = city_src[ci].get(p["code"], 0) + 1
         code_n.setdefault(p["code"], [0] * len(CATS))[cat] += 1
@@ -153,6 +158,11 @@ def main() -> None:
         g["items"].append([p["name"], p["addr"], p["date"], p.get("no", "")])
         placed[p["code"]] = placed.get(p["code"], 0) + 1
         city_m[ci][cat] += 1
+
+    # 大阪府と兵庫県の「太子町」のように、別の都道府県に同じ名前の町があるときは、名前に都道府県を添えて見分ける
+    # (ページでは市区町村を名前で選ぶため)。city_names は住所から取り出したままの名前で、登録済みの自治体名との照らし合わせに使う
+    city_names = list(cities)
+    cities = [f"{c}（{PREFS[city_pref[i]]}）" if city_names.count(c) > 1 else c for i, c in enumerate(city_names)]
 
     pins = [[g["lat"], g["lng"], g["cat"], g["muni"], g["exact"], g["items"], g["city"]] for g in groups.values()]
     # 載っている施設が全部、自治体コードの末尾とは別の種別だった資料は、その種別として数える(地図の種類分けと件数をそろえる)
@@ -212,7 +222,7 @@ def main() -> None:
     for ci, name in enumerate(cities):
         sn = sorted(([code_index[c], n] for c, n in city_src[ci].items()), key=lambda x: x[0])
         # その市区町村の名前の資料は、件数0(データ未取得)でも関係する資料として入れる
-        own = [i for i, t in enumerate(table) if t["muni"] == name and i not in {s for s, _ in sn}]
+        own = [i for i, t in enumerate(table) if t["muni"] == city_names[ci] and i not in {s for s, _ in sn}]
         city_rows.append({"name": name, "pref": city_pref[ci], "n": city_n[ci], "m": city_m[ci],
                           "sn": sn, "src": sorted([s for s, _ in sn] + own)})
     site = {"updated": today, "site": SITE_URL, "prefs": PREFS, "cats": CATS,

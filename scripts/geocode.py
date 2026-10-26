@@ -12,12 +12,18 @@ from __future__ import annotations
 import json
 import os
 import re
+import socket
 import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 
 import requests
+import urllib3.util.connection
+
+# 国土地理院の住所検索は新しい形式の住所(IPv6)も持っていて、IPv6でつながらないパソコンだと
+# つなぐたびに20秒ほど待たされる。初めから古い形式(IPv4)だけでつなぐ(update_sources.py と同じ)
+urllib3.util.connection.allowed_gai_family = lambda: socket.AF_INET
 
 sys.path.insert(0, os.path.dirname(__file__))
 from addresses import collect_all  # noqa: E402
@@ -97,20 +103,26 @@ def kanji_to_int(s: str) -> int:
     return KANJI_DIGITS.get(s, 0)
 
 
+def kanji_numbers(text: str) -> str:
+    """「二丁目」→「2丁目」のように、丁目の前の漢数字を数字に直す。北海道の「南七条西8丁目」「東一線北」の条・線も直す
+    (東京都北区の「十条仲原」のような町名は、条の後ろが方角や数字ではないのでそのまま)。"""
+    kanji = "〇一二三四五六七八九十"
+    return re.sub(rf"([{kanji}]+)(丁目|条(?=[東西南北通0-9{kanji}])|線(?=[東西南北0-9]))",
+                  lambda m: f"{kanji_to_int(m.group(1))}{m.group(2)}", text)
+
+
 def numbers(text: str) -> list[str]:
     """住所の中の数字の並び。番地が一致しているかの確認に使う。
     「二丁目」と「2丁目」は同じものとして扱う。"""
     import unicodedata
-    text = unicodedata.normalize("NFKC", text)
-    text = re.sub(r"([〇一二三四五六七八九十]+)丁目", lambda m: f"{kanji_to_int(m.group(1))}丁目", text)
+    text = kanji_numbers(unicodedata.normalize("NFKC", text))
     return [str(int(n)) for n in re.findall(r"\d+", text)]
 
 
 def town_part(text: str) -> str:
     """住所のうち、番地の数字より前の部分(都道府県・郡・「大字」は除く)。町名が一致しているかの確認に使う。"""
     import unicodedata
-    text = unicodedata.normalize("NFKC", text)
-    text = re.sub(r"([〇一二三四五六七八九十]+)丁目", lambda m: f"{kanji_to_int(m.group(1))}丁目", text)
+    text = kanji_numbers(unicodedata.normalize("NFKC", text))
     text = re.split(r"\d", text, maxsplit=1)[0]
     text = re.sub(r"^(東京都|北海道|(京都|大阪)府|.{2,3}県)", "", text)
     text = re.sub(r"^.{1,5}?郡(?=.+?[町村])", "", text)

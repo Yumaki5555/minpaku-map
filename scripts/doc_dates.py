@@ -1,4 +1,4 @@
-"""資料(PDF・エクセル・CSV・Word・ZIP)の中身から「いつ時点の一覧か」を読み取る。
+"""資料(PDF・エクセル・CSV・Word・ZIP・ページの表)の中身から「いつ時点の一覧か」を読み取る。
 
 自治体の一覧には「令和8年9月30日現在」「(2026年8月末現在)」「基準収受日:令和8年6月30日」
 「R8.8.31現在」「2026/8/31現在」など、いろいろな書き方で日付が入っている。
@@ -131,8 +131,10 @@ def _excel_sections(path: str, fmt: str) -> list[tuple[str, bool]]:
     title_parts, other_parts = [" ".join(sheets.keys())], []
     for df in list(sheets.values())[:10]:
         rows = [[str(c) for c in r if str(c) not in ("nan", "None", "")] for r in df.values.tolist()]
-        # 3つ以上のマスが埋まった最初の行(=表の見出し行)より上を表題の部分とする
-        n = next((i for i, r in enumerate(rows[:15]) if len(r) >= 3), min(len(rows), 6))
+        # 3つ以上のマスが埋まった最初の行(=表の見出し行)より上を表題の部分とする。
+        # 名古屋市の民泊のように2列しかない表は、2つのマスが埋まった最初の行を見出し行とする(一覧の届出日を表題と取り違えないため)
+        need = min(3, max((len(r) for r in rows[:15]), default=0)) or 3
+        n = next((i for i, r in enumerate(rows[:15]) if len(r) >= need), min(len(rows), 6))
         title_parts += [" ".join(r) for r in rows[:n]]
         other_parts += [" ".join(r) for r in rows[n:n + 15] + rows[-5:]]
     return [("\n".join(title_parts), True), ("\n".join(other_parts), False)]
@@ -161,6 +163,19 @@ def _docx_sections(path: str) -> list[tuple[str, bool]]:
     # 目黒区のように、表題も表の1行目に入っている資料がある
     first_rows = [" ".join(dict.fromkeys(c.text for c in r.cells)) for t in doc.tables[:1] for r in t.rows[:2]]
     return [("\n".join(paras[:6] + heads), True), ("\n".join(first_rows + paras), False)]
+
+
+def _html_sections(path: str) -> list[tuple[str, bool]]:
+    """一覧がページの表として載っているもの(姫路市の民泊)。表の直前の説明文(「令和8年7月29日現在、届出順」など)を表題の部分とする。"""
+    from bs4 import BeautifulSoup
+
+    with open(path, "rb") as f:
+        soup = BeautifulSoup(f.read(), "html.parser")
+    for t in soup(["script", "style"]):
+        t.decompose()
+    table = soup.find("table")
+    before = [s.strip() for s in table.find_all_previous(string=True) if s.strip()][:6] if table else []
+    return [("\n".join(reversed(before)), True)]
 
 
 # ---- 資料に日付が書かれていないときの、ファイルの保存日時 ----
@@ -241,6 +256,8 @@ def document_date(path: str, fmt: str, zip_inner: list[str] | None = None) -> tu
             sections = _csv_sections(path)
         elif fmt == "docx":
             sections = _docx_sections(path)
+        elif fmt == "html":
+            sections = _html_sections(path)
         else:
             sections = []
     except Exception:  # noqa: BLE001

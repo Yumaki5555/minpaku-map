@@ -1,0 +1,12 @@
+{
+  "row_count": 9,
+  "date": "20261026",
+  "header": [
+    "届出番号",
+    "届出住宅の所在地"
+  ],
+  "source_url": "https://www.city.amagasaki.hyogo.jp/_res/projects/default_project/_page_/001/014/371/jutakuR80930.csv",
+  "normalized_files": [
+    "data/尼崎市/民泊/整形済み/20261026_尼崎市_民泊_normalized.csv"
+  ]
+}

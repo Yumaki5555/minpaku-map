@@ -1,6 +1,6 @@
 {
   "row_count": 2597,
-  "date": "20261014",
+  "date": "20261026",
   "header": [
     "申請者名",
     "施設名称１",
@@ -16,6 +16,6 @@
   ],
   "source_url": "https://opendata.pref.chiba.lg.jp/resource_download/82",
   "normalized_files": [
-    "data/千葉県/旅館業/整形済み/20261014_千葉県_旅館業_normalized.csv"
+    "data/千葉県/旅館業/整形済み/20261026_千葉県_旅館業_normalized.csv"
   ]
 }

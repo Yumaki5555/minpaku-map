@@ -1,0 +1,15 @@
+{
+  "row_count": 1528,
+  "date": "20261026",
+  "header": [
+    "No.",
+    "振興局",
+    "届出番号",
+    "届出年月日",
+    "届出住宅の所在地"
+  ],
+  "source_url": "https://www.pref.hokkaido.lg.jp/fs/1/3/1/8/3/6/1/7/_/R8.09.15%E5%B1%8A%E5%87%BA%E4%BD%8F%E5%AE%85%E4%B8%80%E8%A6%A7.pdf",
+  "normalized_files": [
+    "data/北海道/民泊/整形済み/20261026_北海道_民泊_normalized.csv"
+  ]
+}

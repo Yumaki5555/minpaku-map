@@ -19,17 +19,23 @@ import io
 import json
 import os
 import re
+import socket
 import sys
 import time
 import unicodedata
 import zipfile
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
-from urllib.parse import urljoin, urlparse
+from urllib.parse import unquote, urljoin, urlparse
 
 import pandas as pd
 import requests
+import urllib3.util.connection
 from bs4 import BeautifulSoup
+
+# 北海道庁のサイトのように、新しい形式の住所(IPv6)も持つサイトは、IPv6でつながらないパソコンだと
+# 1回ごとに20秒ほど待たされてから古い形式(IPv4)につなぎ直す。初めからIPv4だけでつなぐ
+urllib3.util.connection.allowed_gai_family = lambda: socket.AF_INET
 
 sys.path.insert(0, os.path.dirname(__file__))
 from doc_dates import combine_dates, document_date  # noqa: E402
@@ -88,8 +94,8 @@ def merge_split_rows(rows: list) -> list:
 def find_latest_link(row: dict) -> tuple[str, str] | None:
     """「元HP」のページを開き、リンクの文字が「リンク文字」(正規表現)に合う最初のファイルの (URL, 形式) を返す。"""
     page, pattern = row.get("元HP", "").strip(), row.get("リンク文字", "").strip()
-    if not page or not pattern:
-        return None
+    if not page or not pattern or gather_pages(row):
+        return None  # 保健所ごとのページに分かれている資料(北海道の旅館業)は、process_row でページを順に開いて探す
     found = page_links(page, pattern)
     if not found:
         print(f"  [警告] ページ内に「{pattern}」に合うファイルが見つかりませんでした: {page}")
@@ -141,8 +147,8 @@ def infer_years(links: list[tuple[str, str]], start_year: int) -> list[tuple[int
     return out
 
 
-def page_links(page: str, pattern: str) -> list[tuple[str, str]]:
-    """ページ内で、リンクの文字が pattern(正規表現)に合うファイルの (URL, リンクの文字) を載っている順に返す。
+def page_anchors(page: str) -> list[tuple[str, str]]:
+    """ページ内のすべてのリンクの (URL, リンクの文字) を載っている順に返す。開けなければ空。
     bodik(CKAN)のデータセットページの場合は、データの名前をリンクの文字として扱う。
     """
     # bodikや相模原市などのCKAN(オープンデータの仕組み)のデータセットページは、APIでファイル一覧を取る
@@ -151,25 +157,61 @@ def page_links(page: str, pattern: str) -> list[tuple[str, str]]:
         if m:
             resp = requests.get(f"{m.group(1)}/api/3/action/package_show", params={"id": m.group(2)}, timeout=30)
             resp.raise_for_status()
-            items = [(r["url"], r.get("name", "")) for r in resp.json()["result"]["resources"]]
-        else:
-            resp = requests.get(page, headers=HEADERS, timeout=30)
-            resp.raise_for_status()
-            soup = BeautifulSoup(resp.content, "html.parser")
-            # 大阪市のように <base href> でリンクの基準の場所を指定しているページに対応する
-            base_tag = soup.find("base", href=True)
-            origin = urljoin(page, base_tag["href"]) if base_tag else page
-            items = [(urljoin(origin, a["href"]), re.sub(r"\s+", " ", a.get_text(" ", strip=True)))
-                     for a in soup.find_all("a", href=True)]
+            return [(r["url"], r.get("name", "")) for r in resp.json()["result"]["resources"]]
+        resp = get_with_retry(page)
+        soup = BeautifulSoup(resp.content, "html.parser")
+        # 大阪市のように <base href> でリンクの基準の場所を指定しているページに対応する
+        base_tag = soup.find("base", href=True)
+        origin = urljoin(page, base_tag["href"]) if base_tag else page
+        return [(urljoin(origin, a["href"]), re.sub(r"\s+", " ", a.get_text(" ", strip=True)))
+                for a in soup.find_all("a", href=True)]
     except Exception as e:  # noqa: BLE001
         print(f"  [警告] 自治体のページを開けませんでした: {page} ({e})")
         return []
+
+
+def page_links(page: str, pattern: str, decoded: bool = False) -> list[tuple[str, str]]:
+    """ページ内で、リンクの文字が pattern(正規表現)に合うファイルの (URL, リンクの文字) を載っている順に返す。
+    decoded=True のときは、URLの中の日本語(「%E9%A3%9F…」のように符号になっている部分)も元の文字に戻して照らし合わせる
+    (釧路保健所のように、生活衛生と食品衛生のファイルのリンクの文字が同じで、ファイル名でしか見分けられない場合)。
+    """
     out, seen = [], set()
-    for url, text in items:
-        if re.search(pattern, f"{text} {url}") and link_format(url, text) and url not in seen:
+    for url, text in page_anchors(page):
+        target = f"{text} {unquote(url) if decoded else url}"
+        if re.search(pattern, target) and link_format(url, text) and url not in seen:
             out.append((url, text))
             seen.add(url)
     return out
+
+
+def gather_pages(row: dict) -> str:
+    """「まとめ取得」が 1 以外の文字なら、それは元HPから開く子ページのリンクの文字(正規表現)。
+    北海道の旅館業のように、保健所ごとのページに1つずつファイルが置かれている資料で使う。"""
+    v = row.get("まとめ取得", "").strip()
+    return "" if v in ("", "1") else v
+
+
+def gather_targets(row: dict) -> list[tuple[str, str]] | None:
+    """「まとめ取得」で集めるファイルの (URL, 形式) の一覧。まとめ取得しない行は None。
+    子ページのどれか1つでもファイルが見つからなければ、件数が欠けてしまうので空にする(前回の控えを使う)。"""
+    sub = gather_pages(row)
+    if sub:
+        targets = []
+        for page, text in page_anchors(row["元HP"]):
+            if not re.search(sub, text) or page in {p for p, _ in targets}:
+                continue
+            found = page_links(page, row["リンク文字"], decoded=True)
+            if not found:
+                print(f"  [警告] {text} のページに「{row['リンク文字']}」に合うファイルが見つかりませんでした: {page}")
+                return []
+            targets.append((page, found[0]))
+        return [(u, link_format(u, t)) for _, (u, t) in targets]
+    if row.get("まとめ取得", "").strip() == "1" and row.get("リンク文字"):
+        links = page_links(row["元HP"], row["リンク文字"])
+        fmt = infer_format(row.get("文書リンク", "")) or row.get("ファイル形式", "")
+        same = [x for x in links if link_format(*x) == fmt]
+        return [(u, link_format(u, t)) for u, t in (same or links)]
+    return None
 
 
 def untab(rows: list) -> list:
@@ -305,6 +347,10 @@ def pick_col(rec: dict, name: str) -> str:
         if key_col([name], word):
             col = key_col(rec.keys(), word)
             return rec[col] if col else ""
+    # 旅館・ホテルか簡易宿所かの列(愛知県は全体一覧が「旅館業の種別」、毎月の新規が「業種」、福岡県は「営業の種別」と「種別」)
+    if "種別" in name:
+        col = next((k for k in rec if k and ("種別" in k or k == "業種")), None)
+        return rec[col] if col else ""
     return ""
 
 
@@ -379,8 +425,8 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
                 if not dh:
                     continue
                 rec = dict(zip(dh, cells))
-                if rec.get("業種") and "旅館" not in rec["業種"]:
-                    continue  # 理容所・美容所などは対象外
+                if rec.get("業種") and not re.search(r"旅館|ホテル|簡易宿|下宿", rec["業種"]):
+                    continue  # 理容所・美容所などは対象外(愛知県のように業種が「簡易宿所」と書かれているものは対象)
                 addr_col = key_col(rec.keys(), "所在地")
                 if addr_col and not squash(rec[addr_col]) and not squash(rec.get("許可番号")):
                     continue  # 港区の「旅館業施設新規一覧(令和8年8月31日現在) / Ver202608」のような表の終わりの注記
@@ -445,22 +491,41 @@ def save_registry(rows: list[dict], fieldnames: list[str]) -> None:
         w.writerows(rows)
 
 
-def download(url: str, dest_dir: str, basename_hint: str) -> str | None:
+def get_with_retry(url: str, tries: int = 3) -> requests.Response:
+    """北海道の保健所のページのように、ときどき接続が途中で切れるサイトがあるので、少し待って何度かやり直す。
+    「ページが無い(404)」のように、やり直しても変わらない失敗はすぐにあきらめる。"""
+    for attempt in range(tries):
+        try:
+            resp = requests.get(url, headers=HEADERS, timeout=30)
+            if resp.status_code < 500 or attempt == tries - 1:
+                resp.raise_for_status()
+                return resp
+        except (requests.ConnectionError, requests.Timeout):
+            if attempt == tries - 1:
+                raise
+        time.sleep(5 * (attempt + 1))
+
+
+def download(url: str, dest_dir: str, basename_hint: str, allow_html: bool = False) -> str | None:
     os.makedirs(dest_dir, exist_ok=True)
     parsed = urlparse(url)
-    orig_name = os.path.basename(parsed.path) or basename_hint
+    # 北海道の保健所のファイルのように、名前の日本語が「%E3%80%90…」の符号で書かれていると
+    # 名前が長すぎてWindowsで保存できないので、元の文字に戻し、それでも長ければ途中で切る
+    orig_name = unquote(os.path.basename(parsed.path)) or basename_hint
+    stem, ext = os.path.splitext(orig_name)
+    if len(stem) > 60:
+        orig_name = stem[:60] + ext
     if not infer_format(orig_name) and infer_format(basename_hint):
         orig_name += "." + infer_format(basename_hint)
     fname = f"{TODAY}_{safe_name(orig_name)}"
     dest_path = os.path.join(dest_dir, fname)
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=30)
-        resp.raise_for_status()
+        resp = get_with_retry(url)
     except Exception as e:  # noqa: BLE001
         print(f"  [失敗] ダウンロードできませんでした: {e}")
         return None
     # 茨城県のようにサイトの障害中は、ファイルの代わりに「臨時ページ」が返ってくる。表として読むと0件になってしまう
-    if resp.content[:200].lstrip().lower().startswith((b"<!doctype html", b"<html")):
+    if not allow_html and resp.content[:200].lstrip().lower().startswith((b"<!doctype html", b"<html")):
         print("  [失敗] ファイルではなくホームページが返ってきました(サイトの障害・移転の可能性)")
         return None
     with open_with_retry(dest_path, "wb") as f:
@@ -552,17 +617,19 @@ def process_row(row: dict) -> dict:
     dest_dir = os.path.join(DATA_DIR, safe_name(ward), safe_name(kind), "元データ")
     print(f"[{ward}/{kind}] ダウンロード中: {url}")
     # 神奈川県の旅館業のように、地域ごとに分かれた複数のファイルをまとめて1つの一覧として扱う
-    if row.get("まとめ取得", "").strip() == "1" and row.get("リンク文字"):
-        links = page_links(row["元HP"], row["リンク文字"])
-        same = [x for x in links if link_format(*x) == fmt]
-        targets = [(u, link_format(u, t)) for u, t in (same or links)]
-    else:
+    targets = gather_targets(row)
+    if targets is None:
         targets = [(url, fmt)]
+    elif not targets:
+        summary["status"] = "要確認"
+        summary["detail"] = "まとめて集めるファイルの一部が見つからない(前回の控えを使用)"
+        return summary
     results, dates, path = [], [], None
     for t_url, t_fmt in targets:
         if len(targets) > 1:
             print(f"[{ward}/{kind}] ダウンロード中: {t_url}")
-        path = download(t_url, dest_dir, f"{key}.{t_fmt or 'bin'}")
+        # 姫路市の民泊のように、一覧がファイルではなくページの表として載っている場合は、ページそのものを読む
+        path = download(t_url, dest_dir, f"{key}.{t_fmt or 'bin'}", allow_html=t_fmt == "html")
         if not path:
             if "前回の控え" in row.get("メモ", ""):
                 # 千葉県のオープンデータのように海外からの接続を断るサイトは、前回の控え(state/points/)を使う

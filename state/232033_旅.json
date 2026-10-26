@@ -1,0 +1,16 @@
+{
+  "row_count": 24,
+  "date": "20261026",
+  "header": [
+    "許可番号",
+    "許可年月日",
+    "施設名称",
+    "施設住所",
+    "申請者氏名",
+    "代表者氏名"
+  ],
+  "source_url": "https://www.city.ichinomiya.aichi.jp/_res/projects/default_project/_page_/001/075/449/2025ryokangyouitiran.csv",
+  "normalized_files": [
+    "data/一宮市/旅館業/整形済み/20261026_一宮市_旅館業_normalized.csv"
+  ]
+}

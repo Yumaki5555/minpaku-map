@@ -1,0 +1,14 @@
+{
+  "row_count": 1921,
+  "date": "20261026",
+  "header": [
+    "No.",
+    "届出番号",
+    "届出年月日",
+    "住宅の所在地"
+  ],
+  "source_url": "https://www.pref.fukuoka.lg.jp/uploaded/life/845267_63089639_misc.pdf",
+  "normalized_files": [
+    "data/福岡県/民泊/整形済み/20261026_福岡県_民泊_normalized.csv"
+  ]
+}

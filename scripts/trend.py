@@ -112,7 +112,7 @@ def records_csv(table: list[dict], history: list[dict], prefs: list[str]) -> str
     """件数の記録(エクセルで開けるよう、先頭に印(BOM)を付けて保存する)。"""
     buf = io.StringIO()
     w = csv.writer(buf, lineterminator="\r\n")
-    w.writerow(["都府県", "自治体", "種別", "資料の日付", "件数", "前の版からの増減", "記録した日"])
+    w.writerow(["都道府県", "自治体", "種別", "資料の日付", "件数", "前の版からの増減", "記録した日"])
     for t in table:
         prev = None
         for v in versions(history, t["code"]):
@@ -363,7 +363,7 @@ TEMPLATE = """<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>件数の推移｜民泊・旅館業マップ</title>
-<meta name="description" content="首都圏・大阪の自治体が公表している民泊・旅館業の件数を、一覧が更新されるたびに記録し、自治体ごとの増減をグラフにしています。">
+<meta name="description" content="首都圏・北海道・愛知・大阪・兵庫・福岡の自治体が公表している民泊・旅館業の件数を、一覧が更新されるたびに記録し、自治体ごとの増減をグラフにしています。">
 <meta property="og:type" content="website">
 <meta property="og:title" content="民泊・旅館業の件数の推移（全体の合計と自治体ごと）">
 <meta property="og:description" content="自治体の一覧が更新されるたびに件数を記録し、増減をグラフにしています。週2回自動更新。">
@@ -495,7 +495,7 @@ footer{{font-size:15.5px;color:var(--sub);padding:24px 0 90px;border-top:1px sol
 </section>
 
 <div class="filters" role="group" aria-label="絞り込みと並び順">
-  <select id="pref" aria-label="都府県"><option value="">すべての都府県</option>{pref_opts}</select>
+  <select id="pref" aria-label="都道府県"><option value="">すべての都道府県</option>{pref_opts}</select>
   {kind_btns}
   <label class="chk"><input type="checkbox" id="chg">増減があったものだけ</label>
   <select id="sort" aria-label="並び順">
@@ -520,7 +520,7 @@ footer{{font-size:15.5px;color:var(--sub);padding:24px 0 90px;border-top:1px sol
 </tbody></table></div>
 <p class="note"><b>自治体・種別ごと</b>（一覧の版ごと）</p>
 <div class="tablewrap"><table>
-<thead><tr><th>都府県</th><th>自治体</th><th>種別</th><th>資料の日付</th><th style="text-align:right">件数</th><th style="text-align:right">前の版から</th><th>記録した日</th></tr></thead>
+<thead><tr><th>都道府県</th><th>自治体</th><th>種別</th><th>資料の日付</th><th style="text-align:right">件数</th><th style="text-align:right">前の版から</th><th>記録した日</th></tr></thead>
 <tbody>
 {rows}
 </tbody></table></div>

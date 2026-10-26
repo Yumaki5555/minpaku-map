@@ -55,7 +55,8 @@
   const viewURL = () => D.site + (location.search ? decodeURIComponent(location.search) : '');
 
   const placeName = () => S.city ? D.prefs[S.pref] + ' ' + S.city : S.pref !== null ? D.prefs[S.pref] + '全体' : '全地域';
-  const placeLong = () => S.city ? D.prefs[S.pref] + ' ' + S.city : S.pref !== null ? D.prefs[S.pref] + '全体' : '首都圏・大阪（' + D.prefs.join('・') + '）';
+  const ALL_AREA = D.prefs.length + '都道府県';             // 「全地域」を選んでいるときの呼び方(画像の題名など)
+  const placeLong = () => S.city ? D.prefs[S.pref] + ' ' + S.city : S.pref !== null ? D.prefs[S.pref] + '全体' : ALL_AREA + '（' + D.prefs.join('・') + '）';
   const catsLabel = () => S.cats.size === CATS.length ? '4種類すべて' : S.cats.size === 0 ? '種類がえらばれていません' : [...S.cats].sort().map(i => CATS[i]).join('・');
   const scopeCities = () => D.cities.filter(c => S.pref === null || c.pref === S.pref);
   const sumOn = arr => [...S.cats].reduce((t, i) => t + arr[i], 0);
@@ -92,9 +93,16 @@
   function goTo(id) {
     const el = document.getElementById(id);
     if (!el) return;
-    const bar = $('#condbar');
-    const off = (bar && !bar.hidden ? bar.offsetHeight : 0) + 10;
-    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - off, behavior: 'smooth' });
+    const bar = $('#condbar'), hero = $('.hero');
+    let top = el.getBoundingClientRect().top + window.scrollY - 10;
+    // 移動した先で上の条件の帯が出る場合は、帯の高さの分だけ手前で止める(「お知らせ」の見出しなどが帯に隠れないように)
+    if (bar && top > hero.offsetTop + hero.offsetHeight - 40) {
+      const shown = !bar.hidden;
+      bar.hidden = false;
+      top -= bar.offsetHeight;
+      bar.hidden = !shown;
+    }
+    window.scrollTo({ top, behavior: 'smooth' });
   }
   document.addEventListener('click', ev => {
     const a = ev.target.closest('a[data-go]');
@@ -763,11 +771,13 @@
       if (!q) { qmsg.textContent = '住所か市区町村名を入れてから「この場所を表示」を押してください。'; return; }
       qmsg.textContent = '';
       clearSearch();
-      // 1) 都府県名・市区町村名と一致したら、その地域をえらぶ(地図・グラフ・表がその地域になる)
+      // 1) 都道府県名・市区町村名と一致したら、その地域をえらぶ(地図・グラフ・表がその地域になる)
       const pi = D.prefs.indexOf(q);
       if (pi >= 0) { update({ pref: pi, city: null }); qmsg.textContent = D.prefs[pi] + 'を表示しています。'; return; }
-      const bare = q.replace(/^(東京都|神奈川県|埼玉県|千葉県|茨城県|大阪府)/, '');
-      const name = [bare, bare + '市', bare + '区', bare + '町', bare + '村'].find(n => cityBy.has(n));
+      const head = D.prefs.find(pf => q.startsWith(pf));
+      const bare = head ? q.slice(head.length) : q;
+      // 大阪府と兵庫県の「太子町」のように、同じ名前の町は「太子町（兵庫県）」という名前になっている
+      const name = [bare, bare + '市', bare + '区', bare + '町', bare + '村', head && bare + '（' + head + '）'].find(n => n && cityBy.has(n));
       if (name) {
         update({ city: name });
         qmsg.innerHTML = '<b>' + esc(D.prefs[S.pref] + ' ' + name) + '</b>の施設だけを表示しています。ほかの地域も見るときは「検索・しぼりこみを解除」を押してください。';
@@ -987,7 +997,7 @@
     let rows = list.slice(0, 10);
     const si = list.findIndex(x => x.c.name === S.city);
     if (si >= 10) rows = rows.concat([list[si]]);
-    const { cv, g } = frame((S.pref === null ? '首都圏・大阪' : D.prefs[S.pref]) + 'の市区町村ごとの施設の数', '種類：' + catsLabel() + '　／　' + sortLabel + '（上位' + Math.min(10, list.length) + '）');
+    const { cv, g } = frame((S.pref === null ? ALL_AREA : D.prefs[S.pref]) + 'の市区町村ごとの施設の数', '種類：' + catsLabel() + '　／　' + sortLabel + '（上位' + Math.min(10, list.length) + '）');
     legendRow(g, cats, 60, 236);
     const maxV = Math.max(1, ...rows.map(x => x.v));
     hbars(g, rows.map(x => ({ name: x.c.name + (S.pref === null ? '（' + D.prefs[x.c.pref].replace(/[都府県]$/, '') + '）' : ''), n: x.c.n, v: x.v, sel: x.c.name === S.city, rank: list.indexOf(x) + 1 })),
@@ -998,7 +1008,7 @@
   function pngRank(gi) {
     const gr = RG[gi], { on, list } = rankList(gr);
     const rows = list.slice(0, 10);
-    const { cv, g } = frame((S.pref === null ? '首都圏・大阪' : D.prefs[S.pref]) + 'の' + gr.title + 'の数 市区町村ランキング', '種類：' + on.map(i => CATS[i]).join('・') + '　／　上位' + rows.length + '（全' + fmt(list.length) + '市区町村）');
+    const { cv, g } = frame((S.pref === null ? ALL_AREA : D.prefs[S.pref]) + 'の' + gr.title + 'の数 市区町村ランキング', '種類：' + on.map(i => CATS[i]).join('・') + '　／　上位' + rows.length + '（全' + fmt(list.length) + '市区町村）');
     legendRow(g, on, 60, 236);
     const maxV = Math.max(1, ...rows.map(x => x.v));
     hbars(g, rows.map(x => ({ name: x.c.name + (S.pref === null ? '（' + D.prefs[x.c.pref].replace(/[都府県]$/, '') + '）' : ''), n: x.c.n, v: x.v, sel: x.c.name === S.city, rank: x.rank })),

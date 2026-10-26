@@ -1,0 +1,12 @@
+{
+  "row_count": 825,
+  "date": "20261026",
+  "header": [
+    "届出年月日",
+    "住宅の所在地"
+  ],
+  "source_url": "https://www.city.nagoya.jp/_res/projects/default_project/_page_/001/015/510/jutaku_r080930.xls",
+  "normalized_files": [
+    "data/名古屋市/民泊/整形済み/20261026_名古屋市_民泊_normalized.csv"
+  ]
+}

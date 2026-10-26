@@ -1,0 +1,13 @@
+{
+  "row_count": 107,
+  "date": "20261026",
+  "header": [
+    "",
+    "届出年月日",
+    "住宅の所在地"
+  ],
+  "source_url": "https://web.pref.hyogo.lg.jp/kf14/documents/1-1todokeder080622.pdf",
+  "normalized_files": [
+    "data/兵庫県/民泊/整形済み/20261026_兵庫県_民泊_normalized.csv"
+  ]
+}
