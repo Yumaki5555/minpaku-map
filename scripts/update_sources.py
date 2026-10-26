@@ -286,6 +286,12 @@ def match_col(name: str, header: list) -> int | None:
 
 def combine_results(results: list) -> "ExtractResult":
     """複数のファイルから読んだ表を1つにまとめる。列の並びが違う場合は列名で合わせる。"""
+    # 横浜市の旅館業のように、区ごとのファイルでカンマ区切りとタブ区切りが混ざっている場合は、
+    # タブ区切りのファイルを先に普通の表に直す(直さないと列名が合わず、その区の行が空になる)
+    for r in results:
+        if r.header and len(r.header) == 1 and "\t" in str(r.header[0]):
+            fixed = untab([r.header] + list(r.rows))
+            r.header, r.rows = fixed[0], fixed[1:]
     results = [r for r in results if r.header or r.rows]
     if not results:
         return ExtractResult(row_count=0, note="読み取れる表がありませんでした")
