@@ -226,7 +226,8 @@ def main() -> None:
         city_rows.append({"name": name, "pref": city_pref[ci], "n": city_n[ci], "m": city_m[ci],
                           "sn": sn, "src": sorted([s for s, _ in sn] + own)})
     site = {"updated": today, "site": SITE_URL, "prefs": PREFS, "cats": CATS,
-            "axis": [f"{x0:%Y/%m/%d}", f"{x1:%Y/%m/%d}"], "sources": sources, "cities": city_rows}
+            "axis": [f"{x0:%Y/%m/%d}", f"{x1:%Y/%m/%d}"], "sources": sources, "cities": city_rows,
+            "total_paused": trend.TOTAL_PAUSED}  # 全地域の合計のグラフを止めている理由(空なら出す)
 
     total = sum(t["count"] for t in table)
     page = render(site, total, today, not_found, by_source, len(munis), f"{x0:%Y/%m/%d}〜{x1:%Y/%m/%d}")

@@ -348,6 +348,8 @@
         pts: s.count ? seriesOf(s) : null,
       }));
     }
+    // 全地域の合計は出さない(新しく加えた地域に前の件数の記録が無く、増減を正しく表せないため。理由は D.total_paused)
+    if (S.pref === null && D.total_paused) return [];
     const srcs = scopeSources().filter(s => kinds.includes(s.k));
     const cards = [];
     const label = S.pref === null ? '全地域' : D.prefs[S.pref];
@@ -465,7 +467,11 @@
     } else sc.innerHTML = '<span class="tag">' + esc(placeName()) + '</span>の資料の推移（種類ごと）';
     const box = $('#trendcharts');
     if (chartRO) $$('.chbox', box).forEach(b => chartRO.unobserve(b));
-    box.innerHTML = cards.length ? cards.map(c => '<div class="card tcard">' + cardHTML(c) + '</div>').join('') : '<p class="bempty">えらんだ種類の資料がありません。「施設の種類」でえらんでください。</p>';
+    const paused = !S.city && S.pref === null && D.total_paused;
+    box.innerHTML = cards.length ? cards.map(c => '<div class="card tcard">' + cardHTML(c) + '</div>').join('')
+      : paused ? '<div class="tna tpaused"><b>全地域の合計のグラフは表示していません</b><br>' + esc(D.total_paused) + '上の「地域」で都道府県をえらぶと、その地域の推移グラフが出ます。</div>'
+      : '<p class="bempty">えらんだ種類の資料がありません。「施設の種類」でえらんでください。</p>';
+    $('[data-png="trend"]').hidden = paused;
     $$('.tcard', box).forEach((el, i) => {
       const b = $('.chbox', el);
       if (!b) return;

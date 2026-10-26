@@ -1,7 +1,7 @@
 """自治体・種別ごとの件数の移り変わりを、表(CSV)とグラフのページにする。
 
 - docs/data/件数の記録.csv: 自治体・種別ごとに、一覧の版(資料の日付)ごとの件数を1行ずつ並べた表(エクセルで開ける)
-- docs/trend.html        : 全体の合計と、自治体・種別ごとの件数の推移グラフのページ
+- docs/trend.html        : 全体の合計(TOTAL_PAUSED の間は止めている)と、自治体・種別ごとの件数の推移グラフのページ
 
 元になる記録は docs/data/history.json(地図を作るたびに、件数か資料の日付が変わっていれば1回分を書き足す)。
 先頭の "partial": true の回は、記録を始める前の版(手元に残っていた資料やウェブ魚拓の資料を数え直したもの)で、
@@ -64,6 +64,13 @@ def full_snapshots(history: list[dict]) -> list[dict]:
 
 
 AXIS_MONTHS = 3  # グラフの横軸の長さ(最近何か月分か)
+
+# 全体(全地域)の合計のグラフを止めている理由(推移のページとトップページに出す文)。空にすると、また合計のグラフを出す。
+# 2026/10/26 に北海道・愛知・兵庫・福岡を加えたが、加えた地域にはそれより前の件数の記録が無い。totals() の数え方では
+# 加えた地域がグラフの期間ずっと今と同じ件数だったことになり、合計の増減を正しく表せないため止めた(ユーザーの指示)。
+# 都道府県ごとの合計は、加えた地域とそれまでの地域が混ざらないので出したままにする
+TOTAL_PAUSED = ("2026年10月26日に北海道・愛知県・兵庫県・福岡県を加えました。加えた地域は今回が初めての記録で、"
+                "それより前の件数が分からないため、全地域を足した合計がどれだけ増えたか・減ったかを正しく表せません。")
 
 
 def axis_range(all_versions: list[list[dict]]) -> tuple[datetime, datetime]:
@@ -346,15 +353,34 @@ def render_page(table: list[dict], history: list[dict], today: str, prefs: list[
                         f'<td>{e(v["doc"])}</td><td class="num">{v["count"]:,}</td><td class="num">{d}</td>'
                         f'<td>{e(v["recorded"])}</td></tr>')
             prev = v["count"]
-    # 全体の合計は、地図の合計とそろうよう、今の件数がある(データなしでない)自治体・種別だけで出す
-    per_code = {t["code"]: all_vs[t["code"]] for t in table if t["count"] and all_vs[t["code"]]}
-    hero, total_rows = render_hero(per_code, names, x0, x1, today)
+    if TOTAL_PAUSED:  # 全体の合計のグラフと表の代わりに、止めている理由を出す
+        hero = PAUSED.format(note=e(TOTAL_PAUSED))
+        total_table = ""
+    else:
+        # 全体の合計は、地図の合計とそろうよう、今の件数がある(データなしでない)自治体・種別だけで出す
+        per_code = {t["code"]: all_vs[t["code"]] for t in table if t["count"] and all_vs[t["code"]]}
+        hero, total_rows = render_hero(per_code, names, x0, x1, today)
+        total_table = TOTAL_TABLE.format(total_rows=total_rows)
     return TEMPLATE.format(
         x0=f"{x0:%Y/%m/%d}", x1=f"{x1:%Y/%m/%d}",
         today=e(today), start=e(full_snapshots(history)[0]["date"]), items="\n".join(items), pref_opts=pref_opts,
         kind_btns=kind_btns, up=up, down=down, flat=flat, rows="\n".join(rows), csv=e(CSV_NAME), site_url=site_url,
-        hero=hero, total_rows=total_rows,
+        hero=hero, total_table=total_table, og_title="自治体ごと" if TOTAL_PAUSED else "全体の合計と自治体ごと",
     )
+
+
+PAUSED = """<section class="paused" id="hero" aria-labelledby="paused-h">
+<h2 id="paused-h">全体の合計のグラフは、表示を止めています</h2>
+<p>{note}そのため、全体の合計のグラフと表は表示していません。自治体ごとのグラフは、下でこれまでどおりご覧いただけます。</p>
+</section>"""
+
+TOTAL_TABLE = """<p class="note"><b>全体の合計</b>（資料の日付で、件数が変わった日ごと）</p>
+<div class="tablewrap"><table>
+<thead><tr><th>資料の日付</th><th style="text-align:right">合計</th><th style="text-align:right">民泊</th><th style="text-align:right">特区民泊</th><th style="text-align:right">旅館業</th><th style="text-align:right">前の行から</th></tr></thead>
+<tbody>
+{total_rows}
+</tbody></table></div>
+"""
 
 
 TEMPLATE = """<!DOCTYPE html>
@@ -365,7 +391,7 @@ TEMPLATE = """<!DOCTYPE html>
 <title>件数の推移｜民泊・旅館業マップ</title>
 <meta name="description" content="首都圏・北海道・愛知・大阪・兵庫・福岡の自治体が公表している民泊・旅館業の件数を、一覧が更新されるたびに記録し、自治体ごとの増減をグラフにしています。">
 <meta property="og:type" content="website">
-<meta property="og:title" content="民泊・旅館業の件数の推移（全体の合計と自治体ごと）">
+<meta property="og:title" content="民泊・旅館業の件数の推移（{og_title}）">
 <meta property="og:description" content="自治体の一覧が更新されるたびに件数を記録し、増減をグラフにしています。週2回自動更新。">
 <meta property="og:url" content="{site_url}trend.html">
 <meta name="twitter:card" content="summary">
@@ -409,6 +435,9 @@ h2.sec{{font-size:clamp(22px,3vw,28px);margin:36px 0 0}}
 .hero .hchart{{min-width:0;min-height:170px}}
 .hero svg.ch{{--s:var(--ink);margin-top:0}}
 .hero .hnote{{grid-column:1/-1;margin:2px 0 0}}
+.paused{{background:#fdf6e7;border:1px solid #f3d9a6;border-radius:12px;padding:12px 16px;margin:10px 0 0}}
+.paused h2{{font-size:19px;margin:0 0 2px}}
+.paused p{{margin:0;font-size:16px}}
 .lk{{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}}
 .filters{{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0 6px;padding:10px 0;border-top:1px solid var(--line)}}
 /* 種類の切り替え(トップページと同じ、大きなチェックの形) */
@@ -512,13 +541,7 @@ footer{{font-size:15.5px;color:var(--sub);padding:24px 0 90px;border-top:1px sol
 
 <details class="all">
 <summary>すべての記録を表で見る</summary>
-<p class="note"><b>全体の合計</b>（資料の日付で、件数が変わった日ごと）</p>
-<div class="tablewrap"><table>
-<thead><tr><th>資料の日付</th><th style="text-align:right">合計</th><th style="text-align:right">民泊</th><th style="text-align:right">特区民泊</th><th style="text-align:right">旅館業</th><th style="text-align:right">前の行から</th></tr></thead>
-<tbody>
-{total_rows}
-</tbody></table></div>
-<p class="note"><b>自治体・種別ごと</b>（一覧の版ごと）</p>
+{total_table}<p class="note"><b>自治体・種別ごと</b>（一覧の版ごと）</p>
 <div class="tablewrap"><table>
 <thead><tr><th>都道府県</th><th>自治体</th><th>種別</th><th>資料の日付</th><th style="text-align:right">件数</th><th style="text-align:right">前の版から</th><th>記録した日</th></tr></thead>
 <tbody>

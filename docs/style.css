@@ -301,6 +301,7 @@ details.method ul { padding-left: 1.3em; }
 .tmix { font-size: 14.5px; color: var(--warn); background: var(--warnbg); border-radius: 8px; padding: 4px 8px; margin: 6px 0 0; }
 .tna { margin: 10px 0 6px; padding: 12px; border: 2px dashed var(--line2); border-radius: 10px; color: var(--sub); background: var(--soft); }
 .tna b { color: var(--ink); }
+.tpaused { grid-column: 1 / -1; margin: 0; }
 .up { color: var(--up); font-weight: 800; } .down { color: var(--down); font-weight: 800; } .zero { color: var(--sub); font-weight: 800; }
 .chbox { min-height: 180px; margin-top: 8px; }
 svg.ch { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; outline: none; }

@@ -6,7 +6,7 @@
 <title>件数の推移｜民泊・旅館業マップ</title>
 <meta name="description" content="首都圏・北海道・愛知・大阪・兵庫・福岡の自治体が公表している民泊・旅館業の件数を、一覧が更新されるたびに記録し、自治体ごとの増減をグラフにしています。">
 <meta property="og:type" content="website">
-<meta property="og:title" content="民泊・旅館業の件数の推移（全体の合計と自治体ごと）">
+<meta property="og:title" content="民泊・旅館業の件数の推移（自治体ごと）">
 <meta property="og:description" content="自治体の一覧が更新されるたびに件数を記録し、増減をグラフにしています。週2回自動更新。">
 <meta property="og:url" content="https://yumaki5555.github.io/minpaku-map/trend.html">
 <meta name="twitter:card" content="summary">
@@ -50,6 +50,9 @@ h2.sec{font-size:clamp(22px,3vw,28px);margin:36px 0 0}
 .hero .hchart{min-width:0;min-height:170px}
 .hero svg.ch{--s:var(--ink);margin-top:0}
 .hero .hnote{grid-column:1/-1;margin:2px 0 0}
+.paused{background:#fdf6e7;border:1px solid #f3d9a6;border-radius:12px;padding:12px 16px;margin:10px 0 0}
+.paused h2{font-size:19px;margin:0 0 2px}
+.paused p{margin:0;font-size:16px}
 .lk{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
 .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0 6px;padding:10px 0;border-top:1px solid var(--line)}
 /* 種類の切り替え(トップページと同じ、大きなチェックの形) */
@@ -124,17 +127,9 @@ footer{font-size:15.5px;color:var(--sub);padding:24px 0 90px;border-top:1px soli
   <p class="lead">地図に載せている民泊・旅館業の件数を、自治体の一覧が更新されるたびに記録しています（記録開始 2026/09/30／最終確認 <b>2026/10/26</b>・毎週月曜・木曜に自動更新）。</p>
 </header>
 
-<section class="hero" id="hero" aria-labelledby="hero-h">
-<div class="hstat">
-  <h2 id="hero-h">全体の合計</h2>
-  <div><span class="big">75,282</span><span class="unit">件</span></div>
-  <div class="asof">各自治体の最新の資料の合計（2026/10/26 確認）</div>
-  <ul class="hd" aria-label="合計の増減（資料の日付で）"><li title="2026/09/22より後の資料で">直近30日<span class="n"><span class="up">+1,714</span></span><span class="kd pct">+2.3%</span></li><li>2026/07/22から<span class="n"><span class="up">+2,065</span></span><span class="kd pct">+2.8%</span></li></ul>
-  <ul aria-label="種別ごとの内訳（増減はグラフの期間）"><li><span class="dot c0"></span>民泊<span class="n">31,578件</span><span class="kd"><span class="up">+388</span></span></li><li><span class="dot c1"></span>特区民泊<span class="n">10,699件</span><span class="kd"><span class="up">+1,276</span></span></li><li><span class="dot c2"></span>旅館業<span class="n">33,005件</span><span class="kd"><span class="up">+401</span></span></li></ul>
-</div>
-<div class="hchart" data-d='{&quot;a&quot;: 72000, &quot;b&quot;: 76000, &quot;ticks&quot;: [72000, 74000, 76000], &quot;span&quot;: 92, &quot;start&quot;: &quot;2026/07/22&quot;, &quot;end&quot;: &quot;2026/10/22&quot;, &quot;pts&quot;: [[0, 73217, &quot;2026/07/22&quot;, [&quot;グラフの始まりの時点（それより前の増減を含む）&quot;]], [9, 73233, &quot;2026/07/31&quot;, [&quot;前の点から +16&quot;, [1, &quot;大阪府 特区民泊 +16&quot;], [0, &quot;相模原市 民泊 +2&quot;], [0, &quot;大阪府 民泊 -2&quot;]]], [15, 73234, &quot;2026/08/06&quot;, [&quot;前の点から +1&quot;, [2, &quot;茅ヶ崎市 旅館業 +1&quot;]]], [23, 73240, &quot;2026/08/14&quot;, [&quot;前の点から +6&quot;, [2, &quot;練馬区 旅館業 +6&quot;]]], [40, 73378, &quot;2026/08/31&quot;, [&quot;前の点から +138&quot;, [2, &quot;港区 旅館業 +50&quot;], [0, &quot;足立区 民泊 +32&quot;], [0, &quot;北区 民泊 +22&quot;], [2, &quot;北区 旅館業 +20&quot;], [0, &quot;千代田区 民泊 +14&quot;]]], [42, 73391, &quot;2026/09/02&quot;, [&quot;前の点から +13&quot;, [0, &quot;東京都(多摩) 民泊 +18&quot;], [0, &quot;目黒区 民泊 -5&quot;]]], [47, 73391, &quot;2026/09/07&quot;, [&quot;前の点から +0&quot;, [0, &quot;荒川区 民泊 -1&quot;], [2, &quot;荒川区 旅館業 +1&quot;]]], [48, 73392, &quot;2026/09/08&quot;, [&quot;前の点から +1&quot;, [0, &quot;茅ヶ崎市 民泊 +1&quot;]]], [51, 73395, &quot;2026/09/11&quot;, [&quot;前の点から +3&quot;, [2, &quot;埼玉県 旅館業 +2&quot;], [2, &quot;千葉市 旅館業 +1&quot;]]], [54, 73398, &quot;2026/09/14&quot;, [&quot;前の点から +3&quot;, [0, &quot;川口市 民泊 +2&quot;], [2, &quot;横浜市 旅館業 +1&quot;]]], [55, 73407, &quot;2026/09/15&quot;, [&quot;前の点から +9&quot;, [0, &quot;品川区 民泊 +25&quot;], [0, &quot;豊島区 民泊 -16&quot;]]], [56, 73558, &quot;2026/09/16&quot;, [&quot;前の点から +151&quot;, [0, &quot;墨田区 民泊 +141&quot;], [1, &quot;大田区 特区民泊 +9&quot;], [2, &quot;大田区 旅館業 +1&quot;]]], [57, 73568, &quot;2026/09/17&quot;, [&quot;前の点から +10&quot;, [0, &quot;中野区 民泊 +10&quot;]]], [64, 73567, &quot;2026/09/24&quot;, [&quot;前の点から -1&quot;, [0, &quot;川口市 民泊 -1&quot;]]], [69, 73577, &quot;2026/09/29&quot;, [&quot;前の点から +10&quot;, [0, &quot;川崎市 民泊 +10&quot;]]], [70, 73982, &quot;2026/09/30&quot;, [&quot;前の点から +405&quot;, [0, &quot;新宿区 民泊 +122&quot;], [0, &quot;台東区 民泊 +75&quot;], [0, &quot;港区 民泊 +63&quot;], [2, &quot;墨田区 旅館業 +63&quot;], [2, &quot;豊島区 旅館業 +29&quot;], &quot;ほか16件の自治体・種別&quot;]], [71, 74044, &quot;2026/10/01&quot;, [&quot;前の点から +62&quot;, [2, &quot;品川区 旅館業 +37&quot;], [0, &quot;中央区 民泊 +15&quot;], [2, &quot;杉並区 旅館業 +4&quot;], [0, &quot;茨城県 民泊 +4&quot;], [2, &quot;板橋区 旅館業 +2&quot;]]], [72, 75235, &quot;2026/10/02&quot;, [&quot;前の点から +1,191&quot;, [1, &quot;大阪市 特区民泊 +1,245&quot;], [0, &quot;大阪市 民泊 -176&quot;], [2, &quot;世田谷区 旅館業 +46&quot;], [2, &quot;大阪市 旅館業 +44&quot;], [2, &quot;台東区 旅館業 +17&quot;], &quot;ほか1件の自治体・種別&quot;]], [76, 75238, &quot;2026/10/06&quot;, [&quot;前の点から +3&quot;, [2, &quot;江戸川区 旅館業 +2&quot;], [0, &quot;横須賀市 民泊 +1&quot;]]], [78, 75263, &quot;2026/10/08&quot;, [&quot;前の点から +25&quot;, [2, &quot;墨田区 旅館業 +25&quot;], [2, &quot;千代田区 旅館業 -1&quot;], [0, &quot;八王子市 民泊 +1&quot;]]], [79, 75200, &quot;2026/10/09&quot;, [&quot;前の点から -63&quot;, [0, &quot;墨田区 民泊 -64&quot;], [2, &quot;目黒区 旅館業 +2&quot;], [0, &quot;江戸川区 民泊 -1&quot;]]], [83, 75201, &quot;2026/10/13&quot;, [&quot;前の点から +1&quot;, [2, &quot;埼玉県 旅館業 +1&quot;]]], [85, 75208, &quot;2026/10/15&quot;, [&quot;前の点から +7&quot;, [2, &quot;東京都(多摩) 旅館業 +7&quot;]]], [86, 75257, &quot;2026/10/16&quot;, [&quot;前の点から +49&quot;, [0, &quot;台東区 民泊 +48&quot;], [0, &quot;目黒区 民泊 +1&quot;]]], [89, 75271, &quot;2026/10/19&quot;, [&quot;前の点から +14&quot;, [2, &quot;大田区 旅館業 +8&quot;], [1, &quot;大田区 特区民泊 +6&quot;]]], [92, 75282, &quot;2026/10/22&quot;, [&quot;前の点から +11&quot;, [0, &quot;中野区 民泊 +12&quot;], [0, &quot;川崎市 民泊 -1&quot;]]]], &quot;label&quot;: &quot;全体の合計の推移：2026/07/22 73,217件、2026/07/31 73,233件、2026/08/06 73,234件、2026/08/14 73,240件、2026/08/31 73,378件、2026/09/02 73,391件、2026/09/07 73,391件、2026/09/08 73,392件、2026/09/11 73,395件、2026/09/14 73,398件、2026/09/15 73,407件、2026/09/16 73,558件、2026/09/17 73,568件、2026/09/24 73,567件、2026/09/29 73,577件、2026/09/30 73,982件、2026/10/01 74,044件、2026/10/02 75,235件、2026/10/06 75,238件、2026/10/08 75,263件、2026/10/09 75,200件、2026/10/13 75,201件、2026/10/15 75,208件、2026/10/16 75,257件、2026/10/19 75,271件、2026/10/22 75,282件&quot;}'></div>
-<div class="tip" hidden></div>
-<p class="note hnote">地図に載せている全自治体の件数の合計です。横軸は下の自治体ごとのグラフと同じ<b>資料の日付</b>で、どこかの自治体の資料の日付が新しくなり件数が変わった日に点を打ち、点と点を線で結んでいます（点にマウスを重ねると、その日に件数が変わった自治体が出ます）。前の版が分からない自治体は、分かっている一番古い件数のままとして足しています。種別ごとの内訳の増減は、グラフの期間のものです。</p>
+<section class="paused" id="hero" aria-labelledby="paused-h">
+<h2 id="paused-h">全体の合計のグラフは、表示を止めています</h2>
+<p>2026年10月26日に北海道・愛知県・兵庫県・福岡県を加えました。加えた地域は今回が初めての記録で、それより前の件数が分からないため、全地域を足した合計がどれだけ増えたか・減ったかを正しく表せません。そのため、全体の合計のグラフと表は表示していません。自治体ごとのグラフは、下でこれまでどおりご覧いただけます。</p>
 </section>
 
 <section>
@@ -289,37 +284,6 @@ footer{font-size:15.5px;color:var(--sub);padding:24px 0 90px;border-top:1px soli
 
 <details class="all">
 <summary>すべての記録を表で見る</summary>
-<p class="note"><b>全体の合計</b>（資料の日付で、件数が変わった日ごと）</p>
-<div class="tablewrap"><table>
-<thead><tr><th>資料の日付</th><th style="text-align:right">合計</th><th style="text-align:right">民泊</th><th style="text-align:right">特区民泊</th><th style="text-align:right">旅館業</th><th style="text-align:right">前の行から</th></tr></thead>
-<tbody>
-<tr><td>2026/07/22</td><td class="num"><b>73,217</b></td><td class="num">31,190</td><td class="num">9,423</td><td class="num">32,604</td><td class="num"></td></tr>
-<tr><td>2026/07/31</td><td class="num"><b>73,233</b></td><td class="num">31,190</td><td class="num">9,439</td><td class="num">32,604</td><td class="num"><span class="up">+16</span></td></tr>
-<tr><td>2026/08/06</td><td class="num"><b>73,234</b></td><td class="num">31,190</td><td class="num">9,439</td><td class="num">32,605</td><td class="num"><span class="up">+1</span></td></tr>
-<tr><td>2026/08/14</td><td class="num"><b>73,240</b></td><td class="num">31,190</td><td class="num">9,439</td><td class="num">32,611</td><td class="num"><span class="up">+6</span></td></tr>
-<tr><td>2026/08/31</td><td class="num"><b>73,378</b></td><td class="num">31,258</td><td class="num">9,439</td><td class="num">32,681</td><td class="num"><span class="up">+138</span></td></tr>
-<tr><td>2026/09/02</td><td class="num"><b>73,391</b></td><td class="num">31,271</td><td class="num">9,439</td><td class="num">32,681</td><td class="num"><span class="up">+13</span></td></tr>
-<tr><td>2026/09/07</td><td class="num"><b>73,391</b></td><td class="num">31,270</td><td class="num">9,439</td><td class="num">32,682</td><td class="num"><span class="zero">±0</span></td></tr>
-<tr><td>2026/09/08</td><td class="num"><b>73,392</b></td><td class="num">31,271</td><td class="num">9,439</td><td class="num">32,682</td><td class="num"><span class="up">+1</span></td></tr>
-<tr><td>2026/09/11</td><td class="num"><b>73,395</b></td><td class="num">31,271</td><td class="num">9,439</td><td class="num">32,685</td><td class="num"><span class="up">+3</span></td></tr>
-<tr><td>2026/09/14</td><td class="num"><b>73,398</b></td><td class="num">31,273</td><td class="num">9,439</td><td class="num">32,686</td><td class="num"><span class="up">+3</span></td></tr>
-<tr><td>2026/09/15</td><td class="num"><b>73,407</b></td><td class="num">31,282</td><td class="num">9,439</td><td class="num">32,686</td><td class="num"><span class="up">+9</span></td></tr>
-<tr><td>2026/09/16</td><td class="num"><b>73,558</b></td><td class="num">31,423</td><td class="num">9,448</td><td class="num">32,687</td><td class="num"><span class="up">+151</span></td></tr>
-<tr><td>2026/09/17</td><td class="num"><b>73,568</b></td><td class="num">31,433</td><td class="num">9,448</td><td class="num">32,687</td><td class="num"><span class="up">+10</span></td></tr>
-<tr><td>2026/09/24</td><td class="num"><b>73,567</b></td><td class="num">31,432</td><td class="num">9,448</td><td class="num">32,687</td><td class="num"><span class="down">-1</span></td></tr>
-<tr><td>2026/09/29</td><td class="num"><b>73,577</b></td><td class="num">31,442</td><td class="num">9,448</td><td class="num">32,687</td><td class="num"><span class="up">+10</span></td></tr>
-<tr><td>2026/09/30</td><td class="num"><b>73,982</b></td><td class="num">31,723</td><td class="num">9,448</td><td class="num">32,811</td><td class="num"><span class="up">+405</span></td></tr>
-<tr><td>2026/10/01</td><td class="num"><b>74,044</b></td><td class="num">31,742</td><td class="num">9,448</td><td class="num">32,854</td><td class="num"><span class="up">+62</span></td></tr>
-<tr><td>2026/10/02</td><td class="num"><b>75,235</b></td><td class="num">31,581</td><td class="num">10,693</td><td class="num">32,961</td><td class="num"><span class="up">+1,191</span></td></tr>
-<tr><td>2026/10/06</td><td class="num"><b>75,238</b></td><td class="num">31,582</td><td class="num">10,693</td><td class="num">32,963</td><td class="num"><span class="up">+3</span></td></tr>
-<tr><td>2026/10/08</td><td class="num"><b>75,263</b></td><td class="num">31,583</td><td class="num">10,693</td><td class="num">32,987</td><td class="num"><span class="up">+25</span></td></tr>
-<tr><td>2026/10/09</td><td class="num"><b>75,200</b></td><td class="num">31,518</td><td class="num">10,693</td><td class="num">32,989</td><td class="num"><span class="down">-63</span></td></tr>
-<tr><td>2026/10/13</td><td class="num"><b>75,201</b></td><td class="num">31,518</td><td class="num">10,693</td><td class="num">32,990</td><td class="num"><span class="up">+1</span></td></tr>
-<tr><td>2026/10/15</td><td class="num"><b>75,208</b></td><td class="num">31,518</td><td class="num">10,693</td><td class="num">32,997</td><td class="num"><span class="up">+7</span></td></tr>
-<tr><td>2026/10/16</td><td class="num"><b>75,257</b></td><td class="num">31,567</td><td class="num">10,693</td><td class="num">32,997</td><td class="num"><span class="up">+49</span></td></tr>
-<tr><td>2026/10/19</td><td class="num"><b>75,271</b></td><td class="num">31,567</td><td class="num">10,699</td><td class="num">33,005</td><td class="num"><span class="up">+14</span></td></tr>
-<tr><td>2026/10/22</td><td class="num"><b>75,282</b></td><td class="num">31,578</td><td class="num">10,699</td><td class="num">33,005</td><td class="num"><span class="up">+11</span></td></tr>
-</tbody></table></div>
 <p class="note"><b>自治体・種別ごと</b>（一覧の版ごと）</p>
 <div class="tablewrap"><table>
 <thead><tr><th>都道府県</th><th>自治体</th><th>種別</th><th>資料の日付</th><th style="text-align:right">件数</th><th style="text-align:right">前の版から</th><th>記録した日</th></tr></thead>
