@@ -594,22 +594,101 @@
   subs.push(() => applyTable());
 
   // ---------- 地図 ----------
+  // 背景の地図。標準は淡いグレーの地図で、国土地理院の淡色地図にも切り替えられる。画像で保存するときも同じ地図を使う。
+  // 淡いグレーは、OpenStreetMap Japan が配信している日本語の地図を灰色にしたもの
+  // (CARTO の Positron は 2026年10月に試したところ登録キーが必要になっていて「API KEY REQUIRED」の画像しか出なかった)。
+  // filter: 地図の色を薄めるかけ方(画面と、画像で保存するときの両方に使う)
+  const BASES = {
+    gray: {
+      url: 'https://tile.openstreetmap.jp/styles/maptiler-basic-ja/{z}/{x}/{y}{r}.png', img: z => 'https://tile.openstreetmap.jp/styles/maptiler-basic-ja/' + z + '@2x.png', native: 19,
+      filter: 'grayscale(.8) contrast(.72) brightness(1.15)',
+      attribution: '<a href="https://openstreetmap.jp/" target="_blank" rel="noopener">OpenStreetMap Japan</a> &copy; <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>',
+      credit: '地図：© OpenStreetMap contributors © OpenMapTiles（OpenStreetMap Japan）',
+    },
+    gsi: {
+      url: 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', img: z => 'https://cyberjapandata.gsi.go.jp/xyz/pale/' + z + '.png', native: 18,
+      filter: 'saturate(.25) contrast(.85) brightness(1.06)',
+      attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>',
+      credit: '地図：地理院タイル（国土地理院）',
+    },
+  };
+  const MAXZ = 19;
+  // 地理院の淡色地図は大きく拡大すると建物が灰色で塗られて暗く見えるので、拡大するほど背景を透かして明るさをそろえる
+  const opacityAt = (key, z) => key !== 'gsi' || z <= 14 ? 1 : z === 15 ? 0.8 : z === 16 ? 0.6 : 0.45;
+  // 点の大きさ(直径px)。同じ地点の施設が多いほど少しずつ大きくする(1件 6px・2〜3件 8px・4〜6件 10px・7〜10件 12px・11件以上 14px)。
+  // 大きく拡大したときだけ少し大きくする
+  const tier = n => n <= 1 ? 0 : n <= 3 ? 1 : n <= 6 ? 2 : n <= 10 ? 3 : 4;
+  const dotSize = (n, z) => 6 + tier(n) * 2 + (z >= 16 ? 2 : z >= 14 ? 1 : 0);
+  const dotLine = d => d > 8 ? 1.5 : 1;   // 白い輪郭の太さ
+  // 点を1つ描く。comp: [[種類, 件数], …](多い順)。同じ地点に種類の違う施設があるときは件数の割合で塗り分け、
+  // 位置が目安(町の中心付近)の点は真ん中を白くする。sel: 選んだ点(黒い縁取り)
+  function paintDot(g, x, y, d, w, comp, exact, sel) {
+    const ro = d / 2 + w / 2, ri = d / 2 - w / 2;
+    if (sel) { g.beginPath(); g.arc(x, y, ro + 2.5, 0, Math.PI * 2); g.fillStyle = '#1f2a24'; g.fill(); }
+    g.beginPath(); g.arc(x, y, ro, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill();
+    if (comp.length === 1) { g.beginPath(); g.arc(x, y, ri, 0, Math.PI * 2); g.fillStyle = COLORS[comp[0][0]]; g.fill(); }
+    else {
+      const n = comp.reduce((t, c) => t + c[1], 0);
+      let a = -Math.PI / 2;
+      comp.forEach(([c, v]) => { const b = a + v / n * Math.PI * 2; g.beginPath(); g.moveTo(x, y); g.arc(x, y, ri, a, b); g.closePath(); g.fillStyle = COLORS[c]; g.fill(); a = b; });
+    }
+    if (!exact) { g.beginPath(); g.arc(x, y, ri * 0.45, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); }
+  }
+  // 施設の点を描く層。数万の点を1枚のキャンバスにまとめて描く(点を1つずつ地図の部品にするより、ずっと速い)。
+  // 地図を動かしたり拡大したりするたびに全部描き直し、点を間引いたり、近くの点をまとめたりはしない
+  const DotLayer = L.Renderer.extend({
+    options: { padding: 0.4 },
+    _initContainer() { this._container = L.DomUtil.create('canvas', 'dotlayer'); this._ctx = this._container.getContext('2d'); },
+    _destroyContainer() { L.DomUtil.remove(this._container); },
+    // 1回の操作(拡大・移動)で何度か呼ばれるので、描き直しはその操作が終わった直後の1回にまとめる(画面が書き換わる前なので、ちらつかない)
+    _update() {
+      if (this._queued) return;
+      this._queued = true;
+      Promise.resolve().then(() => {
+        this._queued = false;
+        if (!this._map || (this._map._animatingZoom && this._bounds)) return;
+        L.Renderer.prototype._update.call(this);
+        const b = this._bounds, size = b.getSize(), c = this._container;
+        this._dpr = Math.min(3, window.devicePixelRatio || 1);
+        L.DomUtil.setPosition(c, b.min);
+        c.width = Math.round(size.x * this._dpr); c.height = Math.round(size.y * this._dpr);
+        c.style.width = size.x + 'px'; c.style.height = size.y + 'px';
+        if (this.onDraw) this.onDraw();
+      });
+    },
+  });
+
   let mapApi = null;
   async function initMap() {
     const el = $('#map');
     el.innerHTML = '';
-    const map = L.map(el, { preferCanvas: true }).setView(HOME, 10);
-    const base = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
-      maxZoom: 18, className: 'basemap', crossOrigin: 'anonymous',
-      attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>',
-    }).addTo(map);
-    // 地理院の淡色地図は大きく拡大すると建物が灰色で塗られて暗く見えるので、拡大するほど背景を透かして明るさをそろえる
-    const opacityAt = z => z <= 14 ? 1 : z === 15 ? 0.8 : z === 16 ? 0.6 : 0.45;
-    const soften = () => base.setOpacity(opacityAt(map.getZoom()));
-    map.on('zoomend', soften); soften();
-    map.createPane('selPane').style.zIndex = 650;
+    const map = L.map(el, { maxZoom: MAXZ }).setView(HOME, 10);
     // 画面の向きや文字の読み込みで地図の枠の大きさが変わったら、地図にも知らせる
     if (window.ResizeObserver) new ResizeObserver(() => map.invalidateSize()).observe(el);
+
+    // ---- 背景の地図の切り替え。選んだ方はこの端末に覚えておく ----
+    let baseKey = 'gray', base = null;
+    try { if (localStorage.getItem('minpaku-base') === 'gsi') baseKey = 'gsi'; } catch (e) { /* 覚えられなくても動く */ }
+    const bopts = $$('.vopt[data-base]');
+    const soften = () => base.setOpacity(opacityAt(baseKey, map.getZoom()));
+    function setBase(k) {
+      baseKey = k;
+      const b = BASES[k];
+      if (base) map.removeLayer(base);
+      base = L.tileLayer(b.url, { maxZoom: MAXZ, maxNativeZoom: b.native, crossOrigin: 'anonymous', attribution: b.attribution }).addTo(map);
+      base.getContainer().style.filter = b.filter;
+      soften();
+      bopts.forEach(o => o.setAttribute('aria-checked', String(o.dataset.base === k)));
+      try { localStorage.setItem('minpaku-base', k); } catch (e) { /* 同上 */ }
+    }
+    map.on('zoomend', () => soften());
+    bopts.forEach(o => o.addEventListener('click', () => setBase(o.dataset.base)));
+    $('#baseswitch').addEventListener('keydown', ev => {
+      if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
+      const k = baseKey === 'gray' ? 'gsi' : 'gray'; setBase(k); $('.vopt[data-base="' + k + '"]').focus(); ev.preventDefault();
+    });
+    setBase(baseKey);
+
     const loading = L.control({ position: 'topright' });
     loading.onAdd = () => { const d = L.DomUtil.create('div', 'maploading'); d.style.background = '#fff'; d.style.borderRadius = '8px'; d.textContent = '施設の点を読み込んでいます…'; return d; };
     loading.addTo(map);
@@ -621,145 +700,201 @@
     const cityPref = new Map(D.cities.map(c => [c.name, c.pref]));
 
     const touch = window.matchMedia('(hover: none)').matches;
-    const renderer = L.canvas({ padding: 0.5, tolerance: touch ? 12 : 6 });  // 指で押すときは、点の周りも押せるようにする
-    const dotLayer = L.layerGroup();
-    // 同じ場所の施設は点1つにまとめ、件数が多いほど点を少し大きくする(拡大したときは「まとめて見る」のピンと同じくらい)
-    const radiusFor = z => (z <= 9 ? 2 : z <= 10 ? 2.5 : z <= 11 ? 3 : z <= 12 ? 4 : z <= 13 ? 5.5 : z <= 14 ? 8 : 11) + (touch && z >= 14 ? 1 : 0);
-    const weightFor = z => z <= 11 ? 0.5 : z <= 13 ? 1 : 1.5;
-    const grow = n => Math.min(2, 1 + 0.25 * Math.log2(n));
-
-    const dots = P.pins.map(p => {
-      const [lat, lng, cat, muni, exact, items, city] = p;
-      const m = L.circleMarker([lat, lng], { renderer, radius: 3, color: '#fff', weight: 1, fillColor: COLORS[cat],
-        fillOpacity: exact ? 0.9 : 0.45, dashArray: exact ? null : '2 2', n: items.length, cat, muni, city, exact, p });
-      m.on('click', () => showPin(p));
-      return m;
+    const TOL = touch ? 12 : 4;   // 指で押すときは、点の周りも押せるようにする
+    // 完全に同じ位置の施設は(種類や資料が違っても)点1つにまとめ、点の大きさで件数を表す。位置が少しでも違えば別の点にする
+    const spots = [], spotAt = new Map();
+    P.pins.forEach(p => {
+      const k = p[0] + ',' + p[1];
+      let s = spotAt.get(k);
+      if (!s) {
+        const w = map.project([p[0], p[1]], 0);   // ズーム0での位置。ズームzでの位置はこれの2のz乗倍
+        s = { lat: p[0], lng: p[1], x0: w.x, y0: w.y, pins: [], vis: [], comp: [], n: 0, exact: true, key: '' };
+        spotAt.set(k, s); spots.push(s);
+      }
+      s.pins.push(p);
     });
     // 描く順番を種類に関係なく混ぜる(ある種類をまとめて上に描くと、重なった所でその色ばかり目立つため)
     let seed = 12345;
     const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    for (let i = dots.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [dots[i], dots[j]] = [dots[j], dots[i]]; }
-    let view = 'dots';
-    function place() {
-      if (view !== 'dots') return;
-      const z = map.getZoom(), r = radiusFor(z), w = weightFor(z);
-      dots.forEach(m => { m.setRadius(r * grow(m.options.n)); m.setStyle({ weight: w }); });
-    }
-    map.on('zoomend', place);
+    for (let i = spots.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [spots[i], spots[j]] = [spots[j], spots[i]]; }
 
-    // まとめて見る: 同じ建物の施設を1つのピンにし、近くのピンを数字入りの円(種類ごとの割合のドーナツ)にまとめる
-    const tallyOf = layer => { const t = [0, 0, 0, 0]; let n = 0; layer.getAllChildMarkers().forEach(m => { n += m.options.n; t[m.options.cat] += m.options.n; }); return { t, n }; };
-    const cluster = L.markerClusterGroup({
-      chunkedLoading: true, maxClusterRadius: 50, showCoverageOnHover: false, zoomToBoundsOnClick: false,
-      iconCreateFunction: c => {
-        const { t, n } = tallyOf(c);
-        const size = n < 10 ? 36 : n < 100 ? 42 : n < 1000 ? 50 : 58;
-        let acc = 0; const stops = [];
-        t.forEach((v, i) => { if (!v) return; stops.push(COLORS[i] + ' ' + (acc / n * 100).toFixed(2) + '% ' + ((acc + v) / n * 100).toFixed(2) + '%'); acc += v; });
-        return L.divIcon({ html: '<div class="cl" style="width:' + size + 'px;height:' + size + 'px;background:conic-gradient(' + stops.join(',') + ')"><span>' + fmt(n) + '</span></div>', className: '', iconSize: [size, size] });
-      },
+    // ---- 点を描く ----
+    // 同じ見た目の点は1度だけ小さなキャンバスに描いておき、それを画面の画素にそろえて貼る(速く、輪郭もぼやけない)
+    const layer = new DotLayer().addTo(map);
+    const sprites = new Map();
+    function sprite(s, d, w, sel, r) {
+      const key = s.key + (s.exact ? '' : '~') + '|' + d + '|' + w + '|' + (sel ? 1 : 0) + '|' + r;
+      let sp = sprites.get(key);
+      if (!sp) {
+        let n = Math.ceil((d + w + (sel ? 5 : 0) + 2) * r); n += n % 2;
+        const cv = document.createElement('canvas'); cv.width = cv.height = n;
+        const g = cv.getContext('2d'); g.scale(r, r);
+        paintDot(g, n / 2 / r, n / 2 / r, d, w, s.comp, s.exact, sel);
+        sp = { cv, h: n / 2 }; sprites.set(key, sp);
+      }
+      return sp;
+    }
+    let shown = [], drawn = [], grid = new Map(), sel = null, selVis = null, selOthers = 0;
+    const CELL = 32;   // 押した場所の近くの点を探すためのます目(px)
+    const cellKey = (cx, cy) => (cx + 4096) * 8192 + cy + 4096;
+    function draw() {
+      const c = layer._container, g = layer._ctx, b = layer._bounds, r = layer._dpr;
+      if (!b) return;
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.clearRect(0, 0, c.width, c.height);
+      const z = map.getZoom(), k = Math.pow(2, z), o = map.getPixelOrigin();
+      const ox = b.min.x + o.x, oy = b.min.y + o.y, W = b.max.x - b.min.x, H = b.max.y - b.min.y;
+      drawn = []; grid = new Map();
+      for (const s of shown) {
+        const x = s.x0 * k - ox, y = s.y0 * k - oy;
+        if (x < -10 || y < -10 || x > W + 10 || y > H + 10) continue;
+        const d = dotSize(s.n, z), w = dotLine(d), sp = sprite(s, d, w, false, r);
+        g.drawImage(sp.cv, Math.round(x * r) - sp.h, Math.round(y * r) - sp.h);
+        const key = cellKey(Math.floor(x / CELL), Math.floor(y / CELL)), list = grid.get(key);
+        if (list) list.push(drawn.length); else grid.set(key, [drawn.length]);
+        drawn.push({ s, x, y, rad: d / 2 + w / 2 });
+      }
+      // 選んだ点は一番上に、ひとまわり大きく黒い縁取りで描く
+      if (sel && sel.vis.length) {
+        const x = sel.x0 * k - ox, y = sel.y0 * k - oy, sp = sprite(sel, dotSize(sel.n, z) + 6, 2, true, r);
+        g.drawImage(sp.cv, Math.round(x * r) - sp.h, Math.round(y * r) - sp.h);
+      }
+    }
+    layer.onDraw = draw;
+    const redraw = () => { if (!map._animatingZoom) draw(); };
+    // 地図を大きく動かして、描いてある範囲の外が見えそうになったら、動かしている途中でも描き直す
+    map.on('move', () => {
+      if (map._animatingZoom || !layer._bounds) return;
+      const tl = map.containerPointToLayerPoint([0, 0]), br = tl.add(map.getSize()), b = layer._bounds;
+      if (tl.x < b.min.x || tl.y < b.min.y || br.x > b.max.x || br.y > b.max.y) layer._update();
     });
-    const pins = P.pins.map(p => {
-      const [lat, lng, cat, muni, exact, items, city] = p;
-      const n = items.length, size = (n > 1 ? 26 : 22) + (touch ? 2 : 0);
-      const icon = L.divIcon({ className: '', iconSize: [size, size], html: '<div class="pin' + (exact ? '' : ' approx') + '" style="width:' + size + 'px;height:' + size + 'px;background:' + COLORS[cat] + '">' + (n > 1 ? n : '') + '</div>' });
-      return L.marker([lat, lng], { icon, n, cat, muni, city, exact, p, keyboard: false }).on('click', () => showPin(p));
-    });
+    // 指(マウス)の下にある点。上に描いた点ほど優先し、なければ一番近い点。others: そこに重なっているほかの点の数
+    function hit(lp) {
+      const b = layer._bounds;
+      if (!b) return null;
+      const x = lp.x - b.min.x, y = lp.y - b.min.y, cx = Math.floor(x / CELL), cy = Math.floor(y / CELL);
+      let best = null, bestScore = Infinity, near = 0;
+      for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+        (grid.get(cellKey(cx + i, cy + j)) || []).forEach(idx => {
+          const t = drawn[idx], dist = Math.hypot(t.x - x, t.y - y);
+          if (dist > t.rad + TOL) return;
+          near++;
+          const score = dist <= t.rad ? -1 - idx : dist - t.rad;
+          if (score < bestScore) { bestScore = score; best = t; }
+        });
+      }
+      return best && { s: best.s, others: near - 1 };
+    }
+
+    // ---- マウスを重ねると「この地点に○件」を出す ----
+    let moving = false, tipFor = null;
+    const tip = L.tooltip({ direction: 'top', opacity: 1 });
+    function hideTip() { if (tipFor) { map.closeTooltip(tip); tipFor = null; } el.classList.remove('ondot'); }
+    function tipHTML(s) {
+      const one = s.n === 1 ? s.vis[0][5][0][0] || '（施設名の記載なし）' : '';
+      return '<div class="ctip"><b>この地点に ' + fmt(s.n) + '件</b>' + (one ? '<div class="nm">' + esc(one) + '</div>' : '')
+        + '<div>' + s.comp.map(([c, v]) => '<span class="dot c' + c + '"></span> ' + esc(CATS[c]) + ' ' + fmt(v) + '件').join('<br>') + '</div>'
+        + '<div class="d">' + (s.exact ? '' : '位置は目安（町の中心付近）・') + '押すと一覧を表示</div></div>';
+    }
+    map.on('movestart', () => { moving = true; hideTip(); });
+    map.on('moveend', () => { moving = false; });
+    if (!touch) {
+      map.on('mousemove', e => {
+        if (moving) return;
+        const h = hit(e.layerPoint);
+        if (!h) { hideTip(); return; }
+        el.classList.add('ondot');
+        if (tipFor === h.s) return;
+        tipFor = h.s;
+        tip.options.offset = [0, -Math.ceil(dotSize(h.s.n, map.getZoom()) / 2 + 2)];
+        tip.setLatLng([h.s.lat, h.s.lng]).setContent(tipHTML(h.s));
+        map.openTooltip(tip);
+      });
+      map.on('mouseout', hideTip);
+    }
+    map.on('click', e => { const h = hit(e.layerPoint); if (h) { hideTip(); showSpot(h.s, h.others); } });
 
     // ---- 情報カード ----
     const card = $('#infocard'), body = $('#infobody'), closeBtn = $('.infox', card);
-    let selRing = null, selPin = null;
     function emptyCard() {
-      card.classList.remove('open'); card.classList.add('empty'); closeBtn.hidden = true; selPin = null;
-      if (selRing) { map.removeLayer(selRing); selRing = null; }
+      card.classList.remove('open'); card.classList.add('empty'); closeBtn.hidden = true;
+      if (sel) { sel = null; redraw(); }
       body.innerHTML = '<div class="infoempty"><svg aria-hidden="true"><use href="#i-pin"/></svg><div><b>地図の点を押すと、ここに施設の情報が出ます。</b><br>名前・住所・種類・出典（自治体の資料）を表示します。</div></div>';
     }
     function openCard(html) { body.innerHTML = html; card.classList.add('open'); card.classList.remove('empty'); closeBtn.hidden = false; card.scrollTop = 0; }
     closeBtn.addEventListener('click', emptyCard);
-    function showPin(p) {
-      const [lat, lng, cat, mi, exact, items, ci] = p;
-      const s = srcBy.get(P.munis[mi] + '|' + cat);
-      const city = P.cities[ci];
-      const noLabel = ['届出番号', '認定番号', '許可番号', '許可番号'][cat], dLabel = ['届出日', '認定日', '許可日', '許可日'][cat];
-      const item = it => '<li><div class="nm">' + esc(it[0] || '（施設名の記載なし）') + '</div><div class="ad">' + esc(it[1]) + '</div>'
-        + (it[3] || it[2] ? '<div class="meta">' + (it[3] ? noLabel + '：' + esc(it[3]) : '') + (it[3] && it[2] ? '　' : '') + (it[2] ? dLabel + '：' + esc(it[2]) : '') + '</div>' : '') + '</li>';
-      const LIM = 30;
-      const html = '<div class="ihead">' + kic(cat) + '<div><div class="kname">' + esc(CATS[cat]) + '</div><div class="kcity">' + esc(D.prefs[cityPref.get(city)] || '') + ' ' + esc(city)
-        + (items.length > 1 ? '・' + (exact ? 'この建物に' : 'この付近に') + items.length + '件' : '') + '</div></div></div>'
-        + (exact ? '<span class="badge ok">✓ 住所の番地まで分かった位置</span>'
-          : '<span class="badge approx">⚠ 位置は目安です：番地まで分からなかったため、町の中心付近に表示しています</span>')
-        + '<ul class="ilist">' + items.slice(0, LIM).map(item).join('') + '</ul>'
-        + (items.length > LIM ? '<button type="button" class="btn btn-sub btn-sm" id="imore">残りの' + (items.length - LIM) + '件も表示する</button>' : '')
-        + (s ? '<div class="isrc">出典：' + esc(s.muni) + (s.title ? '「' + esc(s.title) + '」' : 'の公表資料') + '<br>資料の日付：' + esc(s.date || '不明')
-          + (srcLink(s) ? '<br><a href="' + esc(srcLink(s)) + '" target="_blank" rel="noopener">自治体のページを開く' + ext + '</a>' : '') + '</div>' : '');
+    // 押した地点の施設の一覧。同じ地点に別の種類・別の資料の施設があるときは、種類ごとに分けて並べる
+    function showSpot(s, others) {
+      const vis = s.vis, LIM = 30, rest = [];
+      const place = p => esc(D.prefs[cityPref.get(P.cities[p[6]])] || '') + ' ' + esc(P.cities[p[6]]);
+      const places = [...new Set(vis.map(place))];
+      const count = 'この地点に' + fmt(s.n) + '件';
+      const badge = s.exact ? '<span class="badge ok">✓ 住所の番地まで分かった位置</span>'
+        : '<span class="badge approx">⚠ 位置は目安です：番地まで分からなかったため、町の中心付近に表示しています</span>';
+      const part = (p, head) => {
+        const [, , cat, mi, , items] = p;
+        const src = srcBy.get(P.munis[mi] + '|' + cat);
+        const noLabel = ['届出番号', '認定番号', '許可番号', '許可番号'][cat], dLabel = ['届出日', '認定日', '許可日', '許可日'][cat];
+        const item = it => '<li><div class="nm">' + esc(it[0] || '（施設名の記載なし）') + '</div><div class="ad">' + esc(it[1]) + '</div>'
+          + (it[3] || it[2] ? '<div class="meta">' + (it[3] ? noLabel + '：' + esc(it[3]) : '') + (it[3] && it[2] ? '　' : '') + (it[2] ? dLabel + '：' + esc(it[2]) : '') + '</div>' : '') + '</li>';
+        rest.push(items.slice(LIM).map(item).join(''));
+        return head + '<ul class="ilist">' + items.slice(0, LIM).map(item).join('') + '</ul>'
+          + (items.length > LIM ? '<button type="button" class="btn btn-sub btn-sm imore" data-i="' + (rest.length - 1) + '">残りの' + (items.length - LIM) + '件も表示する</button>' : '')
+          + (src ? '<div class="isrc">出典：' + esc(src.muni) + (src.title ? '「' + esc(src.title) + '」' : 'の公表資料') + '<br>資料の日付：' + esc(src.date || '不明')
+            + (srcLink(src) ? '<br><a href="' + esc(srcLink(src)) + '" target="_blank" rel="noopener">自治体のページを開く' + ext + '</a>' : '') + '</div>' : '');
+      };
+      let html;
+      if (vis.length === 1) {
+        const cat = vis[0][2];
+        html = part(vis[0], '<div class="ihead">' + kic(cat) + '<div><div class="kname">' + esc(CATS[cat]) + '</div><div class="kcity">' + place(vis[0]) + '・' + count + '</div></div></div>' + badge);
+      } else {
+        html = '<div class="ihead"><svg class="kic" aria-hidden="true" style="color:#1f2a24"><use href="#i-pin"/></svg><div><div class="kname">' + count + '</div><div class="kcity">' + places.join('、') + '</div></div></div>'
+          + '<ul class="ctally">' + s.comp.map(([c, v]) => '<li><span class="dot c' + c + '"></span>' + esc(CATS[c]) + '<span class="v">' + fmt(v) + '件</span></li>').join('') + '</ul>' + badge
+          + vis.slice().sort((a, b) => a[2] - b[2] || b[5].length - a[5].length).map(p => '<section class="ipart">'
+            + part(p, '<h4 class="iph">' + kic(p[2]) + esc(CATS[p[2]]) + ' ' + fmt(p[5].length) + '件' + (places.length > 1 ? '<small>' + place(p) + '</small>' : '') + '</h4>') + '</section>').join('');
+      }
+      if (others > 0) html += '<p class="inear">この点の近くに、ほかに' + fmt(others) + 'か所の点が重なっています。地図を拡大すると分かれて見えます。<br><button type="button" class="btn btn-sub btn-sm izoom">この場所を拡大する</button></p>';
       openCard(html);
-      const more = $('#imore');
-      if (more) more.addEventListener('click', () => { $('.ilist', body).insertAdjacentHTML('beforeend', items.slice(LIM).map(item).join('')); more.remove(); });
-      selPin = p;
-      if (selRing) map.removeLayer(selRing);
-      selRing = L.circleMarker([lat, lng], { pane: 'selPane', radius: 16, color: '#1f2a24', weight: 3, fill: false, interactive: false }).addTo(map);
+      $$('.imore', body).forEach(b => b.addEventListener('click', () => { b.previousElementSibling.insertAdjacentHTML('beforeend', rest[+b.dataset.i]); b.remove(); }));
+      const zb = $('.izoom', body);
+      if (zb) zb.addEventListener('click', () => map.setView([s.lat, s.lng], Math.min(MAXZ, map.getZoom() + 3)));
+      sel = s; selVis = vis; selOthers = others;
+      redraw();
     }
-    function showCluster(layer) {
-      const byCity = new Map();
-      layer.getAllChildMarkers().forEach(m => { const c = P.cities[m.options.city]; byCity.set(c, (byCity.get(c) || 0) + m.options.n); });
-      const { t, n } = tallyOf(layer);
-      const top = [...byCity.entries()].sort((a, b) => b[1] - a[1]);
-      return { top, t, n };
-    }
-    function clusterHTML(info, forCard) {
-      const names = info.top.slice(0, 3).map(([c, v]) => '<b>' + esc(c) + '</b> ' + fmt(v) + '件').join('、') + (info.top.length > 3 ? ' ほか' + (info.top.length - 3) + '市区町村' : '');
-      const tally = info.t.map((v, i) => v ? '<li><span class="dot c' + i + '"></span>' + esc(CATS[i]) + '<span class="v">' + fmt(v) + '件</span></li>' : '').join('');
-      if (forCard) return '<div class="ihead"><svg class="kic" aria-hidden="true"><use href="#v-cluster"/></svg><div><div class="kname">この円の中に ' + fmt(info.n) + '件</div><div class="kcity">' + names + '</div></div></div>'
-        + '<ul class="ctally">' + tally + '</ul><p class="sub">もう一度押すと、この円の範囲を拡大します。</p>';
-      return '<div class="ctip">' + names + '<div>' + info.t.map((v, i) => v ? '<span class="dot c' + i + '"></span> ' + esc(CATS[i]) + ' ' + fmt(v) + '件' : '').filter(Boolean).join('<br>') + '</div><div class="d">合計 ' + fmt(info.n) + '件（押すと拡大）</div></div>';
-    }
-    let tipped = null;
-    if (!touch) {
-      cluster.on('clustermouseover', e => { tipped = e.layer; e.layer.unbindTooltip(); e.layer.bindTooltip(clusterHTML(showCluster(e.layer), false), { direction: 'top', offset: [0, -16], opacity: 1 }).openTooltip(); });
-      cluster.on('clustermouseout', e => { e.layer.closeTooltip(); tipped = null; });
-    }
-    cluster.on('clusterclick', e => {
-      if (touch && tipped !== e.layer) { tipped = e.layer; openCard(clusterHTML(showCluster(e.layer), true)); return; }
-      tipped = null;
-      if (!touch) e.layer.closeTooltip();
-      e.layer.zoomToBounds({ padding: [20, 20] });
-    });
-
-    // ---- 表示の切り替え(点で見る/まとめて見る)。選んだ方はこの端末に覚えておく ----
-    try { if (localStorage.getItem('minpaku-view') === 'cluster') view = 'cluster'; } catch (e) { /* 覚えられなくても動く */ }
-    const vopts = $$('.vopt');
-    function setView(v) {
-      view = v;
-      vopts.forEach(b => b.setAttribute('aria-checked', String(b.dataset.view === v)));
-      if (v === 'dots') { map.removeLayer(cluster); map.addLayer(dotLayer); place(); } else { map.removeLayer(dotLayer); map.addLayer(cluster); }
-      try { localStorage.setItem('minpaku-view', v); } catch (e) { /* 同上 */ }
-      refresh({});
-    }
-    vopts.forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
-    $('.viewswitch').addEventListener('keydown', ev => {
-      if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
-      const v = view === 'dots' ? 'cluster' : 'dots'; setView(v); $('.vopt[data-view="' + v + '"]').focus(); ev.preventDefault();
-    });
 
     // ---- しぼりこみ ----
-    const visible = o => S.cats.has(o.cat) && (S.pref === null || P.mpref[o.muni] === S.pref) && (!S.city || P.cities[o.city] === S.city);
-    let shown = [], lastKey = null;
+    const visible = p => S.cats.has(p[2]) && (S.pref === null || P.mpref[p[3]] === S.pref) && (!S.city || P.cities[p[6]] === S.city);
+    let lastKey = null;
     function refresh(why) {
-      const pick = m => visible(m.options);
-      if (view === 'dots') { shown = dots.filter(pick); dotLayer.clearLayers(); shown.forEach(m => dotLayer.addLayer(m)); }
-      else { shown = pins.filter(pick); cluster.clearLayers(); cluster.addLayers(shown); }
-      const N = shown.reduce((t, m) => t + m.options.n, 0);
+      shown = [];
+      let N = 0;
+      spots.forEach(s => {
+        s.vis = s.pins.filter(visible);
+        if (!s.vis.length) return;
+        const t = [0, 0, 0, 0];
+        s.vis.forEach(p => { t[p[2]] += p[5].length; });
+        s.comp = t.map((v, i) => [i, v]).filter(c => c[1]).sort((a, b) => b[1] - a[1]);
+        s.n = t[0] + t[1] + t[2] + t[3];
+        s.key = s.comp.map(c => c.join(':')).join(',');
+        s.exact = s.vis.every(p => p[4]);
+        N += s.n;
+        shown.push(s);
+      });
+      // 大きい点(同じ地点の施設が多い点)を先に描いて下にし、小さい点が隠れないようにする
+      shown.sort((a, b) => tier(b.n) - tier(a.n));
       const { n } = scopeCounts();
       const M = sumOn(n);
       $('#mapcount').innerHTML = '地図に表示中：<b>' + fmt(N) + '件</b>（' + esc(placeName()) + '・' + esc(catsLabel()) + '）'
         + (M > N ? '<br><span class="sub">この条件の施設 ' + fmt(M) + '件のうち、住所から位置を特定できなかった ' + fmt(M - N) + '件は地図に出ていません。</span>' : '');
-      if (selPin && !visible({ cat: selPin[2], muni: selPin[3], city: selPin[6] })) emptyCard();
+      if (sel && !sel.vis.length) emptyCard();
+      else if (sel && (sel.vis.length !== selVis.length || sel.vis.some((p, i) => p !== selVis[i]))) showSpot(sel, selOthers);
+      redraw();
       const key = S.pref + '|' + S.city;
       map.invalidateSize();   // 地図の枠の大きさが変わっていても、正しい範囲に合わせる
       if (why.home) { map.setView(HOME, 10); lastKey = key; return; }
       if (key !== lastKey && !why.nofit) {
         if (S.pref === null && !S.city) { if (lastKey !== null) map.setView(HOME, 10); }
-        else if (shown.length) map.fitBounds(L.latLngBounds(shown.map(m => m.getLatLng())), { padding: [24, 24], maxZoom: 15, animate: lastKey !== null });
+        else if (shown.length) map.fitBounds(L.latLngBounds(shown.map(s => [s.lat, s.lng])), { padding: [24, 24], maxZoom: 15, animate: lastKey !== null });
       }
       lastKey = key;
     }
@@ -820,10 +955,10 @@
     });
 
     emptyCard();
-    setView(view);  // 条件付きのURLで開いたときも、ここでその地域に合わせる
+    refresh({});  // 条件付きのURLで開いたときも、ここでその地域に合わせる
 
     mapApi = {
-      map, clearSearch, shownMarkers: () => shown, view: () => view, cluster, opacityAt, P,
+      map, clearSearch, shownSpots: () => shown, baseKey: () => baseKey,
     };
   }
 
@@ -876,10 +1011,10 @@
     });
   }
   async function drawMap(g, A) {
-    const { map, P } = mapApi;
+    const { map } = mapApi, key = mapApi.baseKey(), B = BASES[key];
     const z0 = map.getZoom(), size = map.getSize();
     const s = Math.min(A.w / size.x, A.h / size.y);
-    const zt = Math.max(5, Math.min(18, Math.round(z0 + Math.log2(s))));
+    const zt = Math.max(5, Math.min(B.native, Math.round(z0 + Math.log2(s))));
     const k = Math.pow(2, zt - z0);
     const c = map.project(map.getCenter(), z0);
     const X = px => A.x + A.w / 2 + (px - c.x) * s, Y = py => A.y + A.h / 2 + (py - c.y) * s;
@@ -888,51 +1023,27 @@
     const wx0 = c.x - A.w / 2 / s, wx1 = c.x + A.w / 2 / s, wy0 = c.y - A.h / 2 / s, wy1 = c.y + A.h / 2 / s;
     const jobs = [];
     for (let tx = Math.floor(wx0 * k / 256); tx <= Math.floor(wx1 * k / 256); tx++) for (let ty = Math.floor(wy0 * k / 256); ty <= Math.floor(wy1 * k / 256); ty++) {
-      jobs.push(loadImg('https://cyberjapandata.gsi.go.jp/xyz/pale/' + zt + '/' + tx + '/' + ty + '.png').then(im => [im, tx, ty]));
+      jobs.push(loadImg(B.img(zt + '/' + tx + '/' + ty)).then(im => [im, tx, ty]));
     }
     const tiles = await Promise.all(jobs);
-    g.globalAlpha = mapApi.opacityAt(z0);
-    try { g.filter = 'saturate(.25) contrast(.85) brightness(1.06)'; } catch (e) { /* 使えない環境ではそのまま */ }
+    g.globalAlpha = opacityAt(key, z0);
+    try { g.filter = B.filter; } catch (e) { /* 使えない環境ではそのまま */ }
     let okTiles = 0;
     tiles.forEach(([im, tx, ty]) => { if (!im) return; okTiles++; const d = 256 / k * s; g.drawImage(im, X(tx * 256 / k), Y(ty * 256 / k), d + 0.6, d + 0.6); });
     g.filter = 'none'; g.globalAlpha = 1;
     const inA = (x, y) => x > A.x - 30 && x < A.x + A.w + 30 && y > A.y - 30 && y < A.y + A.h + 30;
-    if (mapApi.view() === 'dots') {
-      mapApi.shownMarkers().forEach(m => {
-        const p = map.project(m.getLatLng(), z0), x = X(p.x), y = Y(p.y);
-        if (!inA(x, y)) return;
-        const r = Math.max(2.5, m.getRadius() * s), o = m.options;
-        g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2);
-        g.globalAlpha = o.exact ? 0.9 : 0.45; g.fillStyle = COLORS[o.cat]; g.fill(); g.globalAlpha = 1;
-        g.setLineDash(o.exact ? [] : [2.5, 2.5]); g.lineWidth = Math.max(0.6, (o.weight || 1) * s); g.strokeStyle = '#fff'; g.stroke(); g.setLineDash([]);
-      });
-    } else {
-      const fg = mapApi.cluster._featureGroup;
-      const layers = fg ? fg.getLayers() : [];
-      layers.forEach(l => {
-        const p = map.project(l.getLatLng(), z0), x = X(p.x), y = Y(p.y);
-        if (!inA(x, y)) return;
-        if (l.getAllChildMarkers) {
-          const t = [0, 0, 0, 0]; let n = 0;
-          l.getAllChildMarkers().forEach(m => { n += m.options.n; t[m.options.cat] += m.options.n; });
-          const R = (n < 10 ? 36 : n < 100 ? 42 : n < 1000 ? 50 : 58) / 2 * s;
-          let a = -Math.PI / 2;
-          g.beginPath(); g.arc(x, y, R + 2 * s, 0, Math.PI * 2); g.fillStyle = 'rgba(255,255,255,.9)'; g.fill();
-          t.forEach((v, i) => { if (!v) return; const b = a + v / n * Math.PI * 2; g.beginPath(); g.moveTo(x, y); g.arc(x, y, R, a, b); g.closePath(); g.fillStyle = COLORS[i]; g.fill(); a = b; });
-          g.beginPath(); g.arc(x, y, R - 6 * s, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill();
-          setFont(g, Math.round(13 * s), 700); g.fillStyle = INK; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(fmt(n), x, y + 1);
-        } else {
-          const o = l.options, R = (o.n > 1 ? 13 : 11) * s;
-          g.beginPath(); g.arc(x, y, R, 0, Math.PI * 2); g.globalAlpha = o.exact ? 1 : 0.75; g.fillStyle = COLORS[o.cat]; g.fill(); g.globalAlpha = 1;
-          g.setLineDash(o.exact ? [] : [3, 3]); g.lineWidth = 2; g.strokeStyle = '#fff'; g.stroke(); g.setLineDash([]);
-        }
-      });
-      g.textBaseline = 'alphabetic';
-    }
+    // 画面と同じ点を、画像の大きさに合わせて描く
+    const k0 = Math.pow(2, z0);
+    mapApi.shownSpots().forEach(sp => {
+      const x = X(sp.x0 * k0), y = Y(sp.y0 * k0);
+      if (!inA(x, y)) return;
+      const d = dotSize(sp.n, z0);
+      paintDot(g, x, y, d * s, dotLine(d) * s, sp.comp, sp.exact, false);
+    });
     if (!okTiles) { g.fillStyle = 'rgba(255,255,255,.85)'; g.fillRect(A.x + 20, A.y + 20, 760, 60); fitText(g, '背景の地図を読み込めませんでした', A.x + 36, A.y + 62, 720, 34, 700, SUB); }
-    // 地図の出典(地理院タイル)
+    // 地図の出典
     setFont(g, 30, 400);
-    const at = '地図：地理院タイル（国土地理院）', aw = g.measureText(at).width;
+    const at = B.credit, aw = g.measureText(at).width;
     g.fillStyle = 'rgba(255,255,255,.88)'; g.fillRect(A.x + A.w - aw - 32, A.y + A.h - 50, aw + 32, 50);
     g.fillStyle = SUB; g.textAlign = 'right'; g.fillText(at, A.x + A.w - 16, A.y + A.h - 14); g.textAlign = 'left';
     g.restore();
@@ -957,11 +1068,17 @@
     });
     y = Math.max(y, 640);
     g.fillStyle = LINE; g.fillRect(x, y - 30, 570, 2);
-    g.beginPath(); g.arc(x + 18, y + 6, 14, 0, Math.PI * 2); g.fillStyle = '#6b7280'; g.fill();
+    const grayDot = (cx, cy, r, hollow) => {
+      g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fillStyle = '#6b7280'; g.fill();
+      if (hollow) { g.beginPath(); g.arc(cx, cy, r * 0.45, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill(); }
+    };
+    grayDot(x + 18, y + 6, 12, false);
     fitText(g, '番地まで分かった位置', x + 48, y + 18, 520, 34, 400, SUB);
-    g.beginPath(); g.arc(x + 18, y + 66, 14, 0, Math.PI * 2); g.globalAlpha = 0.45; g.fill(); g.globalAlpha = 1; g.setLineDash([4, 4]); g.strokeStyle = '#6b7280'; g.lineWidth = 2; g.stroke(); g.setLineDash([]);
-    fitText(g, '薄い点：町の中心付近（目安）', x + 48, y + 78, 520, 34, 400, SUB);
-    if (tot > shownN) fitText(g, '※位置が分からない' + fmt(tot - shownN) + '件は地図に出ていません', x, y + 140, 570, 32, 400, SUB, 'left', 30);
+    grayDot(x + 18, y + 62, 12, true);
+    fitText(g, '中が白い点：町の中心付近（目安）', x + 48, y + 74, 520, 34, 400, SUB);
+    grayDot(x + 6, y + 118, 5, false); grayDot(x + 22, y + 118, 8, false); grayDot(x + 44, y + 118, 12, false);
+    fitText(g, '大きい点：同じ地点に複数の施設', x + 66, y + 130, 500, 34, 400, SUB);
+    if (tot > shownN) fitText(g, '※位置が分からない' + fmt(tot - shownN) + '件は地図に出ていません', x, y + 184, 570, 32, 400, SUB, 'left', 24);
     footer(g, scopeSources().filter(s => kindOn(s.k)));
     return cv;
   }

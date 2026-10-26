@@ -7,8 +7,8 @@
   /* ボタン・操作の色(緑) */
   --g: #1e7f3c; --g2: #166530; --gsoft: #eaf6ee; --gsoft2: #d3ecda;
   /* 施設の種類ごとの色(地図・凡例・グラフ・表で共通) */
-  --c0: #e34948; --c1: #6250d6; --c2: #0f9488; --c3: #eda100;
-  --t0: #fdebea; --t1: #eeebfb; --t2: #e1f3f1; --t3: #fdf2d8;
+  --c0: #e44c49; --c1: #8b5cf6; --c2: #1676d2; --c3: #e69b17;
+  --t0: #fdebea; --t1: #f1ecfe; --t2: #e5f0fb; --t3: #fcf1da;
   --up: #c62828; --down: #1d4ed8;
   --warn: #8a5300; --warnbg: #fff6e3;
   --r: 14px;
@@ -144,7 +144,7 @@ h3 { font-size: 22px; line-height: 1.4; margin: 0; }
 .catchk:has(input:not(:checked)) .kic { opacity: .45; }
 .k0 .kic, .kic.k0, .kicon.k0 { color: var(--c0); } .k1 .kic, .kic.k1 { color: var(--c1); } .k2 .kic, .kic.k2 { color: var(--c2); } .k3 .kic, .kic.k3 { color: var(--c3); }
 
-/* 点で見る/まとめて見る の切り替え */
+/* 背景の地図の切り替え */
 .viewswitch { display: inline-flex; border: 2px solid var(--g); border-radius: 14px; overflow: hidden; background: #fff; max-width: 100%; }
 .vopt { display: flex; align-items: center; gap: 10px; min-height: 64px; padding: 8px 16px 8px 10px; border: 0; background: #fff; color: var(--ink);
   font: inherit; cursor: pointer; text-align: left; }
@@ -171,7 +171,7 @@ h3 { font-size: 22px; line-height: 1.4; margin: 0; }
 .mapwrap { position: relative; min-width: 0; }
 #map { height: 70vh; min-height: 460px; max-height: 760px; border: 1px solid var(--line2); border-radius: var(--r); background: #fff; }
 .maploading { padding: 20px; color: var(--sub); }
-.basemap { filter: saturate(.25) contrast(.85) brightness(1.06); }
+#map.ondot { cursor: pointer; }   /* 点の上ではマウスの形を指にする */
 .infocard { position: relative; background: #fff; border: 1px solid var(--line2); border-radius: var(--r); padding: 16px; overflow: auto; max-height: min(70vh, 760px); min-height: 200px; }
 .infox { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border: 0; border-radius: 10px; background: var(--soft); color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .infox[hidden] { display: none; }
@@ -204,14 +204,18 @@ h3 { font-size: 22px; line-height: 1.4; margin: 0; }
 .ctally { list-style: none; padding: 0; margin: 8px 0 0; font-size: 16px; }
 .ctally li { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
 .ctally .v { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+/* 同じ地点に別の種類・資料の施設があるときの、種類ごとのまとまり */
+.ipart { border-top: 2px solid var(--line); margin-top: 12px; padding-top: 10px; }
+.iph { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin: 0; font-size: 18px; line-height: 1.4; }
+.iph .kic { width: 28px; height: 28px; flex: none; }
+.iph small { font-size: 14.5px; font-weight: 400; color: var(--sub); }
+.inear { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--soft); font-size: 15px; color: var(--sub); }
+.inear .btn { margin-top: 6px; }
 
-.pin { border-radius: 50%; border: 1.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.35), 0 1px 3px rgba(0,0,0,.3);
-  color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; line-height: 1; }
-.pin.approx { border-style: dashed; opacity: .75; }
-.cl { border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 1px 4px rgba(0,0,0,.35); }
-.cl span { background: #fff; color: #1c1b19; border-radius: 50%; width: calc(100% - 12px); height: calc(100% - 12px);
-  display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; letter-spacing: -.02em; }
-.ctip { font-size: 13px; line-height: 1.6; min-width: 200px; max-width: 280px; white-space: normal; font-family: var(--font); }
+/* 点にマウスを重ねたときの小さな説明 */
+.ctip { font-size: 13px; line-height: 1.6; min-width: 170px; max-width: 280px; white-space: normal; font-family: var(--font); }
+.ctip b { font-size: 14px; }
+.ctip .nm { font-weight: 700; }
 .ctip .d { color: #555; font-size: 12px; margin-top: 2px; }
 .dot { display: inline-block; width: 13px; height: 13px; border-radius: 50%; flex: none; vertical-align: -1px; }
 .c0 { background: var(--c0); } .c1 { background: var(--c1); } .c2 { background: var(--c2); } .c3 { background: var(--c3); }
@@ -221,9 +225,15 @@ h3 { font-size: 22px; line-height: 1.4; margin: 0; }
 .lgroup { display: flex; flex-wrap: wrap; gap: 4px 16px; }
 .lk { display: inline-flex; align-items: center; gap: 6px; }
 .lk .kic { width: 22px; height: 22px; }
-.ldot { width: 13px; height: 13px; border-radius: 50%; background: #6b7280; border: 1.5px solid #fff; box-shadow: 0 0 0 1px #6b7280; }
-.ldot.approx { opacity: .5; border: 1.5px dashed #fff; }
-.ldot.big { width: 20px; height: 20px; }
+/* 凡例の点(地図の点と同じ形: 白い輪郭の丸。位置が目安の点は真ん中が白い) */
+.ldot { width: 12px; height: 12px; border-radius: 50%; background: #6b7280; box-shadow: 0 0 0 1.5px #fff, 0 0 0 2.5px #c5cbc7; flex: none; }
+.ldot.approx { background: radial-gradient(circle, #fff 0 28%, #6b7280 31%); }
+.ldot.mix { background: conic-gradient(var(--c0) 0 50%, var(--c2) 0 100%); }
+.lsizes { display: inline-flex; align-items: center; gap: 4px; }
+/* 大きさの説明は長いので、狭い画面では点の後ろから普通に折り返す */
+.lk.lksize { display: block; } .lksize .lsizes { vertical-align: -1px; margin-right: 6px; }
+.lsizes .ldot.s1 { width: 6px; height: 6px; } .lsizes .ldot.s2 { width: 8px; height: 8px; } .lsizes .ldot.s3 { width: 10px; height: 10px; }
+.lsizes .ldot.s4 { width: 12px; height: 12px; } .lsizes .ldot.s5 { width: 14px; height: 14px; }
 .lsw { width: 16px; height: 16px; border-radius: 4px; flex: none; }
 .mapcount { font-size: 17px; margin: 10px 0 0; }
 .mapcount b { font-size: 22px; }

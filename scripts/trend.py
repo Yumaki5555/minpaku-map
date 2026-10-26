@@ -401,7 +401,7 @@ TEMPLATE = """<!DOCTYPE html>
   color-scheme:light;
   --bg:#fff;--card:#fff;--ink:#1f2a24;--sub:#47534c;--line:#dde5df;--accent:#166530;--chip:#f6f9f7;
   --g:#1e7f3c;--g2:#166530;--gsoft:#eaf6ee;
-  --c0:#e34948;--c1:#6250d6;--c2:#0f9488;--c3:#eda100;--up:#c62828;--down:#1d4ed8;
+  --c0:#e44c49;--c1:#8b5cf6;--c2:#1676d2;--c3:#e69b17;--up:#c62828;--down:#1d4ed8;
 }}
 *{{box-sizing:border-box}}
 body{{margin:0;background:var(--bg);color:var(--ink);font-size:17px;
