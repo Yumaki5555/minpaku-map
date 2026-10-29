@@ -964,7 +964,7 @@
 
   // ---------- 画像で保存(1920×1080) ----------
   const PW = 1920, PH = 1080, FONT = '"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Meiryo",sans-serif';
-  const INK = '#1f2a24', SUB = '#47534c', LINE = '#e6dfdb', BRAND = '#b75035';  // BRAND はサイトの色(テラコッタ)
+  const INK = '#303637', SUB = '#50585a', LINE = '#e4e4e0', BRAND = '#945945';  // BRAND はサイトの色(テラコッタ)
   function setFont(g, size, weight) { g.font = (weight || 400) + ' ' + size + 'px ' + FONT; }
   // 幅に入るよう文字を小さくする(min より小さくはしない。入らなければ末尾を…にする)
   function fitText(g, s, x, y, maxW, size, weight, color, align, min) {
@@ -1047,7 +1047,7 @@
     g.fillStyle = 'rgba(255,255,255,.88)'; g.fillRect(A.x + A.w - aw - 32, A.y + A.h - 50, aw + 32, 50);
     g.fillStyle = SUB; g.textAlign = 'right'; g.fillText(at, A.x + A.w - 16, A.y + A.h - 14); g.textAlign = 'left';
     g.restore();
-    g.strokeStyle = '#cfc5bf'; g.lineWidth = 2; roundRect(g, A.x, A.y, A.w, A.h, 18); g.stroke();
+    g.strokeStyle = '#d3d3ce'; g.lineWidth = 2; roundRect(g, A.x, A.y, A.w, A.h, 18); g.stroke();
   }
   function swatch(g, x, y, color, sz) { g.fillStyle = color; roundRect(g, x, y, sz, sz, 6); g.fill(); }
   async function pngMap() {
@@ -1088,7 +1088,7 @@
     rows.forEach((r, i) => {
       const cy = A.y + i * rh + rh / 2;
       if (opts.rank) {
-        const col = r.rank === 1 ? '#f6c700' : r.rank === 2 ? '#d5dbd7' : r.rank === 3 ? '#eab68c' : '#f6f0ed';
+        const col = r.rank === 1 ? '#f6c700' : r.rank === 2 ? '#d5dbd7' : r.rank === 3 ? '#eab68c' : '#f2f2ef';
         g.beginPath(); g.arc(A.x + 28, cy, 27, 0, Math.PI * 2); g.fillStyle = col; g.fill();
         setFont(g, 32, 800); g.fillStyle = INK; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(r.rank), A.x + 28, cy + 1); g.textBaseline = 'alphabetic';
       }

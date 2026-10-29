@@ -1,11 +1,12 @@
 /* 民泊・旅館業マップの見た目。build_site.py が docs/style.css に写す */
 :root {
   color-scheme: light;
-  --bg: #ffffff; --soft: #faf6f4; --card: #ffffff;
-  --ink: #1f2a24; --sub: #47534c; --muted: #66716a;
-  --line: #e6dfdb; --line2: #cfc5bf;
-  /* サイトの色(テラコッタ)。ヘッダー・ボタン・選んでいる所に使う。g2 は濃いめ(文字・リンク用)、gsoft は淡いめ(案内の背景) */
-  --g: #b75035; --g2: #923d28; --gsoft: #fbefea; --gsoft2: #f2d6cb;
+  /* ページの地は柔らかなオフホワイト、カードは白(まぶしくならないよう、真っ白の面を減らす) */
+  --bg: #f7f7f5; --soft: #f2f2ef; --card: #ffffff;
+  --ink: #303637; --sub: #50585a; --muted: #646b6d;
+  --line: #e4e4e0; --line2: #cdcdc7;
+  /* サイトの色(落ち着いたテラコッタ)。ヘッダー・ボタン・選んでいる所に使う。g2 は濃いめ(文字・リンク用)、gsoft は淡いめ(案内の背景) */
+  --g: #945945; --g2: #7a4638; --gsoft: #f4ebe7; --gsoft2: #e6d5ce;
   /* 施設の種類ごとの色(地図・凡例・グラフ・表で共通) */
   --c0: #e44c49; --c1: #8b5cf6; --c2: #1676d2; --c3: #e69b17;
   --t0: #fdebea; --t1: #f1ecfe; --t2: #e5f0fb; --t3: #fcf1da;
@@ -78,15 +79,16 @@ h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.25; margin: 0 0 10px; let
 .entries { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 26px 0 0; }
 @media (max-width: 1120px) { .entries { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .entries { grid-template-columns: minmax(0, 1fr); gap: 10px; } }
-.entry { display: flex; align-items: center; gap: 14px; min-height: 104px; padding: 14px 16px; border-radius: 16px; background: var(--g);
-  color: #fff; text-decoration: none; box-shadow: 0 3px 0 var(--g2); transition: transform .1s; }
-.entry:hover { background: var(--g2); }
-.entry:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--g2); }
-.eicon { flex: none; width: 64px; height: 64px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; }
+/* 4つの入口は白いカード(色の面を広げすぎない)。下の線と見出しの文字にサイトの色 */
+.entry { display: flex; align-items: center; gap: 14px; min-height: 104px; padding: 14px 16px; border-radius: 16px; background: var(--card);
+  border: 1px solid var(--line); border-bottom: 3px solid var(--g); color: var(--ink); text-decoration: none; transition: transform .1s; }
+.entry:hover { background: var(--gsoft); border-color: var(--g); }
+.entry:active { transform: translateY(2px); }
+.eicon { flex: none; width: 64px; height: 64px; border-radius: 50%; background: var(--gsoft); display: flex; align-items: center; justify-content: center; }
 .eicon svg { width: 44px; height: 44px; }
 .etext { display: flex; flex-direction: column; min-width: 0; }
-.et { font-size: 21px; font-weight: 800; line-height: 1.35; }
-.ed { font-size: 15px; line-height: 1.5; opacity: .95; }
+.et { font-size: 21px; font-weight: 800; line-height: 1.35; color: var(--g2); }
+.ed { font-size: 15px; line-height: 1.5; color: var(--sub); }
 @media (max-width: 520px) { .entry { min-height: 84px; } .eicon { width: 54px; height: 54px; } .eicon svg { width: 38px; height: 38px; } }
 
 .notice { display: flex; gap: 10px; margin: 22px 0 0; padding: 14px 16px; border-radius: var(--r); background: var(--warnbg); border: 1px solid #f3d9a6; }
@@ -112,7 +114,7 @@ h3 { font-size: 22px; line-height: 1.4; margin: 0; }
 .cardhead { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
 
 /* ---- 条件の欄 ---- */
-.panel { background: var(--soft); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 16px; }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 16px; }
 .prow { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 4px 12px; align-items: center; padding: 10px 0; }
 .prow + .prow { border-top: 1px dashed var(--line); }
 @media (max-width: 700px) { .prow { grid-template-columns: minmax(0, 1fr); } }
@@ -237,11 +239,11 @@ h3 { font-size: 22px; line-height: 1.4; margin: 0; }
 .lsw { width: 16px; height: 16px; border-radius: 4px; flex: none; }
 .mapcount { font-size: 17px; margin: 10px 0 0; }
 .mapcount b { font-size: 22px; }
-.accnote { margin: 16px 0 0; padding: 12px 16px; background: var(--soft); border-radius: var(--r); }
+.accnote { margin: 16px 0 0; padding: 12px 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); }
 .accnote p { margin: 2px 0; display: flex; gap: 8px; font-size: 16px; }
 .accnote .ic { color: var(--warn); margin-top: 5px; }
 
-details.method { margin: 14px 0 0; border: 1px solid var(--line); border-radius: var(--r); padding: 4px 16px; font-size: 16px; color: var(--sub); }
+details.method { margin: 14px 0 0; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 4px 16px; font-size: 16px; color: var(--sub); }
 details.method summary { cursor: pointer; color: var(--g2); font-weight: 800; padding: 10px 0; min-height: 44px; }
 details.method p, details.method ul { margin: 8px 0; }
 details.method ul { padding-left: 1.3em; }
@@ -389,14 +391,14 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 /* ---- 初めての方へ ---- */
 .purpose p { margin: 0; font-size: 18px; }
 .steps { list-style: none; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-.steps li { position: relative; border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 4px; }
+.steps li { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 4px; }
 .steps b { font-size: 18px; }
 .steps span:last-child { font-size: 16px; color: var(--sub); }
 .stepn { position: absolute; top: 12px; right: 14px; width: 34px; height: 34px; border-radius: 50%; background: var(--g); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 .stepi { width: 52px; height: 52px; }
 .kindgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 10px; }
 @media (max-width: 700px) { .kindgrid { grid-template-columns: minmax(0, 1fr); } }
-.kindcard { display: flex; gap: 14px; border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+.kindcard { display: flex; gap: 14px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
 .kindcard h4 { margin: 0 0 2px; font-size: 19px; }
 .kindcard p { margin: 0; font-size: 16px; color: var(--sub); }
 .kicon { width: 60px; height: 60px; flex: none; padding: 8px; border-radius: 14px; }
