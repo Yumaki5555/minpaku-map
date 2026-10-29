@@ -11,23 +11,25 @@
 <meta property="og:description" content="{{AREA}}の自治体が公表している民泊・特区民泊・旅館業の施設を地図にまとめました。週2回自動更新。">
 <meta property="og:url" content="{{SITE_URL}}">
 <meta name="twitter:card" content="summary">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23b75035'/><g fill='white'><path d='M4 6h4v12h20v8h-4v-4H8v4H4z'/><rect x='10' y='12' width='6' height='4' rx='2'/><path d='M18 18v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4z'/></g></svg>">
+<meta name="theme-color" content="#b75035">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="style.css?v={{CSS_V}}">
 </head>
 <body>
 <!-- ページ全体で使う小さな絵(アイコン)。<use href="#i-…"> で呼び出す -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#fff"/><g fill="#b75035"><path d="M4 6h4v12h20v8h-4v-4H8v4H4z"/><rect x="10" y="12" width="6" height="4" rx="2"/><path d="M18 18v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4z"/></g></symbol>
   <symbol id="i-cat0" viewBox="0 0 32 32"><path d="M16 3.5 2.5 15H7v13.5h18V15h4.5z" fill="currentColor"/><rect x="13" y="19" width="6" height="9.5" rx="1" fill="#fff"/><rect x="8.5" y="16" width="4" height="4" rx=".8" fill="#fff"/><rect x="19.5" y="16" width="4" height="4" rx=".8" fill="#fff"/></symbol>
   <symbol id="i-cat1" viewBox="0 0 32 32"><rect x="4" y="7" width="17" height="21.5" rx="2" fill="currentColor"/><g fill="#fff"><rect x="7.5" y="11" width="3.5" height="3.5" rx=".6"/><rect x="14" y="11" width="3.5" height="3.5" rx=".6"/><rect x="7.5" y="17" width="3.5" height="3.5" rx=".6"/><rect x="14" y="17" width="3.5" height="3.5" rx=".6"/><rect x="10.5" y="23" width="4" height="5.5"/></g><path d="m24.5 2.5 2 4.1 4.5.6-3.3 3.1.8 4.4-4-2.1-4 2.1.8-4.4-3.3-3.1 4.5-.6z" fill="currentColor" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/></symbol>
   <symbol id="i-cat2" viewBox="0 0 32 32"><path d="M1.5 13.5c5.5 0 9.5-3 14.5-8.5 5 5.5 9 8.5 14.5 8.5v2h-29z" fill="currentColor"/><rect x="5" y="15.5" width="22" height="13" fill="currentColor"/><path d="M11 17.5h10v5.5l-1.7 1.2-1.6-1.2-1.7 1.2-1.7-1.2-1.6 1.2-1.7-1.2z" fill="#fff"/><rect x="14" y="24.5" width="4" height="4" fill="#fff"/></symbol>
   <symbol id="i-cat3" viewBox="0 0 32 32"><rect x="4" y="3.5" width="3.2" height="25.5" rx="1" fill="currentColor"/><rect x="24.8" y="3.5" width="3.2" height="25.5" rx="1" fill="currentColor"/><rect x="6" y="11.5" width="20" height="4" rx="1" fill="currentColor"/><rect x="6" y="22.5" width="20" height="4" rx="1" fill="currentColor"/><rect x="8.5" y="7.5" width="6.5" height="4" rx="2" fill="currentColor" opacity=".55"/><rect x="8.5" y="18.5" width="6.5" height="4" rx="2" fill="currentColor" opacity=".55"/></symbol>
-  <symbol id="i-map" viewBox="0 0 48 48"><path d="M5 12 17 7l14 5 12-5v29l-12 5-14-5-12 5z" fill="#d9f0df"/><path d="M17 7v29M31 12v29" stroke="#9fd3ae" stroke-width="2"/><path d="M5 12 17 7l14 5 12-5v29l-12 5-14-5-12 5z" fill="none" stroke="#1e7f3c" stroke-width="2.5" stroke-linejoin="round"/><path d="M30 3.5c-4.4 0-8 3.4-8 7.8C22 17.1 30 25.5 30 25.5s8-8.4 8-14.2c0-4.4-3.6-7.8-8-7.8z" fill="#e44c49"/><circle cx="30" cy="11.5" r="3.2" fill="#fff"/></symbol>
-  <symbol id="i-bars" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="9" fill="#eaf6ee"/><rect x="10" y="11" width="16" height="6.5" rx="2" fill="#e44c49"/><rect x="27.5" y="11" width="9" height="6.5" rx="2" fill="#1676d2"/><rect x="10" y="21" width="11" height="6.5" rx="2" fill="#e44c49"/><rect x="22.5" y="21" width="7" height="6.5" rx="2" fill="#1676d2"/><rect x="10" y="31" width="6" height="6.5" rx="2" fill="#8b5cf6"/><rect x="17.5" y="31" width="9" height="6.5" rx="2" fill="#e69b17"/></symbol>
-  <symbol id="i-trend" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="9" fill="#eaf6ee"/><path d="M9 34l9-9 7 5 13-14" fill="none" stroke="#1e7f3c" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 15h7.5v7.5" fill="none" stroke="#1e7f3c" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="25" r="3.2" fill="#e44c49"/><circle cx="25" cy="30" r="3.2" fill="#8b5cf6"/></symbol>
+  <symbol id="i-map" viewBox="0 0 48 48"><path d="M5 12 17 7l14 5 12-5v29l-12 5-14-5-12 5z" fill="#fbe3da"/><path d="M17 7v29M31 12v29" stroke="#ebbcad" stroke-width="2"/><path d="M5 12 17 7l14 5 12-5v29l-12 5-14-5-12 5z" fill="none" stroke="#b75035" stroke-width="2.5" stroke-linejoin="round"/><path d="M30 3.5c-4.4 0-8 3.4-8 7.8C22 17.1 30 25.5 30 25.5s8-8.4 8-14.2c0-4.4-3.6-7.8-8-7.8z" fill="#e44c49"/><circle cx="30" cy="11.5" r="3.2" fill="#fff"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="9" fill="#fbefea"/><rect x="10" y="11" width="16" height="6.5" rx="2" fill="#e44c49"/><rect x="27.5" y="11" width="9" height="6.5" rx="2" fill="#1676d2"/><rect x="10" y="21" width="11" height="6.5" rx="2" fill="#e44c49"/><rect x="22.5" y="21" width="7" height="6.5" rx="2" fill="#1676d2"/><rect x="10" y="31" width="6" height="6.5" rx="2" fill="#8b5cf6"/><rect x="17.5" y="31" width="9" height="6.5" rx="2" fill="#e69b17"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="9" fill="#fbefea"/><path d="M9 34l9-9 7 5 13-14" fill="none" stroke="#b75035" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 15h7.5v7.5" fill="none" stroke="#b75035" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="25" r="3.2" fill="#e44c49"/><circle cx="25" cy="30" r="3.2" fill="#8b5cf6"/></symbol>
   <symbol id="i-beginner" viewBox="0 0 48 48"><path d="M24 44.5 7 31.5V4.5l17 13z" fill="#f6c700"/><path d="M24 44.5l17-13v-27l-17 13z" fill="#22a04b"/><path d="M24 44.5 7 31.5v-27l17 13 17-13v27z" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></symbol>
-  <symbol id="i-list" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="9" fill="#eaf6ee"/><g fill="#1e7f3c"><rect x="10" y="12" width="5" height="5" rx="1.2"/><rect x="10" y="21.5" width="5" height="5" rx="1.2"/><rect x="10" y="31" width="5" height="5" rx="1.2"/></g><g fill="#9fd3ae"><rect x="18" y="12.5" width="20" height="4" rx="2"/><rect x="18" y="22" width="16" height="4" rx="2"/><rect x="18" y="31.5" width="18" height="4" rx="2"/></g></symbol>
-  <symbol id="i-rank" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="9" fill="#eaf6ee"/><rect x="18" y="16" width="12" height="22" rx="2" fill="#f6c700"/><rect x="6.5" y="23" width="11" height="15" rx="2" fill="#c9d3cc"/><rect x="30.5" y="27" width="11" height="11" rx="2" fill="#e8b48a"/><path d="m24 6 1.8 3.6 4 .6-2.9 2.8.7 4-3.6-1.9-3.6 1.9.7-4-2.9-2.8 4-.6z" fill="#e8a400"/></symbol>
+  <symbol id="i-list" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="9" fill="#fbefea"/><g fill="#b75035"><rect x="10" y="12" width="5" height="5" rx="1.2"/><rect x="10" y="21.5" width="5" height="5" rx="1.2"/><rect x="10" y="31" width="5" height="5" rx="1.2"/></g><g fill="#ebbcad"><rect x="18" y="12.5" width="20" height="4" rx="2"/><rect x="18" y="22" width="16" height="4" rx="2"/><rect x="18" y="31.5" width="18" height="4" rx="2"/></g></symbol>
+  <symbol id="i-rank" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="9" fill="#fbefea"/><rect x="18" y="16" width="12" height="22" rx="2" fill="#f6c700"/><rect x="6.5" y="23" width="11" height="15" rx="2" fill="#c9d3cc"/><rect x="30.5" y="27" width="11" height="11" rx="2" fill="#e8b48a"/><path d="m24 6 1.8 3.6 4 .6-2.9 2.8.7 4-3.6-1.9-3.6 1.9.7-4-2.9-2.8 4-.6z" fill="#e8a400"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
   <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M4 3.5v5h5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-image" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="8.5" cy="9.5" r="2" fill="currentColor"/><path d="m4 18 5.5-5.5 4 4 2.5-2.5L20.5 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
@@ -58,7 +60,7 @@
 
 <header class="top">
   <div class="wrap topin">
-    <a class="logo" href="./"><svg class="ic"><use href="#i-pin"/></svg>民泊・旅館業マップ</a>
+    <a class="logo" href="./"><svg class="ic" aria-hidden="true"><use href="#i-logo"/></svg>民泊・旅館業マップ</a>
     <a class="toplink" href="trend.html"><svg class="ic"><use href="#i-chart"/></svg>件数の推移（全自治体のグラフ）</a>
   </div>
 </header>
@@ -80,10 +82,10 @@
         <circle cx="530" cy="62" r="34" fill="#ffeaa8"/>
         <path d="M70 78c0-14 12-24 26-22 6-12 24-16 34-6 14-3 26 8 24 22H70z" fill="#eef4fa"/>
         <path d="M300 52c0-11 10-19 21-17 5-10 19-13 27-5 11-2 21 6 19 17h-67z" fill="#eef4fa"/>
-        <rect x="18" y="214" width="564" height="150" rx="30" fill="#e9f5ec"/>
-        <path d="M60 364c40-30 70-40 120-46" fill="none" stroke="#d3ebda" stroke-width="10" stroke-linecap="round"/>
+        <rect x="18" y="214" width="564" height="150" rx="30" fill="#f5e5db"/>
+        <path d="M60 364c40-30 70-40 120-46" fill="none" stroke="#ecd3c6" stroke-width="10" stroke-linecap="round"/>
         <rect x="18" y="300" width="564" height="24" fill="#fff"/>
-        <path d="M30 312h540" stroke="#dbe5de" stroke-width="2.5" stroke-dasharray="14 12"/>
+        <path d="M30 312h540" stroke="#ecdcd4" stroke-width="2.5" stroke-dasharray="14 12"/>
         <path d="M420 324c20 14 50 26 110 30" fill="none" stroke="#cfe6f6" stroke-width="12" stroke-linecap="round"/>
         <!-- 木 -->
         <rect x="168" y="270" width="6" height="30" rx="2" fill="#a77b52"/><circle cx="171" cy="262" r="16" fill="#8fd09f"/>
@@ -126,7 +128,7 @@
         <g transform="translate(446 96)"><path d="M17 0C7.6 0 0 7.4 0 16.6 0 29 17 46 17 46s17-17 17-29.4C34 7.4 26.4 0 17 0z" fill="#1676d2"/><circle cx="17" cy="16.6" r="7" fill="#fff"/></g>
         <g transform="translate(531 160)"><path d="M17 0C7.6 0 0 7.4 0 16.6 0 29 17 46 17 46s17-17 17-29.4C34 7.4 26.4 0 17 0z" fill="#e69b17"/><circle cx="17" cy="16.6" r="7" fill="#fff"/></g>
         <!-- 旅行かばんを持った人 -->
-        <g transform="translate(24 252)"><circle cx="12" cy="6" r="6" fill="#f2c9a6"/><path d="M4 18c0-4 3.5-6 8-6s8 2 8 6v12H4z" fill="#22a04b"/><rect x="5" y="30" width="5" height="16" rx="2" fill="#3e5b57"/><rect x="14" y="30" width="5" height="16" rx="2" fill="#3e5b57"/><rect x="21" y="30" width="11" height="14" rx="3" fill="#6fa8dc"/><path d="M26 30v-6" stroke="#4c7fb0" stroke-width="2"/></g>
+        <g transform="translate(24 252)"><circle cx="12" cy="6" r="6" fill="#f2c9a6"/><path d="M4 18c0-4 3.5-6 8-6s8 2 8 6v12H4z" fill="#b75035"/><rect x="5" y="30" width="5" height="16" rx="2" fill="#3e5b57"/><rect x="14" y="30" width="5" height="16" rx="2" fill="#3e5b57"/><rect x="21" y="30" width="11" height="14" rx="3" fill="#6fa8dc"/><path d="M26 30v-6" stroke="#4c7fb0" stroke-width="2"/></g>
       </svg>
     </div>
   </div>

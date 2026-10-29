@@ -1,11 +1,11 @@
 /* 民泊・旅館業マップの見た目。build_site.py が docs/style.css に写す */
 :root {
   color-scheme: light;
-  --bg: #ffffff; --soft: #f6f9f7; --card: #ffffff;
+  --bg: #ffffff; --soft: #faf6f4; --card: #ffffff;
   --ink: #1f2a24; --sub: #47534c; --muted: #66716a;
-  --line: #dde5df; --line2: #c5d1c9;
-  /* ボタン・操作の色(緑) */
-  --g: #1e7f3c; --g2: #166530; --gsoft: #eaf6ee; --gsoft2: #d3ecda;
+  --line: #e6dfdb; --line2: #cfc5bf;
+  /* サイトの色(テラコッタ)。ヘッダー・ボタン・選んでいる所に使う。g2 は濃いめ(文字・リンク用)、gsoft は淡いめ(案内の背景) */
+  --g: #b75035; --g2: #923d28; --gsoft: #fbefea; --gsoft2: #f2d6cb;
   /* 施設の種類ごとの色(地図・凡例・グラフ・表で共通) */
   --c0: #e44c49; --c1: #8b5cf6; --c2: #1676d2; --c3: #e69b17;
   --t0: #fdebea; --t1: #f1ecfe; --t2: #e5f0fb; --t3: #fcf1da;
@@ -40,11 +40,11 @@ a { color: var(--g2); text-underline-offset: 3px; }
 .actions:empty { display: none; }
 
 /* ---- 画面上部 ---- */
-.top { border-bottom: 1px solid var(--line); }
-.topin { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 60px; flex-wrap: wrap; }
-.logo { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: 19px; color: var(--ink); text-decoration: none; }
-.logo .ic { color: var(--c0); width: 26px; height: 26px; }
-.toplink { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 16px; }
+.top { background: var(--g); color: #fff; }
+.topin { display: flex; align-items: center; justify-content: space-between; gap: 4px 12px; min-height: 60px; flex-wrap: wrap; padding-top: 6px; padding-bottom: 6px; }
+.logo { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 19px; color: #fff; text-decoration: none; }
+.logo .ic { width: 30px; height: 30px; }
+.toplink { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 16px; color: #fff; }
 
 .condbar { position: fixed; top: 0; left: 0; right: 0; z-index: 2000; background: rgba(255,255,255,.97); border-bottom: 2px solid var(--gsoft2);
   box-shadow: 0 2px 10px rgba(0,0,0,.06); }
@@ -153,7 +153,7 @@ h3 { font-size: 22px; line-height: 1.4; margin: 0; }
 .vopt small { display: block; font-size: 14px; color: var(--sub); line-height: 1.4; }
 .vopt .vimg { width: 56px; height: 36px; flex: none; }
 .vopt[aria-checked="true"] { background: var(--g); color: #fff; }
-.vopt[aria-checked="true"] small { color: #e7f5ec; }
+.vopt[aria-checked="true"] small { color: #fff4f0; }
 @media (max-width: 520px) { .viewswitch { display: flex; } .vopt { flex: 1 1 50%; padding: 8px; gap: 6px; } .vopt .vimg { width: 44px; height: 28px; } }
 
 /* ---- 地図 ---- */
@@ -192,7 +192,7 @@ h3 { font-size: 22px; line-height: 1.4; margin: 0; }
 .ihead .kname { font-size: 20px; font-weight: 800; line-height: 1.3; }
 .ihead .kcity { font-size: 15px; color: var(--sub); }
 .badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 8px; padding: 2px 10px; font-size: 14.5px; font-weight: 700; margin: 10px 0 0; }
-.badge.ok { background: var(--gsoft); color: var(--g2); }
+.badge.ok { background: #eaf6ee; color: #166530; }  /* 「位置が確か」の印なので、サイトの色ではなく緑のまま */
 .badge.approx { background: var(--warnbg); color: var(--warn); border: 1px dashed #d9a441; }
 .ilist { list-style: none; margin: 10px 0 0; padding: 0; }
 .ilist li { border-top: 1px solid var(--line); padding: 10px 0; }
@@ -424,4 +424,4 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 2500; background: var(--ink); color: #fff; border-radius: 12px;
   padding: 10px 16px; font-size: 16px; box-shadow: 0 4px 16px rgba(0,0,0,.25); max-width: calc(100vw - 24px); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .toast[hidden] { display: none; }
-.toast a { color: #bff0cf; font-weight: 800; }
+.toast a { color: #ffd5c7; font-weight: 800; }

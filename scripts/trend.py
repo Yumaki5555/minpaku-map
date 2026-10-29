@@ -395,12 +395,13 @@ TEMPLATE = """<!DOCTYPE html>
 <meta property="og:description" content="自治体の一覧が更新されるたびに件数を記録し、増減をグラフにしています。週2回自動更新。">
 <meta property="og:url" content="{site_url}trend.html">
 <meta name="twitter:card" content="summary">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23b75035'/><g fill='white'><path d='M4 6h4v12h20v8h-4v-4H8v4H4z'/><rect x='10' y='12' width='6' height='4' rx='2'/><path d='M18 18v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4z'/></g></svg>">
+<meta name="theme-color" content="#b75035">
 <style>
 :root{{
   color-scheme:light;
-  --bg:#fff;--card:#fff;--ink:#1f2a24;--sub:#47534c;--line:#dde5df;--accent:#166530;--chip:#f6f9f7;
-  --g:#1e7f3c;--g2:#166530;--gsoft:#eaf6ee;
+  --bg:#fff;--card:#fff;--ink:#1f2a24;--sub:#47534c;--line:#e6dfdb;--accent:#923d28;--chip:#faf6f4;
+  --g:#b75035;--g2:#923d28;--gsoft:#fbefea;
   --c0:#e44c49;--c1:#8b5cf6;--c2:#1676d2;--c3:#e69b17;--up:#c62828;--down:#1d4ed8;
 }}
 *{{box-sizing:border-box}}
@@ -408,6 +409,11 @@ body{{margin:0;background:var(--bg);color:var(--ink);font-size:17px;
   font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Meiryo",sans-serif;line-height:1.75}}
 a{{color:var(--accent);text-underline-offset:3px}}
 .wrap{{max-width:1180px;margin:0 auto;padding:0 16px}}
+/* 一番上の帯(地図のページと同じサイトの色) */
+.brandbar{{background:var(--g)}}
+.brandbar .wrap{{display:flex;align-items:center;min-height:60px}}
+.logo{{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:19px;color:#fff;text-decoration:none}}
+.logo svg{{width:30px;height:30px;flex:none}}
 header{{padding:16px 0 4px}}
 .back{{display:inline-flex;align-items:center;gap:6px;min-height:46px;padding:6px 16px;border:2px solid var(--g);border-radius:12px;
   font-size:16px;font-weight:700;text-decoration:none;color:var(--g2);background:#fff}}
@@ -441,13 +447,13 @@ h2.sec{{font-size:clamp(22px,3vw,28px);margin:36px 0 0}}
 .lk{{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}}
 .filters{{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0 6px;padding:10px 0;border-top:1px solid var(--line)}}
 /* 種類の切り替え(トップページと同じ、大きなチェックの形) */
-.tagbtn{{border:2px solid #c5d1c9;background:#fff;color:var(--ink);border-radius:12px;min-height:50px;
+.tagbtn{{border:2px solid #cfc5bf;background:#fff;color:var(--ink);border-radius:12px;min-height:50px;
   padding:6px 14px 6px 10px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px}}
-.tagbtn::before{{content:"";width:24px;height:24px;border-radius:7px;border:2.5px solid #c5d1c9;background:#fff;flex:none}}
+.tagbtn::before{{content:"";width:24px;height:24px;border-radius:7px;border:2.5px solid #cfc5bf;background:#fff;flex:none}}
 .tagbtn[aria-pressed="true"]{{border-color:var(--g);background:var(--gsoft)}}
 .tagbtn[aria-pressed="true"]::before{{background:var(--g) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/18px no-repeat;border-color:var(--g)}}
 .tagbtn[aria-pressed="false"] .dot{{opacity:.45}}
-select{{min-height:48px;padding:8px 12px;border:2px solid #c5d1c9;border-radius:10px;background:#fff;color:var(--ink);font-size:17px;font-family:inherit;max-width:100%}}
+select{{min-height:48px;padding:8px 12px;border:2px solid #cfc5bf;border-radius:10px;background:#fff;color:var(--ink);font-size:17px;font-family:inherit;max-width:100%}}
 label.chk{{font-size:16px;font-weight:700;display:inline-flex;align-items:center;gap:8px;cursor:pointer;min-height:48px}}
 label.chk input{{width:24px;height:24px;accent-color:var(--g)}}
 .shown{{font-size:16px;color:var(--sub);margin-left:auto}}
@@ -505,6 +511,7 @@ footer{{font-size:15.5px;color:var(--sub);padding:24px 0 90px;border-top:1px sol
 </style>
 </head>
 <body>
+<div class="brandbar"><div class="wrap"><a class="logo" href="./"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#fff"/><g fill="#b75035"><path d="M4 6h4v12h20v8h-4v-4H8v4H4z"/><rect x="10" y="12" width="6" height="4" rx="2"/><path d="M18 18v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4z"/></g></svg>民泊・旅館業マップ</a></div></div>
 <div class="wrap">
 <header>
   <a class="back" href="./">← 民泊・旅館業マップ（地図・グラフ）に戻る</a>

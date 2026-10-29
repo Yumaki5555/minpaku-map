@@ -964,7 +964,7 @@
 
   // ---------- 画像で保存(1920×1080) ----------
   const PW = 1920, PH = 1080, FONT = '"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Meiryo",sans-serif';
-  const INK = '#1f2a24', SUB = '#47534c', LINE = '#dde5df', GREEN = '#1e7f3c';
+  const INK = '#1f2a24', SUB = '#47534c', LINE = '#e6dfdb', BRAND = '#b75035';  // BRAND はサイトの色(テラコッタ)
   function setFont(g, size, weight) { g.font = (weight || 400) + ' ' + size + 'px ' + FONT; }
   // 幅に入るよう文字を小さくする(min より小さくはしない。入らなければ末尾を…にする)
   function fitText(g, s, x, y, maxW, size, weight, color, align, min) {
@@ -983,7 +983,7 @@
     cv.width = PW; cv.height = PH;
     const g = cv.getContext('2d');
     g.fillStyle = '#fff'; g.fillRect(0, 0, PW, PH);
-    g.fillStyle = GREEN; g.fillRect(0, 0, PW, 14);
+    g.fillStyle = BRAND; g.fillRect(0, 0, PW, 14);
     // 左上の小さなピンの絵
     g.save(); g.translate(56, 46); g.fillStyle = COLORS[0];
     g.beginPath(); g.moveTo(26, 0); g.bezierCurveTo(11.6, 0, 0, 11.3, 0, 25.4); g.bezierCurveTo(0, 44.4, 26, 70, 26, 70); g.bezierCurveTo(26, 70, 52, 44.4, 52, 25.4); g.bezierCurveTo(52, 11.3, 40.4, 0, 26, 0); g.fill();
@@ -999,7 +999,7 @@
     const one = ok.length === 1 ? ok[0] : null;
     fitText(g, one ? '出典：' + one.muni + (one.title ? '「' + one.title + '」' : 'の公表資料') + '　' + srcLink(one)
       : '出典：各自治体の公表資料（' + ok.length + 'の資料。資料ごとのリンクは下のページの一覧表にあります）', 60, 998, PW - 120, 34, 400, SUB);
-    fitText(g, '元のデータ：' + viewURL(), 60, 1048, PW - 120, 36, 700, GREEN);
+    fitText(g, '元のデータ：' + viewURL(), 60, 1048, PW - 120, 36, 700, BRAND);
   }
   function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
   function loadImg(url) {
@@ -1047,7 +1047,7 @@
     g.fillStyle = 'rgba(255,255,255,.88)'; g.fillRect(A.x + A.w - aw - 32, A.y + A.h - 50, aw + 32, 50);
     g.fillStyle = SUB; g.textAlign = 'right'; g.fillText(at, A.x + A.w - 16, A.y + A.h - 14); g.textAlign = 'left';
     g.restore();
-    g.strokeStyle = '#c5d1c9'; g.lineWidth = 2; roundRect(g, A.x, A.y, A.w, A.h, 18); g.stroke();
+    g.strokeStyle = '#cfc5bf'; g.lineWidth = 2; roundRect(g, A.x, A.y, A.w, A.h, 18); g.stroke();
   }
   function swatch(g, x, y, color, sz) { g.fillStyle = color; roundRect(g, x, y, sz, sz, 6); g.fill(); }
   async function pngMap() {
@@ -1088,12 +1088,12 @@
     rows.forEach((r, i) => {
       const cy = A.y + i * rh + rh / 2;
       if (opts.rank) {
-        const col = r.rank === 1 ? '#f6c700' : r.rank === 2 ? '#d5dbd7' : r.rank === 3 ? '#eab68c' : '#f1f5f2';
+        const col = r.rank === 1 ? '#f6c700' : r.rank === 2 ? '#d5dbd7' : r.rank === 3 ? '#eab68c' : '#f6f0ed';
         g.beginPath(); g.arc(A.x + 28, cy, 27, 0, Math.PI * 2); g.fillStyle = col; g.fill();
         setFont(g, 32, 800); g.fillStyle = INK; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(r.rank), A.x + 28, cy + 1); g.textBaseline = 'alphabetic';
       }
       const nx = A.x + (opts.rank ? 70 : 0);
-      fitText(g, r.name, nx, cy + 15, nameW - 20, 44, 800, r.sel ? GREEN : INK, 'left', 34);
+      fitText(g, r.name, nx, cy + 15, nameW - 20, 44, 800, r.sel ? BRAND : INK, 'left', 34);
       let x = bx;
       cats.forEach(c => {
         const v = r.n[c];
