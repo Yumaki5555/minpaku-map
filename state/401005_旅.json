@@ -1,6 +1,6 @@
 {
   "row_count": 177,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "施設所在地",
     "施設名称",
@@ -12,6 +12,6 @@
   ],
   "source_url": "https://data.bodik.jp/dataset/9000da6c-3839-4fdd-b527-1c8d38eea432/resource/3cf0f26e-8bb0-4ced-b248-948357ed0b10/download/401005_ryokangyoshisetsuichiran_20260331.csv",
   "normalized_files": [
-    "data/北九州市/旅館業/整形済み/20261026_北九州市_旅館業_normalized.csv"
+    "data/北九州市/旅館業/整形済み/20261029_北九州市_旅館業_normalized.csv"
   ]
 }

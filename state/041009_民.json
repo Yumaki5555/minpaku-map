@@ -1,12 +1,12 @@
 {
   "row_count": 70,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "",
     "施設住所"
   ],
   "source_url": "https://www.city.sendai.jp/sekatsuese/jigyosha/kankyo/shokuhin/minpaku/documents/r89.pdf",
   "normalized_files": [
-    "data/仙台市/民泊/整形済み/20261026_仙台市_民泊_normalized.csv"
+    "data/仙台市/民泊/整形済み/20261029_仙台市_民泊_normalized.csv"
   ]
 }

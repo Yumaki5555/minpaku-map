@@ -1,6 +1,6 @@
 {
   "row_count": 1955,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "①営業所名称",
     "①営業所名称２",
@@ -18,6 +18,6 @@
   ],
   "source_url": "https://web.pref.hyogo.lg.jp/kf14/documents/000028_hotel_all.xlsx",
   "normalized_files": [
-    "data/兵庫県/旅館業/整形済み/20261026_兵庫県_旅館業_normalized.csv"
+    "data/兵庫県/旅館業/整形済み/20261029_兵庫県_旅館業_normalized.csv"
   ]
 }

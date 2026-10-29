@@ -1,6 +1,6 @@
 {
   "row_count": 746,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "許可番号",
     "nan",
@@ -19,7 +19,7 @@
   ],
   "source_url": "https://www.pref.aichi.jp/uploaded/attachment/623598.csv",
   "normalized_files": [
-    "data/愛知県/旅館業/整形済み/20261026_愛知県_旅館業_旅館ホテル等_normalized.csv",
-    "data/愛知県/旅館業/整形済み/20261026_愛知県_旅館業_簡易宿所_normalized.csv"
+    "data/愛知県/旅館業/整形済み/20261029_愛知県_旅館業_旅館ホテル等_normalized.csv",
+    "data/愛知県/旅館業/整形済み/20261029_愛知県_旅館業_簡易宿所_normalized.csv"
   ]
 }

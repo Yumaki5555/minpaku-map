@@ -1,6 +1,6 @@
 {
   "row_count": 265,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "許可年月日",
     "施設所在地",
@@ -13,6 +13,6 @@
   ],
   "source_url": "https://opendata.pref.shizuoka.jp/dataset/12259/resource/105881/%E6%97%85%E9%A4%A8%E6%A5%AD%E8%A8%B1%E5%8F%AF%E5%85%A8%E6%96%BD%E8%A8%AD%EF%BC%88R8.3.31%E7%8F%BE%E5%9C%A8%EF%BC%89.csv",
   "normalized_files": [
-    "data/静岡市/旅館業/整形済み/20261026_静岡市_旅館業_normalized.csv"
+    "data/静岡市/旅館業/整形済み/20261029_静岡市_旅館業_normalized.csv"
   ]
 }

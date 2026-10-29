@@ -1,6 +1,6 @@
 {
   "row_count": 18,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "許可番号",
     "営業者住所",
@@ -17,6 +17,6 @@
   ],
   "source_url": "https://www.nishi.or.jp/kenko/hokenjojoho/seikatsukankyo/minpaku.files/ryokann9.pdf",
   "normalized_files": [
-    "data/西宮市/旅館業/整形済み/20261026_西宮市_旅館業_normalized.csv"
+    "data/西宮市/旅館業/整形済み/20261029_西宮市_旅館業_normalized.csv"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "row_count": 611,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "届出番号",
     "届出日",
@@ -9,6 +9,6 @@
   ],
   "source_url": "https://www.city.kita.lg.jp/_res/projects/default_project/_page_/001/008/993/zyuutaku0809.pdf",
   "normalized_files": [
-    "data/北区/民泊/整形済み/20261026_北区_民泊_normalized.csv"
+    "data/北区/民泊/整形済み/20261029_北区_民泊_normalized.csv"
   ]
 }

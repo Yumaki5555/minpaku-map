@@ -1,6 +1,6 @@
 {
   "row_count": 1434,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "所在区",
     "No.",
@@ -16,6 +16,6 @@
   ],
   "source_url": "https://www.city.fukuoka.lg.jp/hofuku/hokensho/kurashinoeisei/jigyosya/ryokan/documents/ryokanR8.9Excel.xls",
   "normalized_files": [
-    "data/福岡市/旅館業/整形済み/20261026_福岡市_旅館業_normalized.csv"
+    "data/福岡市/旅館業/整形済み/20261029_福岡市_旅館業_normalized.csv"
   ]
 }

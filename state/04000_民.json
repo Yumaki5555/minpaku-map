@@ -1,11 +1,11 @@
 {
   "row_count": 84,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "届出住宅所在地"
   ],
   "source_url": "https://www.pref.miyagi.jp/documents/30180/1006ichiran.pdf",
   "normalized_files": [
-    "data/宮城県/民泊/整形済み/20261026_宮城県_民泊_normalized.csv"
+    "data/宮城県/民泊/整形済み/20261029_宮城県_民泊_normalized.csv"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "row_count": 689,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "業種区分",
     "施設名称",
@@ -18,7 +18,7 @@
   ],
   "source_url": "https://www.city.sapporo.jp/hokenjo/f3seikatu/documents/sapporo-eigyoshisetsu-ryokan-r80930.xlsx",
   "normalized_files": [
-    "data/札幌市/旅館業/整形済み/20261026_札幌市_旅館業_旅館ホテル等_normalized.csv",
-    "data/札幌市/旅館業/整形済み/20261026_札幌市_旅館業_簡易宿所_normalized.csv"
+    "data/札幌市/旅館業/整形済み/20261029_札幌市_旅館業_旅館ホテル等_normalized.csv",
+    "data/札幌市/旅館業/整形済み/20261029_札幌市_旅館業_簡易宿所_normalized.csv"
   ]
 }

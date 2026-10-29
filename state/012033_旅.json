@@ -1,6 +1,6 @@
 {
   "row_count": 278,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "No",
     "区分",
@@ -9,7 +9,7 @@
   ],
   "source_url": "https://www.city.otaru.lg.jp/docs/2020101300609/file_contents/R8-9.xlsx",
   "normalized_files": [
-    "data/小樽市/旅館業/整形済み/20261026_小樽市_旅館業_旅館ホテル等_normalized.csv",
-    "data/小樽市/旅館業/整形済み/20261026_小樽市_旅館業_簡易宿所_normalized.csv"
+    "data/小樽市/旅館業/整形済み/20261029_小樽市_旅館業_旅館ホテル等_normalized.csv",
+    "data/小樽市/旅館業/整形済み/20261029_小樽市_旅館業_簡易宿所_normalized.csv"
   ]
 }

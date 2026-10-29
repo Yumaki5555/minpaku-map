@@ -1,6 +1,6 @@
 {
   "row_count": 75,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "施設(種別)",
     "施設名称",
@@ -10,7 +10,7 @@
   ],
   "source_url": "https://www.city.sakai.lg.jp/kenko/kankyoeisei/taisaku/ryokankeihatu.files/R8.9.30ryokan.pdf",
   "normalized_files": [
-    "data/堺市/旅館業/整形済み/20261026_堺市_旅館業_旅館ホテル等_normalized.csv",
-    "data/堺市/旅館業/整形済み/20261026_堺市_旅館業_簡易宿所_normalized.csv"
+    "data/堺市/旅館業/整形済み/20261029_堺市_旅館業_旅館ホテル等_normalized.csv",
+    "data/堺市/旅館業/整形済み/20261029_堺市_旅館業_簡易宿所_normalized.csv"
   ]
 }

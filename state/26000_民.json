@@ -1,6 +1,6 @@
 {
-  "row_count": 126,
-  "date": "20261026",
+  "row_count": 127,
+  "date": "20261029",
   "header": [
     "",
     "届出受理番号",
@@ -8,8 +8,8 @@
     "届出受理年月日\n※平成30年6月15日までは法施行日",
     "住宅宿泊管理業者の商号又は名称"
   ],
-  "source_url": "https://www.pref.kyoto.jp/seikatsu/news/documents/jyusyuku261016.pdf",
+  "source_url": "https://www.pref.kyoto.jp/seikatsu/news/documents/jyusyuku261028.pdf",
   "normalized_files": [
-    "data/京都府/民泊/整形済み/20261026_京都府_民泊_normalized.csv"
+    "data/京都府/民泊/整形済み/20261029_京都府_民泊_normalized.csv"
   ]
 }

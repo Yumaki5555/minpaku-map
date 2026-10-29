@@ -1,13 +1,13 @@
 {
-  "row_count": 1360,
-  "date": "20261026",
+  "row_count": 1387,
+  "date": "20261029",
   "header": [
     "届出番号",
     "届出住宅の所在地",
     "届出年月日"
   ],
-  "source_url": "https://www.city.kyoto.lg.jp/hokenfukushi/cmsfiles/contents/0000193/193116/080831todokedeichiran.pdf",
+  "source_url": "https://www.city.kyoto.lg.jp/hokenfukushi/cmsfiles/contents/0000193/193116/080930todokedeichiran.pdf",
   "normalized_files": [
-    "data/京都市/民泊/整形済み/20261026_京都市_民泊_normalized.csv"
+    "data/京都市/民泊/整形済み/20261029_京都市_民泊_normalized.csv"
   ]
 }

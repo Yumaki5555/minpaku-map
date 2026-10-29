@@ -1,6 +1,6 @@
 {
   "row_count": 258,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "施設名",
     "施設所在地",
@@ -12,7 +12,7 @@
   ],
   "source_url": "https://www.city.asahikawa.hokkaido.jp/kurashi/135/203/205/d079219_d/fil/012041_04ryokan_list.csv",
   "normalized_files": [
-    "data/旭川市/旅館業/整形済み/20261026_旭川市_旅館業_旅館ホテル等_normalized.csv",
-    "data/旭川市/旅館業/整形済み/20261026_旭川市_旅館業_簡易宿所_normalized.csv"
+    "data/旭川市/旅館業/整形済み/20261029_旭川市_旅館業_旅館ホテル等_normalized.csv",
+    "data/旭川市/旅館業/整形済み/20261029_旭川市_旅館業_簡易宿所_normalized.csv"
   ]
 }

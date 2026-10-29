@@ -1,6 +1,6 @@
 {
   "row_count": 35,
-  "date": "20261026",
+  "date": "20261029",
   "header": [
     "施設名称",
     "施設所在地",
@@ -15,6 +15,6 @@
   ],
   "source_url": "https://www.city.amagasaki.hyogo.jp/_res/projects/default_project/_page_/001/001/031/ryokanR80930.csv",
   "normalized_files": [
-    "data/尼崎市/旅館業/整形済み/20261026_尼崎市_旅館業_normalized.csv"
+    "data/尼崎市/旅館業/整形済み/20261029_尼崎市_旅館業_normalized.csv"
   ]
 }
