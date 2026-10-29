@@ -640,6 +640,9 @@
     options: { padding: 0.4 },
     _initContainer() { this._container = L.DomUtil.create('canvas', 'dotlayer'); this._ctx = this._container.getContext('2d'); },
     _destroyContainer() { L.DomUtil.remove(this._container); },
+    // 描き直し(_update)は後回しにするので、最初の描き直しの前に地図が動くとまだ中心が決まっていない
+    // (URLで地域を指定して開いたとき)。そのときは何もしない(すぐ後の描き直しで正しい位置に描く)
+    _updateTransform(center, zoom) { if (this._center) L.Renderer.prototype._updateTransform.call(this, center, zoom); },
     // 1回の操作(拡大・移動)で何度か呼ばれるので、描き直しはその操作が終わった直後の1回にまとめる(画面が書き換わる前なので、ちらつかない)
     _update() {
       if (this._queued) return;
