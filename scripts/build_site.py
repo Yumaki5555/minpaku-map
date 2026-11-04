@@ -11,6 +11,7 @@
 """
 from __future__ import annotations
 
+import csv
 import hashlib
 import html
 import json
@@ -228,7 +229,8 @@ def main() -> None:
                           "sn": sn, "src": sorted([s for s, _ in sn] + own)})
     site = {"updated": today, "site": SITE_URL, "prefs": PREFS, "cats": CATS,
             "axis": [f"{x0:%Y/%m/%d}", f"{x1:%Y/%m/%d}"], "sources": sources, "cities": city_rows,
-            "total_paused": trend.TOTAL_PAUSED}  # 全地域の合計のグラフを止めている理由(空なら出す)
+            "total_paused": trend.TOTAL_PAUSED,  # 全地域の合計のグラフを止めている理由(空なら出す)
+            "contacts": load_contacts(), "areas": load_area_codes()}
 
     total = sum(t["count"] for t in table)
     page = render(site, total, today, not_found, by_source, len(munis), f"{x0:%Y/%m/%d}〜{x1:%Y/%m/%d}")
@@ -275,6 +277,22 @@ def render_method(by_source: dict, not_found: int, today: str) -> str:
 <li>新しく加わった住所も、定期の更新で同じ方法で調べています。この判断は、今後の確認結果によって見直すことがあります。</li>
 </ul>
 </details>"""
+
+
+def load_contacts() -> list:
+    """公式の案内で担当を確かめた自治体(担当案内.csv)。ここにない地域は画面で「問い合わせ先を探す」と出す。"""
+    path = os.path.join(BASE_DIR, "担当案内.csv")
+    if not os.path.exists(path):
+        return []
+    with open(path, encoding="utf-8-sig", newline="") as f:
+        return [{"pref": r["都道府県"], "name": r["自治体"], "scope": r["範囲"], "dept": r["担当部署"], "url": r["案内URL"],
+                 "except": [x for x in r["対象外"].split("、") if x]} for r in csv.DictReader(f)]
+
+
+def load_area_codes() -> dict:
+    """地域の名前 → 自治体コード(「声を届ける」の窓口検索で地域を選んだ状態にする。ない地域は利用者が選ぶ)。"""
+    with open(os.path.join(SITE_SRC, "area_codes.json"), encoding="utf-8") as f:
+        return json.load(f)
 
 
 def copy_asset(name: str) -> str:

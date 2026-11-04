@@ -114,6 +114,9 @@ h3 { font-size: 22px; line-height: 1.4; margin: 0; }
 .cardhead { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
 
 /* ---- 条件の欄 ---- */
+.askrow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 10px 0; font-size: 15.5px; color: var(--sub); }
+.askrow a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
+@media print { .askrow { display: none; } }
 .panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 16px; }
 .prow { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 4px 12px; align-items: center; padding: 10px 0; }
 .prow + .prow { border-top: 1px dashed var(--line); }

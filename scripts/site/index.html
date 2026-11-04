@@ -45,6 +45,9 @@
 </svg>
 
 <a class="skip" href="#map-sec">地図へ移動</a>
+<style>nihon-site-nav:not(:defined){display:block;min-height:45px;padding:0 16px;background:#f4f6f6;border-bottom:1px solid #d5dcde;font:14px/44px system-ui,sans-serif}@media print{nihon-site-nav{display:none!important}}</style>
+<nihon-site-nav><a href="https://yumaki5555.github.io/">日本を知る。</a></nihon-site-nav>
+<script src="https://yumaki5555.github.io/shared/site-nav.js" data-place="manual" async></script>
 
 <!-- いま選んでいる条件(下へ読み進めても見えるよう、画面の上に出しておく) -->
 <div class="condbar" id="condbar" hidden>
@@ -213,6 +216,8 @@
       <p id="qmsg" class="qmsg" aria-live="polite"></p>
       <datalist id="citylist"></datalist>
     </form>
+
+    <div class="askrow" id="askrow"></div>
 
     <div class="mapgrid">
       <div class="mapwrap">

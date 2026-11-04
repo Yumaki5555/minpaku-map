@@ -174,6 +174,42 @@
   }
   subs.push(renderRegions, renderCitySel, renderCatFilters, renderCond);
 
+  // ---- 問い合わせの案内 ----
+  // 公式の案内で担当を確かめた地域(D.contacts)だけ、その案内へ。ほかは「問い合わせ先を探す」とし、担当と決めつけない
+  function askTarget() {
+    const pref = S.pref !== null ? D.prefs[S.pref] : null;
+    if (!pref) return null;
+    if (S.city) {
+      const self = D.contacts.find(c => c.scope === 'self' && c.pref === pref && c.name === S.city);
+      if (self) return self;
+      return D.contacts.find(c => c.scope === 'rest' && c.pref === pref && !c.except.includes(S.city)) || null;
+    }
+    return D.contacts.find(c => c.scope !== 'self' && c.pref === pref) || null;
+  }
+  function renderAsk() {
+    const row = $('#askrow');
+    if (!row) return;
+    row.textContent = '';
+    const pref = S.pref !== null ? D.prefs[S.pref] : null;
+    const link = document.createElement('a');
+    const note = document.createElement('span');
+    const hit = askTarget();
+    if (hit) {
+      link.href = hit.url;
+      link.textContent = 'この地域の民泊について問い合わせる';
+      note.textContent = '担当：' + (hit.name || hit.pref) + ' ' + hit.dept + (S.city ? '' : '（市区町村によって担当が異なります）');
+    } else {
+      const code = S.city ? D.areas[pref + '/' + S.city] : pref ? D.areas[pref] : null;
+      link.href = '/todokeru/#/contacts' + (code ? '?tab=area&code=' + code : '');
+      link.setAttribute('data-nihon-handoff', '');
+      if (pref) link.setAttribute('data-item', '民泊・旅館業マップ：' + placeName());
+      link.textContent = '問い合わせ先を探す';
+      if (pref) note.textContent = 'この地域の民泊の担当は、公式の案内で確認できていません。';
+    }
+    row.append(link, note);
+  }
+  subs.push(renderAsk);
+
   function resetAll() {
     $('#q').value = ''; $('#qmsg').textContent = ''; $('#tq').value = ''; $('#tsort').value = 'area'; $('#barsort').value = 'sum';
     if (mapApi) mapApi.clearSearch();
