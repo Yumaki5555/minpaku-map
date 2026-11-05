@@ -1,14 +1,14 @@
 {
-  "row_count": 3126,
-  "date": "20261102",
+  "row_count": 3308,
+  "date": "20261105",
   "header": [
     "届出住宅の住所",
     "届出番号",
     "届出日",
     "消防法令上違反公表施設"
   ],
-  "source_url": "https://www.city.sapporo.jp/keizai/kanko/minpaku/documents/r081002_minpaku_ichiran.xlsx",
+  "source_url": "https://www.city.sapporo.jp/keizai/kanko/minpaku/documents/ichiran20261031.xlsx",
   "normalized_files": [
-    "data/札幌市/民泊/整形済み/20261102_札幌市_民泊_normalized.csv"
+    "data/札幌市/民泊/整形済み/20261105_札幌市_民泊_normalized.csv"
   ]
 }

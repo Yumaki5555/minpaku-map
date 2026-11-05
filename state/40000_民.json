@@ -1,6 +1,6 @@
 {
   "row_count": 1953,
-  "date": "20261102",
+  "date": "20261105",
   "header": [
     "No.",
     "届出番号",
@@ -9,6 +9,6 @@
   ],
   "source_url": "https://www.pref.fukuoka.lg.jp/uploaded/life/849939_63126564_misc.pdf",
   "normalized_files": [
-    "data/福岡県/民泊/整形済み/20261102_福岡県_民泊_normalized.csv"
+    "data/福岡県/民泊/整形済み/20261105_福岡県_民泊_normalized.csv"
   ]
 }

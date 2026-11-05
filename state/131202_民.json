@@ -1,6 +1,6 @@
 {
   "row_count": 113,
-  "date": "20261102",
+  "date": "20261105",
   "header": [
     "",
     "届出番号",
@@ -10,6 +10,6 @@
   ],
   "source_url": "https://www.city.nerima.tokyo.jp/hokenfukushi/eisei/minpaku/minnpaku.files/20261028minpaku.pdf",
   "normalized_files": [
-    "data/練馬区/民泊/整形済み/20261102_練馬区_民泊_normalized.csv"
+    "data/練馬区/民泊/整形済み/20261105_練馬区_民泊_normalized.csv"
   ]
 }

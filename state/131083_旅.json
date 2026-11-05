@@ -1,6 +1,6 @@
 {
-  "row_count": 372,
-  "date": "20261102",
+  "row_count": 377,
+  "date": "20261105",
   "header": [
     "No.",
     "施設の名称",
@@ -11,8 +11,8 @@
     "営業者名",
     "許可年月日"
   ],
-  "source_url": "https://www.city.koto.lg.jp/260403/fukushi/ese/kankyo/documents/202609_ryokan_list.pdf",
+  "source_url": "https://www.city.koto.lg.jp/260403/fukushi/ese/kankyo/documents/202610_ryokan_list.pdf",
   "normalized_files": [
-    "data/江東区/旅館業/整形済み/20261102_江東区_旅館業_normalized.csv"
+    "data/江東区/旅館業/整形済み/20261105_江東区_旅館業_normalized.csv"
   ]
 }
