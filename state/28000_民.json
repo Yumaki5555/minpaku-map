@@ -1,13 +1,14 @@
 {
-  "row_count": 107,
-  "date": "20261105",
+  "row_count": 115,
+  "date": "20261109",
   "header": [
     "",
+    "届出番号",
     "届出年月日",
     "住宅の所在地"
   ],
-  "source_url": "https://web.pref.hyogo.lg.jp/kf14/documents/1-1todokeder080622.pdf",
+  "source_url": "https://web.pref.hyogo.lg.jp/kf14/documents/1-1todokeder081104.pdf",
   "normalized_files": [
-    "data/兵庫県/民泊/整形済み/20261105_兵庫県_民泊_normalized.csv"
+    "data/兵庫県/民泊/整形済み/20261109_兵庫県_民泊_normalized.csv"
   ]
 }

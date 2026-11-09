@@ -1,6 +1,6 @@
 {
-  "row_count": 31,
-  "date": "20261105",
+  "row_count": 32,
+  "date": "20261109",
   "header": [
     "業態",
     "種別",
@@ -13,9 +13,9 @@
     "申請者_所在地",
     "客室_数"
   ],
-  "source_url": "https://www.city.koshigaya.saitama.jp/kurashi_shisei/fukushi/hokenjo/kankyo/files/ryokann.xls",
+  "source_url": "https://www.city.koshigaya.saitama.jp/kurashi_shisei/fukushi/hokenjo/kankyo/files/ryokangyou.xls",
   "normalized_files": [
-    "data/越谷市/旅館業/整形済み/20261105_越谷市_旅館業_旅館ホテル等_normalized.csv",
-    "data/越谷市/旅館業/整形済み/20261105_越谷市_旅館業_簡易宿所_normalized.csv"
+    "data/越谷市/旅館業/整形済み/20261109_越谷市_旅館業_旅館ホテル等_normalized.csv",
+    "data/越谷市/旅館業/整形済み/20261109_越谷市_旅館業_簡易宿所_normalized.csv"
   ]
 }

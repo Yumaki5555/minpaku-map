@@ -1,6 +1,6 @@
 {
-  "row_count": 739,
-  "date": "20261105",
+  "row_count": 762,
+  "date": "20261109",
   "header": [
     "No",
     "施設名称",
@@ -9,10 +9,11 @@
     "TEL2",
     "許可日",
     "許可番号",
-    "施設(種\n別)"
+    "施設(種別\n)"
   ],
-  "source_url": "https://www.city.katsushika.lg.jp/_res/projects/default_project/_page_/001/026/096/ryokan-r8.9.30.pdf",
+  "source_url": "https://www.city.katsushika.lg.jp/_res/projects/default_project/_page_/001/026/096/ryokan-r8.10.31.pdf",
   "normalized_files": [
-    "data/葛飾区/旅館業/整形済み/20261105_葛飾区_旅館業_normalized.csv"
+    "data/葛飾区/旅館業/整形済み/20261109_葛飾区_旅館業_旅館ホテル等_normalized.csv",
+    "data/葛飾区/旅館業/整形済み/20261109_葛飾区_旅館業_簡易宿所_normalized.csv"
   ]
 }
