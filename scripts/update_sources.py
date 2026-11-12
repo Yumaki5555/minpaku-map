@@ -371,6 +371,25 @@ def pick_col(rec: dict, name: str) -> str:
     return ""
 
 
+ERA_BASE = {"令和": 2018, "平成": 1988, "昭和": 1925}
+
+
+def permit_date(rec: dict) -> tuple[int, int, int] | None:
+    """「許可日」「許可等年月日」「許可年月日」などの列の日付を (年, 月, 日) にそろえる。読めなければ None。"""
+    col = next((k for k in rec if k and "許可" in k and ("日" in k) and "番号" not in k), None)
+    t = squash(rec.get(col)) if col else ""
+    if not t:
+        return None
+    m = re.search(r"(令和|平成|昭和)(\d+|元)年(\d+)月(\d+)日", t)
+    if m:
+        y = 1 if m.group(2) == "元" else int(m.group(2))
+        return ERA_BASE[m.group(1)] + y, int(m.group(3)), int(m.group(4))
+    m = re.search(r"(?<!\d)(\d{4})[年/.-](\d{1,2})[月/.-](\d{1,2})", t)
+    if m:
+        return int(m.group(1)), int(m.group(2)), int(m.group(3))
+    return None
+
+
 def squash(v) -> str:
     """全角/半角・空白・改行の違いをそろえる(PDFから読むと途中に改行が入るため)。"""
     if isinstance(v, float) and v != v:
@@ -401,7 +420,12 @@ def apply_monthly_diffs(row: dict, header: list, rows: list, dest_dir: str, base
     def same(x: dict, rec: dict) -> bool:
         no = squash(rec.get("許可番号"))
         if no and x.get("許可番号"):
-            return squash(x["許可番号"]) == no
+            if squash(x["許可番号"]) != no:
+                return False
+            # 横浜市の「中生指令第5012号」のように許可番号が毎年振り直される自治体があるため、
+            # 許可日が両方に書かれていて違えば別の施設とみなす(令和8年の新規を平成16年の施設と取り違えないように)
+            d1, d2 = permit_date(x), permit_date(rec)
+            return not (d1 and d2 and d1 != d2)
         key = facility_key(rec)
         return bool(key[0] or key[1]) and facility_key(x) == key
 
@@ -567,6 +591,17 @@ def source_date(path: str, fmt: str, row: dict) -> tuple[str, str] | None:
     """資料の日付と根拠。資料から分からなければ、自治体のサイト上のファイルの更新日時を使う。"""
     inner = unzip(path, row.get("ZIP内ファイル", "").strip()) if fmt == "zip" else None
     found = document_date(path, fmt, inner)
+    if found and fmt == "zip" and "ZIPの中のファイルの保存日" in found[1]:
+        # 横浜市の「20261001ryokan.zip」(ページには「令和8年10月1日現在」)のように、ZIPの名前に日付があればそちらを使う。
+        # 中のファイルの保存日は、市が作り直した日(10/15など)になっていて、何日時点の一覧かを表さないため
+        name = re.sub(r"^\d{8}_", "", os.path.basename(path))  # 先頭の「取得した日_」を除く
+        m = re.search(r"(?<!\d)(20\d{2})(\d{2})(\d{2})(?!\d)", name)
+        if m:
+            try:
+                d = datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+                return d.strftime("%Y/%m/%d"), "資料に日付の記載がないため、ZIPのファイル名の日付"
+            except ValueError:
+                pass
     if found:
         return found
     if path in SERVER_DATES:

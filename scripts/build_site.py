@@ -94,6 +94,22 @@ def city_of(addr: str, pref: str, known: list[str]) -> str:
     return m.group(1) if m else ""
 
 
+def mark_prefecture_scope(registry: list[dict]) -> None:
+    """神奈川県の民泊のように、横浜市など自分で受け付けている市を除いた「県が受け付けている地域」だけの一覧は、
+    県全体の数と間違えないよう「神奈川県(県所管域)」と表示する(北海道は「道所管域」、大阪府・京都府は「府所管域」)。
+    同じ県に同じ種類の一覧を出している市があれば、県の一覧はその市を除いたものとみなす。
+    千葉県・静岡県・福岡県の民泊のように、県が全域を受け付けている一覧には付けない。
+    すでに「東京都(多摩)」のように範囲が書いてある名前はそのまま。"""
+    for r in registry:
+        code, _, kind = r["自治体コード"].partition("_")
+        name = r["自治体名"]
+        if len(code) != 5 or not code.endswith("000") or name.endswith(")"):
+            continue
+        if any(o is not r and o["自治体コード"][:2] == code[:2] and o["自治体コード"].partition("_")[2] == kind
+               for o in registry):
+            r["自治体名"] = f"{name}({name[-1]}所管域)"
+
+
 def known_names(reg_by_code: dict) -> list[str]:
     """登録済みの市区町村名(都府県全体の資料は除く)を、長い名前から順に並べたもの。"""
     return sorted({r["自治体名"] for r in reg_by_code.values() if not r["自治体名"].endswith(("都", "府", "県", ")"))},
@@ -107,6 +123,7 @@ def main() -> None:
     cache = load_cache()
 
     registry = sorted(registry, key=lambda r: pref_index(r["自治体コード"]))  # 同じ都府県の中は登録順
+    mark_prefecture_scope(registry)
     munis: list[str] = []
     muni_pref: list[int] = []
     for r in registry:
