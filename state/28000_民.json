@@ -1,6 +1,6 @@
 {
   "row_count": 115,
-  "date": "20261112",
+  "date": "20261113",
   "header": [
     "",
     "届出番号",
@@ -9,6 +9,6 @@
   ],
   "source_url": "https://web.pref.hyogo.lg.jp/kf14/documents/1-1todokeder081104.pdf",
   "normalized_files": [
-    "data/兵庫県/民泊/整形済み/20261112_兵庫県_民泊_normalized.csv"
+    "data/兵庫県/民泊/整形済み/20261113_兵庫県_民泊_normalized.csv"
   ]
 }

@@ -1,12 +1,12 @@
 {
   "row_count": 194,
-  "date": "20261112",
+  "date": "20261113",
   "header": [
     "HP番号 施設名称 所在地",
     "種類"
   ],
   "source_url": "https://www.city.ota.tokyo.jp/seikatsu/hoken/minpaku/minpaku.files/1019kyoka.pdf",
   "normalized_files": [
-    "data/大田区/旅館業/整形済み/20261112_大田区_旅館業_normalized.csv"
+    "data/大田区/旅館業/整形済み/20261113_大田区_旅館業_normalized.csv"
   ]
 }

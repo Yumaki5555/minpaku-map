@@ -1,6 +1,6 @@
 {
   "row_count": 3308,
-  "date": "20261112",
+  "date": "20261113",
   "header": [
     "届出住宅の住所",
     "届出番号",
@@ -9,6 +9,6 @@
   ],
   "source_url": "https://www.city.sapporo.jp/keizai/kanko/minpaku/documents/ichiran20261031.xlsx",
   "normalized_files": [
-    "data/札幌市/民泊/整形済み/20261112_札幌市_民泊_normalized.csv"
+    "data/札幌市/民泊/整形済み/20261113_札幌市_民泊_normalized.csv"
   ]
 }

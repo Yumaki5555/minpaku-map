@@ -1,6 +1,6 @@
 {
   "row_count": 128,
-  "date": "20261112",
+  "date": "20261113",
   "header": [
     "",
     "届出受理番号",
@@ -10,6 +10,6 @@
   ],
   "source_url": "https://www.pref.kyoto.jp/seikatsu/news/documents/jyusyuku261030.pdf",
   "normalized_files": [
-    "data/京都府/民泊/整形済み/20261112_京都府_民泊_normalized.csv"
+    "data/京都府/民泊/整形済み/20261113_京都府_民泊_normalized.csv"
   ]
 }
