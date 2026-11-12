@@ -1,6 +1,6 @@
 {
   "row_count": 283,
-  "date": "20261109",
+  "date": "20261112",
   "header": [
     "No",
     "届出年月日",
@@ -8,6 +8,6 @@
   ],
   "source_url": "https://www.pref.ibaraki.jp/hokenfukushi/seiei/kankyo/seiei/minpaku/documents/20261105_todokedejyouhou.pdf",
   "normalized_files": [
-    "data/茨城県/民泊/整形済み/20261109_茨城県_民泊_normalized.csv"
+    "data/茨城県/民泊/整形済み/20261112_茨城県_民泊_normalized.csv"
   ]
 }
