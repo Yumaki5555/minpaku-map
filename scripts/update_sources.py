@@ -38,7 +38,7 @@ from bs4 import BeautifulSoup
 urllib3.util.connection.allowed_gai_family = lambda: socket.AF_INET
 
 sys.path.insert(0, os.path.dirname(__file__))
-from doc_dates import combine_dates, document_date  # noqa: E402
+from doc_dates import combine_dates, document_date, name_date  # noqa: E402
 from extractors import (  # noqa: E402
     ExtractResult,
     extract,
@@ -591,22 +591,26 @@ def source_date(path: str, fmt: str, row: dict) -> tuple[str, str] | None:
     """資料の日付と根拠。資料から分からなければ、自治体のサイト上のファイルの更新日時を使う。"""
     inner = unzip(path, row.get("ZIP内ファイル", "").strip()) if fmt == "zip" else None
     found = document_date(path, fmt, inner)
-    if found and fmt == "zip" and "ZIPの中のファイルの保存日" in found[1]:
-        # 横浜市の「20261001ryokan.zip」(ページには「令和8年10月1日現在」)のように、ZIPの名前に日付があればそちらを使う。
-        # 中のファイルの保存日は、市が作り直した日(10/15など)になっていて、何日時点の一覧かを表さないため
-        name = re.sub(r"^\d{8}_", "", os.path.basename(path))  # 先頭の「取得した日_」を除く
-        m = re.search(r"(?<!\d)(20\d{2})(\d{2})(\d{2})(?!\d)", name)
-        if m:
-            try:
-                d = datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)))
-                return d.strftime("%Y/%m/%d"), "資料に日付の記載がないため、ZIPのファイル名の日付"
-            except ValueError:
-                pass
-    if found:
+    if not found and path in SERVER_DATES:
+        found = SERVER_DATES[path], "資料に日付の記載がないため、自治体のサイト上のファイルの更新日"
+    return prefer_name_date(os.path.basename(path), found)
+
+
+def prefer_name_date(saved_name: str, found: tuple[str, str] | None) -> tuple[str, str] | None:
+    """資料の中に日付が無く、保存日・サイトの更新日で代わりにしているときは、ファイル名の日付があればそちらを使う。
+    札幌市の「ichiran20261031.xlsx」(保存日11/02)、横浜市の「20261001ryokan.zip」(中のファイルの保存日10/15)など。
+    保存日・更新日より後の日付は使わない(中身がその日より後の情報であるはずがない。墨田区 jj081014.pdf は保存日10/09)。
+    saved_name は data/ に保存したファイル名(先頭の「取得した日_」は除く)。過去の記録を直すときにも使う。"""
+    if found and "記載がない" not in found[1]:
         return found
-    if path in SERVER_DATES:
-        return SERVER_DATES[path], "資料に日付の記載がないため、自治体のサイト上のファイルの更新日"
-    return None
+    name = re.sub(r"^\d{8}_", "", saved_name)
+    hit = name_date(name)
+    if not hit:
+        return found
+    d = hit[0].strftime("%Y/%m/%d")
+    if found and d > found[0]:
+        return found
+    return d, hit[1]
 
 
 def file_tag(row: dict) -> str:

@@ -234,6 +234,64 @@ def _fmt(d: date) -> str:
     return d.strftime("%Y/%m/%d")
 
 
+# ---- ファイル名に書かれた日付 ----
+# 資料の中に日付が無い自治体でも、ファイル名に「ichiran20261031」「r081015」「minpaku_202609」「令和8年9月新規」
+# のように一覧の日付が入っていることが多い。保存日より確かなので、こちらを優先する(update_sources.source_date)。
+# 年月だけのもの(202609 など)は、その月の末日の時点とみなす。
+_NAME_FULL = [
+    re.compile(r"(?<!\d)(?P<y>20\d\d)(?P<m>\d\d)(?P<d>\d\d)(?!\d)"),                 # 20261031
+    re.compile(r"[rR](?P<r>\d)(?P<m>\d\d)(?P<d>\d\d)(?!\d)"),                          # r81031
+    re.compile(r"[rR](?P<r>\d\d)(?P<m>\d\d)(?P<d>\d\d)(?!\d)"),                        # r081015, R080930
+    re.compile(r"[rR](?P<r>\d{1,2})\.(?P<m>\d{1,2})\.(?P<d>\d{1,2})(?![\d.])"),        # R8.3.31
+    re.compile(r"(?<!\d)(?P<yy>\d\d)(?P<m>\d\d)(?P<d>\d\d)(?!\d)"),                    # 261015(西暦の下2桁) / jj081014(令和)
+]
+_NAME_MONTH = [
+    re.compile(r"(?<!\d)(?P<y>20\d\d)(?P<m>\d\d)(?!\d)"),                             # 202609
+    re.compile(r"[rR](?P<r>\d)(?P<m>\d\d)(?!\d)"),                                     # r810
+    re.compile(r"[rR](?P<r>\d\d)(?P<m>\d\d)(?!\d)"),                                   # r0809
+    re.compile(r"[rR](?P<r>\d{1,2})\.(?P<m>\d{1,2})(?![\d.])"),                        # R8.9
+    re.compile(r"(?:令和|[rR])(?P<r>\d{1,2}|元)年(?P<m>\d{1,2})月(?!\d{1,2}日)"),       # 令和8年9月
+    re.compile(r"(?<!\d)(?P<y>20\d\d)年(?P<m>\d{1,2})月(?!\d{1,2}日)"),                # 2026年9月
+]
+
+
+def _name_year(g: dict) -> int | None:
+    if g.get("y"):
+        return int(g["y"])
+    if g.get("r"):
+        return 2019 if g["r"] == "元" else 2018 + int(g["r"])
+    yy = int(g["yy"])
+    if 18 <= yy <= date.today().year - 2000:
+        return 2000 + yy  # 261015 → 2026年
+    if g["yy"].startswith("0") and 1 <= yy <= date.today().year - 2018:
+        return 2018 + yy  # 081014 → 令和8年
+    return None
+
+
+def name_date(name: str) -> tuple[date, str] | None:
+    """ファイル名(拡張子つき)から一覧の日付を読む。返り値は (日付, 根拠の文)。
+    「20260901_20260930」のように2つあるときは新しい方(期間の終わり)。14桁の数字(登録した日時)などは使わない。"""
+    stem = unicodedata.normalize("NFKC", os.path.splitext(name)[0])
+    found: list[tuple[date, str]] = []
+    for pats, month in ((_NAME_FULL, False), (_NAME_MONTH, True)):
+        for pat in pats:
+            for m in pat.finditer(stem):
+                g = m.groupdict()
+                try:
+                    y, mo = _name_year(g), int(g["m"])
+                    if y is None:
+                        continue
+                    d = date(y, mo, calendar.monthrange(y, mo)[1] if month else int(g["d"]))
+                except (ValueError, TypeError):
+                    continue
+                if date(2018, 1, 1) <= d <= date.today():
+                    found.append((d, "の年月の末日" if month else "の日付"))
+    if not found:
+        return None
+    d, how = max(found)
+    return d, f"資料に日付の記載がないため、ファイル名「{name}」{how}"
+
+
 def document_date(path: str, fmt: str, zip_inner: list[str] | None = None) -> tuple[str, str] | None:
     """資料の日付と、その根拠を返す。ZIPのときは中のファイル(zip_inner)を調べる。"""
     if fmt == "zip":
