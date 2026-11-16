@@ -1,6 +1,6 @@
 {
-  "row_count": 1867,
-  "date": "20261113",
+  "row_count": 1862,
+  "date": "20261116",
   "header": [
     "届出番号",
     "届出日",
@@ -8,15 +8,15 @@
     "番",
     "号",
     "建物名・室名",
-    "住宅宿泊管理業者名",
     "緊急連絡先",
     "旧条例※1",
     "",
     "新条例※2",
-    ""
+    "",
+    "住宅宿泊管理業者名"
   ],
-  "source_url": "https://files.city.shibuya.tokyo.jp/assets/12995aba8b194961be709ba879857f70/6da47c64c4c34ec99d3cf52e21eb2734/minpaku_list_minpaku.pdf",
+  "source_url": "https://files.city.shibuya.tokyo.jp/assets/12995aba8b194961be709ba879857f70/edee5d24a5fa4e13afbec862235424fc/minpaku_list_minpaku.pdf",
   "normalized_files": [
-    "data/渋谷区/民泊/整形済み/20261113_渋谷区_民泊_normalized.csv"
+    "data/渋谷区/民泊/整形済み/20261116_渋谷区_民泊_normalized.csv"
   ]
 }
