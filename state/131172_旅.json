@@ -1,6 +1,6 @@
 {
-  "row_count": 587,
-  "date": "20261119",
+  "row_count": 291,
+  "date": "20261123",
   "header": [
     "許可・確認・届出番号",
     "営業形態",
@@ -12,11 +12,12 @@
     "代表者氏名",
     "営業者TEL",
     "総客室数",
-    "定員"
+    "定員",
+    "許可・確認・届出日"
   ],
-  "source_url": "https://www.city.kita.lg.jp/_res/projects/default_project/_page_/001/008/993/ryokan0810.pdf",
+  "source_url": "https://www.city.kita.lg.jp/_res/projects/default_project/_page_/001/008/993/ryokan0810syuusei.pdf",
   "normalized_files": [
-    "data/北区/旅館業/整形済み/20261119_北区_旅館業_旅館ホテル等_normalized.csv",
-    "data/北区/旅館業/整形済み/20261119_北区_旅館業_簡易宿所_normalized.csv"
+    "data/北区/旅館業/整形済み/20261123_北区_旅館業_旅館ホテル等_normalized.csv",
+    "data/北区/旅館業/整形済み/20261123_北区_旅館業_簡易宿所_normalized.csv"
   ]
 }

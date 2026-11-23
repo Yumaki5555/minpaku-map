@@ -1,6 +1,6 @@
 {
   "row_count": 194,
-  "date": "20261119",
+  "date": "20261123",
   "header": [
     "住宅の所在地",
     "nan",
@@ -130,6 +130,6 @@
   ],
   "source_url": "https://www.city.kobe.lg.jp/documents/13968/20261105.csv",
   "normalized_files": [
-    "data/神戸市/民泊/整形済み/20261119_神戸市_民泊_normalized.csv"
+    "data/神戸市/民泊/整形済み/20261123_神戸市_民泊_normalized.csv"
   ]
 }
