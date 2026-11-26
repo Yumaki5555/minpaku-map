@@ -1,12 +1,12 @@
 {
   "row_count": 225,
-  "date": "20261123",
+  "date": "20261126",
   "header": [
     "届出年月日",
     "届出住宅所在地"
   ],
   "source_url": "https://www.pref.aichi.jp/uploaded/attachment/636548.csv",
   "normalized_files": [
-    "data/愛知県/民泊/整形済み/20261123_愛知県_民泊_normalized.csv"
+    "data/愛知県/民泊/整形済み/20261126_愛知県_民泊_normalized.csv"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "row_count": 718,
-  "date": "20261123",
+  "date": "20261126",
   "header": [
     "営業の種別",
     "営業施設の名称",
@@ -13,7 +13,7 @@
   ],
   "source_url": "https://www.pref.fukuoka.lg.jp/uploaded/life/853350_63150724_misc.xlsx",
   "normalized_files": [
-    "data/福岡県/旅館業/整形済み/20261123_福岡県_旅館業_旅館ホテル等_normalized.csv",
-    "data/福岡県/旅館業/整形済み/20261123_福岡県_旅館業_簡易宿所_normalized.csv"
+    "data/福岡県/旅館業/整形済み/20261126_福岡県_旅館業_旅館ホテル等_normalized.csv",
+    "data/福岡県/旅館業/整形済み/20261126_福岡県_旅館業_簡易宿所_normalized.csv"
   ]
 }

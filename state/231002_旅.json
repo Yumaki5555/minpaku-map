@@ -1,12 +1,12 @@
 {
   "row_count": 902,
-  "date": "20261123",
+  "date": "20261126",
   "header": [
     "施設名称",
     "施設所在地"
   ],
   "source_url": "https://www.city.nagoya.jp/_res/projects/default_project/_page_/001/015/513/ryokan_r081031.xls",
   "normalized_files": [
-    "data/名古屋市/旅館業/整形済み/20261123_名古屋市_旅館業_normalized.csv"
+    "data/名古屋市/旅館業/整形済み/20261126_名古屋市_旅館業_normalized.csv"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "row_count": 432,
-  "date": "20261123",
+  "date": "20261126",
   "header": [
     "連番",
     "名称",
@@ -9,6 +9,6 @@
   ],
   "source_url": "https://www.pref.osaka.lg.jp/documents/34855/ryokan081031.xlsx",
   "normalized_files": [
-    "data/大阪府/旅館業/整形済み/20261123_大阪府_旅館業_normalized.csv"
+    "data/大阪府/旅館業/整形済み/20261126_大阪府_旅館業_normalized.csv"
   ]
 }

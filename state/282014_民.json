@@ -1,6 +1,6 @@
 {
   "row_count": 18,
-  "date": "20261123",
+  "date": "20261126",
   "header": [
     "届け出順",
     "届出年月日",
@@ -8,6 +8,6 @@
   ],
   "source_url": "https://www.city.himeji.lg.jp/kurashi/0000007634.html",
   "normalized_files": [
-    "data/姫路市/民泊/整形済み/20261123_姫路市_民泊_normalized.csv"
+    "data/姫路市/民泊/整形済み/20261126_姫路市_民泊_normalized.csv"
   ]
 }

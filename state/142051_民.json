@@ -1,6 +1,6 @@
 {
   "row_count": 96,
-  "date": "20261123",
+  "date": "20261126",
   "header": [
     "No",
     "届出番号",
@@ -9,6 +9,6 @@
   ],
   "source_url": "https://www.city.fujisawa.kanagawa.jp/documents/20160/minpakuichiran10.pdf",
   "normalized_files": [
-    "data/藤沢市/民泊/整形済み/20261123_藤沢市_民泊_normalized.csv"
+    "data/藤沢市/民泊/整形済み/20261126_藤沢市_民泊_normalized.csv"
   ]
 }
